@@ -1,0 +1,1 @@
+# Handles GET, POST requests to FastAPI backend

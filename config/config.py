@@ -1,0 +1,1 @@
+# Stores API base URL and authentication tokens
