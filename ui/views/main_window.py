@@ -20,7 +20,6 @@ from PySide6.QtWidgets import (QApplication, QFrame, QLabel, QMainWindow,
     QWidget)
 
 
-
 from ui.views.home import HomePage
 from ui.views.collection import CollectionPage
 from ui.views.statistic import StatPage
@@ -35,7 +34,6 @@ class Page(Enum):
     STAT = 3
     NOTIFICATION = 4
     COMMUNITY = 5
-
 
 class Ui_MainWindow(object):
 
