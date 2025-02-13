@@ -1,7 +1,7 @@
 # Entry point - initializes app, loads UI
 import sys
 from PySide6.QtWidgets import QApplication, QMainWindow
-from views.main_window import Ui_MainWindow  # Import the generated UI class
+from ui.views.main_window import Ui_MainWindow  # Import the generated UI class
 
 
 def apply_stylesheet(app, stylesheet_path="./static/styles/style.qss"):
@@ -10,12 +10,10 @@ def apply_stylesheet(app, stylesheet_path="./static/styles/style.qss"):
         qss = file.read()
         app.setStyleSheet(qss)
 
-
 class MainApp(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)  # Load the UI
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

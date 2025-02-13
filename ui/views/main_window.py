@@ -8,7 +8,7 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
+from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale, QDir, 
     QMetaObject, QObject, QPoint, QRect,
     QSize, QTime, QUrl, Qt)
 from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
@@ -19,11 +19,13 @@ from PySide6.QtWidgets import (QApplication, QFrame, QLabel, QMainWindow,
     QPushButton, QScrollArea, QScrollBar, QSizePolicy, QStackedWidget,
     QWidget)
 
-from views.home import HomePage
-from views.collection import CollectionPage
-from views.statistic import StatPage
-from views.notification import NotificationPage
-from views.community import CommunityPage
+
+
+from ui.views.home import HomePage
+from ui.views.collection import CollectionPage
+from ui.views.statistic import StatPage
+from ui.views.notification import NotificationPage
+from ui.views.community import CommunityPage
 
 from enum import Enum
 
@@ -59,7 +61,8 @@ class Ui_MainWindow(object):
         self.logo = QLabel(self.top)
         self.logo.setObjectName(u"logo")
         self.logo.setGeometry(QRect(10, 10, 61, 71))
-        self.logo.setPixmap(QPixmap(u"./static/images/logo.png"))
+        img_path = QDir.currentPath() + "/static/images/logo.png"
+        self.logo.setPixmap(QPixmap(img_path))
         self.logo.setScaledContents(True)
         self.logo.setIndent(0)
 
@@ -77,7 +80,8 @@ class Ui_MainWindow(object):
         self.home.setObjectName(u"home")
         self.home.setGeometry(QRect(10, 20, 51, 61))
         icon = QIcon()
-        icon.addFile(u"./static/images/home.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        img_path = QDir.currentPath() + "/static/images/home.png"
+        icon.addFile(img_path, QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.home.setIcon(icon)
         self.home.setIconSize(QSize(50, 50))
 
@@ -85,7 +89,8 @@ class Ui_MainWindow(object):
         self.collection.setObjectName(u"collection")
         self.collection.setGeometry(QRect(10, 110, 51, 61))
         icon1 = QIcon()
-        icon1.addFile(u"./static/images/collection.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        img_path = QDir.currentPath() + "/static/images/collection.png"
+        icon1.addFile(img_path, QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.collection.setIcon(icon1)
         self.collection.setIconSize(QSize(50, 50))
 
@@ -93,7 +98,8 @@ class Ui_MainWindow(object):
         self.stats.setObjectName(u"stats")
         self.stats.setGeometry(QRect(10, 200, 51, 61))
         icon2 = QIcon()
-        icon2.addFile(u"./static/images/stat.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        img_path = QDir.currentPath() + "/static/images/stat.png"
+        icon2.addFile(img_path, QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.stats.setIcon(icon2)
         self.stats.setIconSize(QSize(50, 50))
 
@@ -101,7 +107,8 @@ class Ui_MainWindow(object):
         self.noti.setObjectName(u"noti")
         self.noti.setGeometry(QRect(10, 290, 51, 61))
         icon3 = QIcon()
-        icon3.addFile(u"./static/images/noti.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        img_path = QDir.currentPath() + "/static/images/noti.png"
+        icon3.addFile(img_path, QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.noti.setIcon(icon3)
         self.noti.setIconSize(QSize(50, 50))
 
@@ -109,7 +116,8 @@ class Ui_MainWindow(object):
         self.community.setObjectName(u"community")
         self.community.setGeometry(QRect(10, 380, 51, 61))
         icon4 = QIcon()
-        icon4.addFile(u"./static/images/community.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        img_path = QDir.currentPath() + "/static/images/community.png"
+        icon4.addFile(img_path, QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.community.setIcon(icon4)
         self.community.setIconSize(QSize(50, 50))
 
@@ -123,7 +131,8 @@ class Ui_MainWindow(object):
         self.logout.setObjectName(u"logout")
         self.logout.setGeometry(QRect(0, 70, 71, 61))
         icon5 = QIcon()
-        icon5.addFile(u"./static/images/logout.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        img_path = QDir.currentPath() + "/static/images/logout.png"
+        icon5.addFile(img_path, QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.logout.setIcon(icon5)
         self.logout.setIconSize(QSize(50, 50))
 
