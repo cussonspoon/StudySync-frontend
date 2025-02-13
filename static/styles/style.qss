@@ -1,0 +1,33 @@
+/* Sidebar Styling */
+#sidebar {
+    background-color: #FAFAFA;
+    border: 1px solid #474747;
+}
+
+/* Sidebar Buttons */
+QPushButton {
+    background-color: transparent;
+    border: none;
+}
+
+QPushButton:hover {
+    background-color: rgba(71, 71, 71, 0.2);
+    border-radius: 10px;
+}
+
+QPushButton:pressed {
+    background-color: rgba(71, 71, 71, 0.4);
+}
+
+/* Dashboard Styling */
+#homePage, #collectionPage, #statsPage, #notification, #communityPage {
+    background-color: #F8F6F1;
+}
+
+QScrollArea {
+    background: #F8F6F1;
+    border: none;
+    margin: 1;
+    padding: 1;
+}
+

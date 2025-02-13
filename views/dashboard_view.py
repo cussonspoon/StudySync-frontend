@@ -1,1 +1,0 @@
-# User study progress

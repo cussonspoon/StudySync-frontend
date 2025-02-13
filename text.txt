@@ -1,0 +1,17 @@
+#plan 
+
+- setup frontend structure
+main
+static: sidebar
+change: (open-space)
+    - dashboard  
+    - collection
+        -folder
+    - stats
+    - commu
+
+
+
+
+- setup global style 
+- setup API call + MVC
