@@ -16,7 +16,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QFrame, QLabel, QMainWindow,
-    QPushButton, QScrollArea, QScrollBar, QSizePolicy, QStackedWidget,
+    QPushButton, QScrollArea, QScrollBar, QSizePolicy, QStackedWidget, QHBoxLayout, QVBoxLayout, 
     QWidget)
 
 
@@ -40,7 +40,10 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1228, 831)
+        MainWindow.resize(1300, 831)
+        MainWindow.setMinimumSize(QSize(1300, 831))
+        MainWindow.setMaximumSize(QSize(1300, 831))
+
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.sidebar = QFrame(self.centralwidget)
@@ -135,7 +138,7 @@ class Ui_MainWindow(object):
         self.logout.setIconSize(QSize(50, 50))
 
         self.contentArea = QStackedWidget(self.centralwidget)
-        self.contentArea.setGeometry(QRect(90, 0, 1138, 831))
+        self.contentArea.setGeometry(QRect(90, 0, 1300, 831))
         self.contentArea.setObjectName("contentArea")
         # self.setStyleSheet("background-color: #F8F6F1; ")
 
@@ -204,9 +207,5 @@ class Ui_MainWindow(object):
     # retranslateUi
 
     
-
-
-
-
 
 
