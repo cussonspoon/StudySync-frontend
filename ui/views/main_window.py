@@ -16,7 +16,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QFrame, QLabel, QMainWindow,
-    QPushButton, QScrollArea, QScrollBar, QSizePolicy, QStackedWidget, QHBoxLayout, QVBoxLayout, 
+    QPushButton, QScrollArea, QScrollBar, QSizePolicy, QStackedWidget, QHBoxLayout, QVBoxLayout, QToolButton, 
     QWidget)
 
 
@@ -66,7 +66,7 @@ class Ui_MainWindow(object):
         self.logo.setPixmap(QPixmap(img_path))
         self.logo.setScaledContents(True)
         self.logo.setIndent(0)
-
+  
         self.menus = QFrame(self.sidebar)
         self.menus.setObjectName(u"menus")
         self.menus.setGeometry(QRect(10, 140, 71, 471))
@@ -77,14 +77,26 @@ class Ui_MainWindow(object):
         self.menus.setFrameShadow(QFrame.Shadow.Raised)
         self.menus.setLineWidth(0)
 
-        self.home = QPushButton(self.menus)
+        self.home = QPushButton("Home", self.menus)
         self.home.setObjectName(u"home")
         self.home.setGeometry(QRect(10, 20, 51, 61))
+        # self.home.setGeometry(QRect(10, 20, 80, 80))
+
         icon = QIcon()
         img_path = QDir.currentPath() + "/static/images/home.png"
         icon.addFile(img_path, QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.home.setIcon(icon)
         self.home.setIconSize(QSize(50, 50))
+        # self.home.setIconSize(QSize(40, 40))
+
+    #     self.home.setStyleSheet("""
+    #     QPushButton {
+    #         text-align: center;
+    #         padding-top: 0px;  /* Push text below the icon */
+    #         font-size: 12px;
+    #         font-weight: bold;
+    #     }
+    # """)
 
         self.collection = QPushButton(self.menus)
         self.collection.setObjectName(u"collection")
@@ -141,7 +153,6 @@ class Ui_MainWindow(object):
         self.contentArea.setGeometry(QRect(90, 0, 1300, 831))
         self.contentArea.setObjectName("contentArea")
         # self.setStyleSheet("background-color: #F8F6F1; ")
-
 
         self.page_home = HomePage()
         self.page_home.setObjectName("homePage")
