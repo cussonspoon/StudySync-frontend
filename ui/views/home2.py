@@ -56,33 +56,12 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from utils.shaped_image_label import ShapedImageLabel
+
 class HomePage(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi()
-
-    def setCircularImage(self, img_path, size):
-        """Load an image and apply a circular mask"""
-        pixmap = QPixmap(img_path).scaled(
-            size.width(),
-            size.height(),
-            Qt.KeepAspectRatioByExpanding,
-            Qt.SmoothTransformation,
-        )
-        circular_pixmap = QPixmap(size.width(), size.height())
-        circular_pixmap.fill(Qt.white)
-
-        # Create circular mask
-        painter = QPainter(circular_pixmap)
-        painter.setRenderHint(QPainter.Antialiasing)
-        path = QPainterPath()
-        path.addEllipse(0, 0, size.width(), size.height())
-        painter.setClipPath(path)
-        painter.drawPixmap(0, 0, pixmap)
-        painter.end()
-
-        # Set the processed circular image to QLabel
-        self.Profilepic.setPixmap(circular_pixmap)
 
     def setupUi(self):
         self.setObjectName("HomePage")
@@ -92,6 +71,7 @@ class HomePage(QWidget):
 
         # scrollArea
         self.scrollArea = QScrollArea(self)
+        
         self.scrollArea.setObjectName("scrollArea")
         self.scrollArea.setGeometry(QRect(10, 90, 1200, 771))
         self.scrollArea.setWidgetResizable(True)
@@ -104,15 +84,19 @@ class HomePage(QWidget):
         self.Banner.setObjectName("Banner")
         self.Banner.setGeometry(QRect(0, 0, 1180, 331))
         img_path = QDir.currentPath() + "/static/images/banner.jpg"
-        self.Banner.setPixmap(QPixmap(img_path))
+        ShapedImageLabel(0, 0, 1180, 331, img_path, ShapedImageLabel.ROUNDED_RECT_TOP , 20, self.Banner)
+      
+        # self.Banner.setPixmap(QPixmap(img_path))
+        # opacity_effect = QGraphicsOpacityEffect()
+        # opacity_effect.setOpacity(1)
+        # self.Banner.setGraphicsEffect(opacity_effect)
 
-        effect = QGraphicsOpacityEffect()
-        effect.setOpacity(1.0)  # 100% opacity
-        self.Banner.setGraphicsEffect(effect)
-        
         self.Profilepic = QLabel(self.scrollAreaWidgetContents)
         self.Profilepic.setObjectName("Profilepic")
         self.Profilepic.setGeometry(QRect(60, 280, 111, 111))
+        img_path = QDir.currentPath() + "/static/images/profile.jpg"
+        ShapedImageLabel(0, 0, 101, 101, img_path, ShapedImageLabel.CIRCLE , 20, self.Profilepic)
+
         # img_path = QDir.currentPath() + "/static/images/profile.jpg"
         # self.setCircularImage(img_path, QSize(111, 111))
         # self.Profilepic.setPixmap(QPixmap(img_path))
@@ -212,24 +196,8 @@ class HomePage(QWidget):
                 border: 1px solid #aaa;
             }
             
-            #Banner {
-                border-top-left-radius: 20px;
-                border-top-right-radius: 20px;
-                border-bottom-left-radius: 0px;
-                border-bottom-right-radius: 0px;
-                border: 0px solid #ccc;
-            }
-       
-            #Profilepic {
-                width: 101px;
-                height: 101px;
-                background-image: url("./static/images/profile.jpg");
-                background-repeat: no-repeat;
-                background-position: center;
-                border-radius: 50%;
-                border: 2px solid #ccc; 
-            }
-            
+           
+           
             #searchBarFrame {
                 border: 2px solid #2596be;
                 border-radius: 10px;

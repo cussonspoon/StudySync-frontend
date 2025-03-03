@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (QApplication, QFrame, QLabel, QMainWindow,
     QWidget)
 
 
-from ui.views.home import HomePage
+from ui.views.home2 import HomePage
 from ui.views.collection import CollectionPage
 from ui.views.statistic import StatPage
 from ui.views.notification import NotificationPage

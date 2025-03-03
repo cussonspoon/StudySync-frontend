@@ -28,9 +28,10 @@ QPushButton:pressed {
 }
 
 /* Dashboard Styling */
-#homePage, #collectionPage, #statsPage, #notification, #communityPage {
+/* #homePage, #collectionPage, #statsPage, #notification, #communityPage {
     background-color: #F8F6F1;
 }
+
 
 QScrollArea {
     background: #F8F6F1;
@@ -38,4 +39,4 @@ QScrollArea {
     margin: 1;
     padding: 1;
 }
-
+ */
