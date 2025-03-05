@@ -65,6 +65,7 @@ class ShapedImageLabel(QLabel):
             )
 
         painter.setClipPath(path)
+        painter.setOpacity(1)
         painter.drawPixmap(0, 0, scaled_pixmap)
         painter.end()
 

@@ -79,17 +79,14 @@ class HomePage(QWidget):
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 1200, 769))
         
-
         self.Banner = QLabel(self.scrollAreaWidgetContents)
         self.Banner.setObjectName("Banner")
         self.Banner.setGeometry(QRect(0, 0, 1180, 331))
         img_path = QDir.currentPath() + "/static/images/banner.jpg"
-        ShapedImageLabel(0, 0, 1180, 331, img_path, ShapedImageLabel.ROUNDED_RECT_TOP , 20, self.Banner)
-      
-        # self.Banner.setPixmap(QPixmap(img_path))
-        # opacity_effect = QGraphicsOpacityEffect()
-        # opacity_effect.setOpacity(1)
-        # self.Banner.setGraphicsEffect(opacity_effect)
+        # pixmap = QPixmap(img_path)
+        # self.Banner.setPixmap(pixmap)
+        # ShapedImageLabel(0, 0, 1180, 331, img_path, ShapedImageLabel.ROUNDED_RECT_TOP , 20, self.Banner)
+    
 
         self.Profilepic = QLabel(self.scrollAreaWidgetContents)
         self.Profilepic.setObjectName("Profilepic")
@@ -184,7 +181,6 @@ class HomePage(QWidget):
 
         self.setStyleSheet(
             """
-                           
             QFrame {
                 border: 1px solid #aaa;
             }
@@ -195,8 +191,12 @@ class HomePage(QWidget):
             QLabel {
                 border: 1px solid #aaa;
             }
+
+            #Banner {
+                background-image: url("./static/images/banner.jpg");
+                background-repeat: no-repeat;
+            }
             
-           
            
             #searchBarFrame {
                 border: 2px solid #2596be;

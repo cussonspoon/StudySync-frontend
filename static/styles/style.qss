@@ -1,7 +1,6 @@
 QLabel {
     font-family: sans-serif;
     color: #333333; 
-    font-size: 30px; 
     font-weight: normal;
     letter-spacing: 1px;
 }

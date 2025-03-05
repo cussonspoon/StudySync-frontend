@@ -19,8 +19,7 @@ from PySide6.QtWidgets import (QApplication, QFrame, QLabel, QMainWindow,
     QPushButton, QScrollArea, QScrollBar, QSizePolicy, QStackedWidget, QHBoxLayout, QVBoxLayout, QToolButton, 
     QWidget)
 
-
-from ui.views.home2 import HomePage
+from ui.views.home3 import HomePage
 from ui.views.collection import CollectionPage
 from ui.views.statistic import StatPage
 from ui.views.notification import NotificationPage
@@ -36,7 +35,6 @@ class Page(Enum):
     COMMUNITY = 5
 
 class Ui_MainWindow(object):
-
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
