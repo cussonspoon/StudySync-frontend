@@ -7,12 +7,16 @@ class HorizontalImageScroller(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        # Get absolute paths for images
-        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-       
         self.image_paths = [
             "./static/images/pic1.jpg",
             "./static/images/pic2.jpg",
+            "./static/images/pic3.jpg",
+            "./static/images/pic3.jpg",
+            "./static/images/pic3.jpg",
+            "./static/images/pic1.jpg",
+            "./static/images/pic2.jpg",
+            "./static/images/pic3.jpg",
+            "./static/images/pic3.jpg",
             "./static/images/pic3.jpg"
         ]
 
@@ -53,20 +57,22 @@ class HorizontalImageScroller(QWidget):
         self.scroll_area.setWidget(self.scroll_widget)
 
         # Navigation buttons
-        self.prev_button = QPushButton("←")
-        self.next_button = QPushButton("→")
+        # self.prev_button = QPushButton("←")
+        # self.next_button = QPushButton("→")
+        # self.prev_button.setFixedSize(20, 60)
+        # self.next_button.setFixedSize(20, 60)
         
-        self.prev_button.clicked.connect(self.scroll_left)
-        self.next_button.clicked.connect(self.scroll_right)
+        # self.prev_button.clicked.connect(self.scroll_left)
+        # self.next_button.clicked.connect(self.scroll_right)
 
-        # Layout setup
-        button_layout = QHBoxLayout()
-        button_layout.addWidget(self.prev_button)
-        button_layout.addWidget(self.next_button)
+        # # Layout setup
+        # button_layout = QHBoxLayout()
+        # self.scroll_layout.addWidget(self.prev_button)
+        # self.scroll_layout.addWidget(self.next_button)
 
         main_layout = QVBoxLayout()
         main_layout.addWidget(self.scroll_area)
-        main_layout.addLayout(button_layout)
+        # main_layout.addLayout(button_layout)
 
         self.setLayout(main_layout)
 

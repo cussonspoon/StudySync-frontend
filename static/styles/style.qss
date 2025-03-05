@@ -1,4 +1,6 @@
 QLabel {
+    border: 2px solid black;  /* Border width and color */
+    border-radius: 5px;
     font-family: sans-serif;
     color: #333333; 
     font-weight: normal;
@@ -12,10 +14,10 @@ QLabel {
 }
 
 /* Sidebar Buttons */
-QPushButton {
+/* QPushButton {
     background-color: transparent;
     border: none;
-}
+} */
 
 QPushButton:hover {
     background-color: rgba(71, 71, 71, 0.2);

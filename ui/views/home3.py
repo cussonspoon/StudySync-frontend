@@ -180,7 +180,7 @@ class HomePage(QWidget):
         # 📌 Collection Text
         self.collectionText = QLabel(self.scrollAreaWidgetContents)
         self.collectionText.setObjectName("collectionText")
-        self.collectionText.setGeometry(30, 370, 141, 21)
+        self.collectionText.setGeometry(30, 360, 170, 30)
         font = QFont()
         font.setPointSize(21)
         self.collectionText.setFont(font)
@@ -195,21 +195,24 @@ class HomePage(QWidget):
         self.load_image(self.collectionIcon, img_path, 141, 101)
 
         # 📌 Horizontal Image Scroller (Carousel)
-        self.horizontalScroller = HorizontalImageScroller(self.scrollAreaWidgetContents)
-        self.horizontalScroller.setGeometry(10, 430, 1220, 250)
+        self.collections = HorizontalImageScroller(self.scrollAreaWidgetContents)
+        self.collections.setGeometry(10, 430, 1180, 250)
 
         # 📌 Recommended Section
         self.label4 = QLabel(self.scrollAreaWidgetContents)
         self.label4.setObjectName("label4")
-        self.label4.setGeometry(30, 710, 141, 21)  # Adjusted Y position to follow carousel
+        self.label4.setGeometry(30, 710, 350, 30)  # Adjusted Y position to follow carousel
         font = QFont()
         font.setPointSize(21)
         self.label4.setFont(font)
-        self.label4.setText("Recommended")
+        self.label4.setText("Recommended folder for you")
         self.label4.setStyleSheet("color: #333333;")
 
+        self.recommend_folders = HorizontalImageScroller(self.scrollAreaWidgetContents)
+        self.recommend_folders.setGeometry(10, 780, 1180, 250)
+
         # 📌 Ensure scrollable content height is correct
-        self.scrollAreaWidgetContents.setMinimumHeight(900)
+        self.scrollAreaWidgetContents.setMinimumHeight(1500)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
         # 📌 Header Frame
@@ -233,8 +236,12 @@ class HomePage(QWidget):
             label.setStyleSheet("color: red; font-size: 14px;")
             print(f"⚠️ Error loading image at {path}")
         else:
-            pixmap = pixmap.scaled(width, height, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-            label.setPixmap(pixmap)
+            scaled_pixmap = pixmap.scaled(width, height, Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation)
+
+            label.setFixedSize(width, height)
+            label.setAlignment(Qt.AlignCenter)  # Center image in the QLabel
+            label.setStyleSheet("background-color: transparent;")  # Remove unwanted background color
+            label.setPixmap(scaled_pixmap)
 
 class MainWindow(QMainWindow):
     def __init__(self):
