@@ -1,51 +1,103 @@
-from PySide import QtGui, QtCore
+import sys
+from PySide6.QtWidgets import (
+    QApplication,
+    QWidget,
+    QPushButton,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLineEdit,
+    QLabel,
+    QFrame,
+    QScrollArea,
+    QSizePolicy
+)
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont
 
 
-class UberLabel(QtGui.QLabel):
-    def __init__(self, img):
-        super(UberLabel, self).__init__()
-        self.setFrameStyle(QtGui.QFrame.StyledPanel)
-        self.pixmap = QtGui.QPixmap(img)
-        self.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
-
-    def paintEvent(self, event):
-        size = self.size()
-        painter = QtGui.QPainter(self)
-        point = QtCore.QPoint(0,0)
-        scaledPix = self.pixmap.scaled(size, QtCore.Qt.KeepAspectRatio, transformMode = QtCore.Qt.SmoothTransformation)
-        point.setX((size.width() - scaledPix.width())/2)
-        point.setY((size.height() - scaledPix.height())/2)
-        # print point.x(), ' ', point.y()
-        painter.drawPixmap(point, scaledPix)
-
-class UberLabelWidget(QtGui.QWidget):
+class ToDoApp(QWidget):
     def __init__(self):
-        QtGui.QWidget.__init__(self)
-        self.label = UberLabel("/Users/ubertron/Pictures/my_image.jpg")
+        super().__init__()
+        self.setWindowTitle("To-Do List")
+        self.resize(400, 500)
 
-        vb_layout = QtGui.QVBoxLayout()
-        vb_layout.addWidget(self.label)
-        self.setStyleSheet("background-color:rgb(253, 105, 102);")
-        self.setLayout(vb_layout)
+        # ✅ Main Layout (Manages everything)
+        self.layout = QVBoxLayout(self)
 
-class MyWindow(QtGui.QMainWindow):
-    def __init__(self):
-        QtGui.QMainWindow.__init__(self)
-        self.setGeometry(300, 100, 270, 100)
-        self.setWindowTitle('Uber Label Window')
-        self.exit = QtGui.QAction('Exit', self)
-        self.exit.setStatusTip('Exitgram')
-        self.exit.triggered.connect(app.quit)
-        menu_bar = self.menuBar()
-        file_object = menu_bar.addMenu('&File')
-        file_object.addAction(self.exit)
-        self.statusBar()
-        widget = UberLabelWidget()
-        self.setCentralWidget(widget)
-        self.label = widget.label
+        # ✅ Scroll Area (Contains tasks)
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
+
+        # ✅ Scroll Widget (Container for Tasks)
+        self.scroll_widget = QWidget()
+        self.task_container = QVBoxLayout(self.scroll_widget)  # ✅ Layout for tasks
+
+        # ✅ Ensure scroll area contains the task container
+        self.scroll_area.setWidget(self.scroll_widget)
+
+        # ✅ Add Task Button (Above Scroll Area)
+        self.add_task_btn = QPushButton("Add Task")
+        self.add_task_btn.clicked.connect(self.add_task)
+
+        # ✅ Add widgets to main layout
+        self.layout.addWidget(self.add_task_btn)
+        self.layout.addWidget(self.scroll_area)
+
+    def add_task(self):
+        """Adds a new task with a delete button."""
+        task_frame = QFrame()
+        task_frame.setFrameShape(QFrame.Box)
+        task_frame.setStyleSheet("background-color: #F7F7F7; padding: 5px;")
+        task_frame.setFixedHeight(70)
+
+        task_layout = QHBoxLayout(task_frame)
+
+        # Task Input Field
+        task_input = QLineEdit()
+        task_input.setPlaceholderText("Enter your task here...")
+        task_input.setFont(QFont("Arial", 12))
+
+        # Status Label
+        status_label = QLabel("In Progress")
+        status_label.setFont(QFont("Arial", 12))
+        status_label.setStyleSheet("color: green;")
+
+        # Delete Button
+        delete_btn = QPushButton("❌")
+        delete_btn.setFixedSize(25, 25)
+        delete_btn.setStyleSheet("border: none; font-size: 14px; color: red;")
+        delete_btn.clicked.connect(lambda: self.delete_task(task_frame))
+
+        # Add widgets to horizontal layout
+        task_layout.addWidget(task_input)
+        task_layout.addWidget(status_label)
+        task_layout.addWidget(delete_btn)
+
+        # ✅ Add Task to the Layout
+        self.task_container.addWidget(task_frame)
+
+        # ✅ Dynamically Adjust Scroll Widget Height
+        self.adjust_scroll_height()
+
+    def delete_task(self, task_frame):
+        """Deletes a task from the layout."""
+        for i in reversed(range(self.task_container.count())): 
+            item = self.task_container.itemAt(i)
+            if item.widget() == task_frame: 
+                item.widget().deleteLater()
+                break
+
+        self.adjust_scroll_height()  # ✅ Update height after deletion
+
+    def adjust_scroll_height(self):
+        """Dynamically adjusts the scroll area height to prevent expansion."""
+        total_height = sum(self.task_container.itemAt(i).widget().height() for i in range(self.task_container.count()))
+        self.scroll_widget.setMinimumHeight(total_height)  # ✅ Adjust height dynamically
 
 
-app = QtGui.QApplication([])
-win = MyWindow()
-win.show()
-app.exec_()
+# Run Application
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = ToDoApp()
+    window.show()
+    sys.exit(app.exec())

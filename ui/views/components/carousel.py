@@ -23,7 +23,7 @@ class HorizontalImageScroller(QWidget):
         # Create a scrollable area
         self.scroll_area = QScrollArea(self)
         self.scroll_area.setWidgetResizable(True)
-        
+
         # Create a container widget for panels
         self.scroll_widget = QWidget()
         self.scroll_layout = QHBoxLayout(self.scroll_widget)
