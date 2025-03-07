@@ -16,9 +16,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QFrame, QLabel, QMainWindow,
-    QPushButton, QScrollArea, QScrollBar, QSizePolicy, QStackedWidget,
+    QPushButton, QScrollArea, QScrollBar, QSizePolicy, QStackedWidget, QHBoxLayout, QVBoxLayout, QToolButton, 
     QWidget)
-
 
 from ui.views.home import HomePage
 from ui.views.collection import CollectionPage
@@ -36,11 +35,13 @@ class Page(Enum):
     COMMUNITY = 5
 
 class Ui_MainWindow(object):
-
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1228, 831)
+        MainWindow.resize(1300, 831)
+        MainWindow.setMinimumSize(QSize(1300, 831))
+        MainWindow.setMaximumSize(QSize(1300, 831))
+
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.sidebar = QFrame(self.centralwidget)
@@ -63,7 +64,7 @@ class Ui_MainWindow(object):
         self.logo.setPixmap(QPixmap(img_path))
         self.logo.setScaledContents(True)
         self.logo.setIndent(0)
-
+  
         self.menus = QFrame(self.sidebar)
         self.menus.setObjectName(u"menus")
         self.menus.setGeometry(QRect(10, 140, 71, 471))
@@ -74,9 +75,11 @@ class Ui_MainWindow(object):
         self.menus.setFrameShadow(QFrame.Shadow.Raised)
         self.menus.setLineWidth(0)
 
-        self.home = QPushButton(self.menus)
+        self.home = QPushButton("Home", self.menus)
         self.home.setObjectName(u"home")
         self.home.setGeometry(QRect(10, 20, 51, 61))
+        # self.home.setGeometry(QRect(10, 20, 80, 80))
+
         icon = QIcon()
         img_path = QDir.currentPath() + "/static/images/home.png"
         icon.addFile(img_path, QSize(), QIcon.Mode.Normal, QIcon.State.Off)
@@ -135,10 +138,9 @@ class Ui_MainWindow(object):
         self.logout.setIconSize(QSize(50, 50))
 
         self.contentArea = QStackedWidget(self.centralwidget)
-        self.contentArea.setGeometry(QRect(90, 0, 1138, 831))
+        self.contentArea.setGeometry(QRect(90, 0, 1300, 831))
         self.contentArea.setObjectName("contentArea")
         # self.setStyleSheet("background-color: #F8F6F1; ")
-
 
         self.page_home = HomePage()
         self.page_home.setObjectName("homePage")
@@ -201,12 +203,8 @@ class Ui_MainWindow(object):
         self.noti.setText("")
         self.community.setText("")
         self.logout.setText("")
-    # retranslateUi
+
 
     
-
-
-
-
 
 

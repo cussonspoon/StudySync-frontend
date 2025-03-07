@@ -11,3 +11,6 @@ class CollectionPage(QWidget):
         self.label = QLabel("Welcome to Collection Page!")
         layout.addWidget(self.label)
         self.setLayout(layout)
+
+    
+    

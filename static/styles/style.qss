@@ -1,7 +1,8 @@
 QLabel {
+    border: 2px solid black;  /* Border width and color */
+    border-radius: 5px;
     font-family: sans-serif;
     color: #333333; 
-    font-size: 30px; 
     font-weight: normal;
     letter-spacing: 1px;
 }
@@ -13,10 +14,10 @@ QLabel {
 }
 
 /* Sidebar Buttons */
-QPushButton {
+/* QPushButton {
     background-color: transparent;
     border: none;
-}
+} */
 
 QPushButton:hover {
     background-color: rgba(71, 71, 71, 0.2);
@@ -28,9 +29,10 @@ QPushButton:pressed {
 }
 
 /* Dashboard Styling */
-#homePage, #collectionPage, #statsPage, #notification, #communityPage {
+/* #homePage, #collectionPage, #statsPage, #notification, #communityPage {
     background-color: #F8F6F1;
 }
+
 
 QScrollArea {
     background: #F8F6F1;
@@ -38,4 +40,4 @@ QScrollArea {
     margin: 1;
     padding: 1;
 }
-
+ */
