@@ -45,8 +45,6 @@ class ToDoApp(QWidget):
         self.layout.addWidget(self.add_task_btn)
         self.layout.addWidget(self.scroll_area)
 
-     
-    
     def add_task(self):
         """Adds a new task with a circle button, text box, and status label."""
 
@@ -107,11 +105,8 @@ class ToDoApp(QWidget):
         task_layout.addWidget(separator)
 
         self.task_container.insertWidget(self.task_container.count(), task_frame)
-
-
         # spacer = QSpacerItem(0, 0, QSizePolicy.Minimum, QSizePolicy.Fixed)
         # self.task_container.addItem(spacer)
-
 
     def toggle_status(self, label):
         """Toggles the status between 'In Progress' (green) and 'Done' (red)."""

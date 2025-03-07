@@ -53,4 +53,3 @@ class Image(QWidget):
             label.setPixmap(scaled_pixmap)
 
 
-    

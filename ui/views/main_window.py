@@ -19,7 +19,7 @@ from PySide6.QtWidgets import (QApplication, QFrame, QLabel, QMainWindow,
     QPushButton, QScrollArea, QScrollBar, QSizePolicy, QStackedWidget, QHBoxLayout, QVBoxLayout, QToolButton, 
     QWidget)
 
-from ui.views.home3 import HomePage
+from ui.views.home import HomePage
 from ui.views.collection import CollectionPage
 from ui.views.statistic import StatPage
 from ui.views.notification import NotificationPage
@@ -85,16 +85,6 @@ class Ui_MainWindow(object):
         icon.addFile(img_path, QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.home.setIcon(icon)
         self.home.setIconSize(QSize(50, 50))
-        # self.home.setIconSize(QSize(40, 40))
-
-    #     self.home.setStyleSheet("""
-    #     QPushButton {
-    #         text-align: center;
-    #         padding-top: 0px;  /* Push text below the icon */
-    #         font-size: 12px;
-    #         font-weight: bold;
-    #     }
-    # """)
 
         self.collection = QPushButton(self.menus)
         self.collection.setObjectName(u"collection")
@@ -213,7 +203,7 @@ class Ui_MainWindow(object):
         self.noti.setText("")
         self.community.setText("")
         self.logout.setText("")
-    # retranslateUi
+
 
     
 
