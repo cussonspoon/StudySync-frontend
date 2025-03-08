@@ -1,12 +1,27 @@
-
 import sys
 import os
 from PySide6.QtCore import Qt, QDir
 from PySide6.QtGui import QFont, QPixmap
-from PySide6.QtWidgets import QApplication, QMainWindow, QFrame, QLabel, QScrollArea, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLineEdit, QLabel, QFrame, QScrollArea, QSizePolicy, QSpacerItem
+from PySide6.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QFrame,
+    QLabel,
+    QScrollArea,
+    QWidget,
+    QPushButton,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLineEdit,
+    QLabel,
+    QFrame,
+    QScrollArea,
+    QSizePolicy,
+    QSpacerItem,
+)
 
 from ui.views.components.carousel import HorizontalImageScroller
-from utils.ui import Text, Image
+from utils.ui import Text, Image, SearchBar
 
 
 class HomePage(QWidget):
@@ -16,126 +31,176 @@ class HomePage(QWidget):
 
     def setupUi(self):
         self.setObjectName("Form")
-        self.resize(1200, 771)
         self.setStyleSheet("background-color: #FAFAFA;")
+
+        # ✅ Search Bar (Fixed at the Top)
+        self.searchFrame = QFrame(self)
+        self.searchFrame.setFixedHeight(111)
+        self.searchFrame.setStyleSheet("background-color: white; border-bottom: 1px solid #DDD;")
+
+        search_layout = QVBoxLayout(self.searchFrame)
+        search_layout.setAlignment(Qt.AlignCenter)
+        self.searchBar = SearchBar(self.searchFrame)
+        search_layout.addWidget(self.searchBar)
+        self.searchFrame.setLayout(search_layout)
 
         # 📌 Scroll Area Setup
         self.scrollArea = QScrollArea(self)
-        self.scrollArea.setObjectName("scrollArea")
-        self.scrollArea.setGeometry(0, 110, 1250, 800)
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         self.scrollAreaWidgetContents = QWidget()
-        self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(0, 0, 1250, 1000)  # Extended height for scrolling
+        self.scroll_layout = QVBoxLayout(self.scrollAreaWidgetContents)
+        self.scroll_layout.setAlignment(Qt.AlignTop)
+        self.scroll_layout.setSpacing(10)  # Set spacing between sections
 
-        self.bannerPic = Image(10, 0, 1171, 291, "banner.jpg", self.scrollAreaWidgetContents)
-        self.profilePic = Image(50, 240, 91, 91, "profile.jpg", self.scrollAreaWidgetContents)
-        self.collectionText = Text(30, 360, 21, "My Collections", "333333", self.scrollAreaWidgetContents)
-        self.collectionIcon = Image(200, 320, 141, 101, "collectionIcon.png", self.scrollAreaWidgetContents)
+        # ✅ Banner Image
+        self.bannerFrame = QFrame(self.scrollAreaWidgetContents)
+        self.bannerFrame.setFixedSize(1171, 291)
+        self.bannerLayout = QVBoxLayout(self.bannerFrame)
+        self.bannerPic = Image(1171, 291, "banner.jpg", self.bannerFrame)
+        self.bannerLayout.addWidget(self.bannerPic)
+        self.bannerFrame.setLayout(self.bannerLayout)
+        self.scroll_layout.addWidget(self.bannerFrame)
 
+        # ✅ Profile Picture (Overlapping Banner)
+        self.profilePic = Image(91, 91, "profile.jpg", self.bannerFrame)
+        self.profilePic.move(20, self.bannerFrame.height() - 45)  # Adjust overlap
+
+        # ✅ Spacing between Banner/Profile and "My Collections"
+        spacing_banner = QFrame(self.scrollAreaWidgetContents)
+        spacing_banner.setFixedHeight(20)  # 20px spacing
+        self.scroll_layout.addWidget(spacing_banner)
+
+        # ✅ Collection Icon & Text on Same Line
+        collection_layout = QHBoxLayout()
+        self.collectionIcon = Image(155, 101, "collectionIcon.png", self.scrollAreaWidgetContents)
+        self.collectionText = Text(21, "My Collections", "333333", self.scrollAreaWidgetContents)
+
+        collection_layout.addWidget(self.collectionIcon)
+        collection_layout.addWidget(self.collectionText)
+        collection_layout.addStretch()  # Pushes content to the left
+
+        collection_container = QFrame(self.scrollAreaWidgetContents)
+        collection_container.setLayout(collection_layout)
+        self.scroll_layout.addWidget(collection_container)
+
+        # ✅ Collection Scroller
         self.collections = HorizontalImageScroller(self.scrollAreaWidgetContents)
-        self.collections.setGeometry(10, 430, 1180, 250)
-        self.recommendsText = Text(30, 710, 21, "Recommended folder for you", "333333", self.scrollAreaWidgetContents)
+        self.scroll_layout.addWidget(self.collections)
+
+        # ✅ Spacing between Collection Scroller and "Recommended Folders"
+        spacing_collections = QFrame(self.scrollAreaWidgetContents)
+        spacing_collections.setFixedHeight(20)  # 20px spacing
+        self.scroll_layout.addWidget(spacing_collections)
+
+        # ✅ Recommended Folders Section
+        self.recommendsText = Text(21, "Recommended folders for you", "333333", self.scrollAreaWidgetContents)
+        self.scroll_layout.addWidget(self.recommendsText)
 
         self.recommendFolders = HorizontalImageScroller(self.scrollAreaWidgetContents)
-        self.recommendFolders.setGeometry(10, 780, 1180, 250)
+        self.scroll_layout.addWidget(self.recommendFolders)
 
-        self.taskText = Text(30, 1090, 21, "Task", "333333", self.scrollAreaWidgetContents)
-        self.taskImg = Image(90, 1050, 141, 101, "task.png", self.scrollAreaWidgetContents)
+        # ✅ Spacing between Recommended Folders and "Task" Section
+        spacing_recommended = QFrame(self.scrollAreaWidgetContents)
+        spacing_recommended.setFixedHeight(20)  # 20px spacing
+        self.scroll_layout.addWidget(spacing_recommended)
 
-        self.taskManagement = TaskManagement(27, 1170, 800, 400, self.scrollAreaWidgetContents)
+        # ✅ Task Section (Text + Image on Same Line)
+        task_layout = QHBoxLayout()
+        self.taskText = Text(21, "Task", "333333", self.scrollAreaWidgetContents)
+        self.taskImg = Image(141, 130, "task.png", self.scrollAreaWidgetContents)
 
-        # 📌 Ensure scrollable content height is correct
-        self.scrollAreaWidgetContents.setMinimumHeight(1500)
+        task_layout.addWidget(self.taskText)
+        task_layout.addWidget(self.taskImg)
+        task_layout.addStretch()
+
+        task_container = QFrame(self.scrollAreaWidgetContents)
+        task_container.setLayout(task_layout)
+        self.scroll_layout.addWidget(task_container)
+
+        # ✅ Task Management (Scrollable)
+        self.taskManagement = TaskManagement(50, 1180, 800, 700, self.scrollAreaWidgetContents)
+        self.taskManagement.setMinimumHeight(400)
+        self.scroll_layout.addWidget(self.taskManagement)
+
+        # ✅ Apply Layout to Scroll Area
+        self.scrollAreaWidgetContents.setLayout(self.scroll_layout)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
-        # 📌 Header Frame
-        self.searchFrame = QFrame(self)
-        self.searchFrame.setObjectName("searchFrame")
-        self.searchFrame.setGeometry(0, 0, 1250, 111)
-        self.searchFrame.setFrameShape(QFrame.Shape.StyledPanel)
-        self.searchFrame.setFrameShadow(QFrame.Shadow.Raised)
-        
-    def load_image(self, label, path, width, height):
-        """Loads an image into a QLabel while maintaining aspect ratio."""
-        if not os.path.exists(path):
-            label.setText("⚠️ Image not found")
-            label.setStyleSheet("color: red; font-size: 14px;")
-            print(f"⚠️ Warning: Image not found at {path}")
-            return
+        # ✅ Main Layout (Includes Search Bar and Scroll Area)
+        main_layout = QVBoxLayout(self)
+        main_layout.addWidget(self.searchFrame)
+        main_layout.addWidget(self.scrollArea)
+        self.setLayout(main_layout)
 
-        pixmap = QPixmap(path)
-        if pixmap.isNull():
-            label.setText("⚠️ Error loading image")
-            label.setStyleSheet("color: red; font-size: 14px;")
-            print(f"⚠️ Error loading image at {path}")
-        else:
-            scaled_pixmap = pixmap.scaled(width, height, Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation)
-
-            label.setFixedSize(width, height)
-            label.setAlignment(Qt.AlignCenter)  # Center image in the QLabel
-            label.setStyleSheet("background-color: transparent;")  # Remove unwanted background color
-            label.setPixmap(scaled_pixmap)
-
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("StudySync Dashboard")  # Set Window Title
-        self.setGeometry(100, 100, 1200, 771)  # Set Window Size
-        self.ui = HomePage()
-        self.setCentralWidget(self.ui)
+    def update_scroll_height(self):
+        """Adjusts the scroll area height when tasks are added."""
+        total_height = self.scroll_layout.sizeHint().height() + 20  # Add extra padding
+        self.scrollAreaWidgetContents.setMinimumHeight(total_height)
 
 
 class TaskManagement(QWidget):
     def __init__(self, pos_x, pos_y, width, length, parent=None):
         super().__init__(parent)
         self.setWindowTitle("To-Do List")
-        # self.setFixedSize(400, 500)
         self.setGeometry(pos_x, pos_y, width, length)
+        self.setFixedSize(width, length)
 
         self.layout = QVBoxLayout(self)
 
-        #Scrollable 
+        # Scrollable
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
-        self.scroll_area.setFixedSize(width, length) 
-        
+        # self.scroll_area.setFixedSize(width - 50, length - 100)
+
         self.scroll_widget = QWidget()
         self.task_container = QVBoxLayout(self.scroll_widget)
-        
+
         self.scroll_area.setWidget(self.scroll_widget)
 
         # Add Task Button
-        self.add_task_btn = QPushButton("Add Task")
+        self.add_task_btn = QPushButton("+ Add Task")
         self.add_task_btn.clicked.connect(self.add_task)
 
-        self.task_container.setSpacing(0)
-        self.task_container.setAlignment(Qt.AlignTop)  
+        self.add_task_btn.setStyleSheet(
+            """
+            QPushButton {
+                background: transparent;  
+                border: none;             
+                font-size: 16px;         
+                color: grey;          
+                padding: 5px;           
+                text-align: left;
+            }
+            QPushButton:hover {
+                color: green;           
+            }
+        """
+        )
+
+        self.task_container.setSpacing(2)
+        self.task_container.setAlignment(Qt.AlignTop)
         self.layout.setSpacing(0)
 
         self.layout.addWidget(self.add_task_btn)
         self.layout.addWidget(self.scroll_area)
 
     def add_task(self):
-        """Adds a new task with a circle button, text box, and status label."""
 
         task_frame = QFrame()
-        # task_frame.setFrameShape(QFrame.Box)
-        task_frame.setFixedHeight(70)
-        task_frame.setStyleSheet("background-color: #F7F7F7; padding: 5px;")
+        task_frame.setObjectName("taskFrame")
+        task_frame.setFixedHeight(50)
+        task_frame.setStyleSheet("background-color: #F1F0E9; padding: 2px;")
 
         task_layout = QHBoxLayout(task_frame)
 
-        # Circle Button (Leftmost)
         circle_btn = QPushButton("●")
         circle_btn.setFixedSize(20, 20)
         circle_btn.setStyleSheet("color: gray; border: none; font-size: 18px;")
         circle_btn.clicked.connect(lambda: self.toggle_status(status_label))
 
-        # Task Input Field
         task_input = QLineEdit()
         task_input.setPlaceholderText("Enter your task here...")
         task_input.setFont(QFont("Arial", 12))
@@ -143,15 +208,14 @@ class TaskManagement(QWidget):
         task_input.setStyleSheet(
             """
             QLineEdit {
-                border: 1px solid white;
-                border-radius: 4px;
+                border: none; 
                 padding: 5px;
                 font-size: 12px;
                 color: black;
-                outline: none; /* Prevents the blue border */
+                outline: none; 
             }
             QLineEdit:focus {
-                border: 1px solid gray; /* Keeps the same border when clicked */
+                border: 1px solid #BDB395; 
                 outline: none;
             }
         """
@@ -169,6 +233,7 @@ class TaskManagement(QWidget):
 
         separator = QFrame()
         separator.setFrameShape(QFrame.HLine)
+        separator.setStyleSheet("background-color: #BDB395; height: 1px; border: none;")
 
         task_layout.addWidget(circle_btn)
         task_layout.addWidget(task_input)
@@ -177,8 +242,6 @@ class TaskManagement(QWidget):
         task_layout.addWidget(separator)
 
         self.task_container.insertWidget(self.task_container.count(), task_frame)
-        # spacer = QSpacerItem(0, 0, QSizePolicy.Minimum, QSizePolicy.Fixed)
-        # self.task_container.addItem(spacer)
 
     def toggle_status(self, label):
         """Toggles the status between 'In Progress' (green) and 'Done' (red)."""
@@ -190,11 +253,21 @@ class TaskManagement(QWidget):
             label.setStyleSheet("color: green;")
 
     def delete_task(self, task_frame):
-        for i in reversed(range(self.task_container.count())): 
+        for i in reversed(range(self.task_container.count())):
             item = self.task_container.itemAt(i)
-            if item.widget() == task_frame: 
+            if item.widget() == task_frame:
                 item.widget().deleteLater()
                 break
+
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("StudySync Dashboard")  # Set Window Title
+        self.setGeometry(100, 100, 1200, 771)  # Set Window Size
+        self.ui = HomePage()
+        self.setCentralWidget(self.ui)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

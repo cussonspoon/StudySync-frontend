@@ -1,5 +1,6 @@
 import os
 import sys
+from PySide6.QtCore import Qt, QDir
 from PySide6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QScrollArea, QFrame
 from PySide6.QtGui import QPixmap
 
@@ -23,6 +24,9 @@ class HorizontalImageScroller(QWidget):
         # Create a scrollable area
         self.scroll_area = QScrollArea(self)
         self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroll_area.setMinimumHeight(200)
+
 
         # Create a container widget for panels
         self.scroll_widget = QWidget()
@@ -55,20 +59,6 @@ class HorizontalImageScroller(QWidget):
             self.scroll_layout.addWidget(panel)
 
         self.scroll_area.setWidget(self.scroll_widget)
-
-        # Navigation buttons
-        # self.prev_button = QPushButton("←")
-        # self.next_button = QPushButton("→")
-        # self.prev_button.setFixedSize(20, 60)
-        # self.next_button.setFixedSize(20, 60)
-        
-        # self.prev_button.clicked.connect(self.scroll_left)
-        # self.next_button.clicked.connect(self.scroll_right)
-
-        # # Layout setup
-        # button_layout = QHBoxLayout()
-        # self.scroll_layout.addWidget(self.prev_button)
-        # self.scroll_layout.addWidget(self.next_button)
 
         main_layout = QVBoxLayout()
         main_layout.addWidget(self.scroll_area)

@@ -1,6 +1,5 @@
 QLabel {
-    border: 2px solid black;  /* Border width and color */
-    border-radius: 5px;
+  
     font-family: sans-serif;
     color: #333333; 
     font-weight: normal;
@@ -11,6 +10,17 @@ QLabel {
 #sidebar {
     background-color: #FAFAFA;
     border: 1px solid #474747;
+}
+
+QFrame {
+    border: 1px solid #474747;
+    /* border: none;  */
+    background-color: #F7F7F7;  /* Optional background color */
+    padding: 5px;  /* Adjust padding if needed */
+}
+
+#taskFrame {
+    border-radius: 10px;
 }
 
 /* Sidebar Buttons */
@@ -29,8 +39,8 @@ QPushButton:pressed {
 }
 
 /* Dashboard Styling */
-/* #homePage, #collectionPage, #statsPage, #notification, #communityPage {
-    background-color: #F8F6F1;
+ #homePage, #collectionPage, #statsPage, #notification, #communityPage {
+    background-color: #F6F0F0;
 }
 
 
@@ -40,4 +50,4 @@ QScrollArea {
     margin: 1;
     padding: 1;
 }
- */
+
