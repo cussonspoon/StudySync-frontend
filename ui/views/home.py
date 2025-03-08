@@ -33,10 +33,11 @@ class HomePage(QWidget):
         self.setObjectName("Form")
         self.setStyleSheet("background-color: #FAFAFA;")
 
-        # ✅ Search Bar (Fixed at the Top)
         self.searchFrame = QFrame(self)
         self.searchFrame.setFixedHeight(111)
-        self.searchFrame.setStyleSheet("background-color: white; border-bottom: 1px solid #DDD;")
+        self.searchFrame.setStyleSheet(
+            "background-color:  #F8F6F1; margin: 0px; padding: 0px;"
+        )
 
         search_layout = QVBoxLayout(self.searchFrame)
         search_layout.setAlignment(Qt.AlignCenter)
@@ -44,70 +45,76 @@ class HomePage(QWidget):
         search_layout.addWidget(self.searchBar)
         self.searchFrame.setLayout(search_layout)
 
-        # 📌 Scroll Area Setup
         self.scrollArea = QScrollArea(self)
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scrollArea.setStyleSheet("background-color: #F8F6F1;")
 
         self.scrollAreaWidgetContents = QWidget()
         self.scroll_layout = QVBoxLayout(self.scrollAreaWidgetContents)
         self.scroll_layout.setAlignment(Qt.AlignTop)
-        self.scroll_layout.setSpacing(10)  # Set spacing between sections
+        self.scroll_layout.setSpacing(10)
 
-        # ✅ Banner Image
         self.bannerFrame = QFrame(self.scrollAreaWidgetContents)
-        self.bannerFrame.setFixedSize(1171, 291)
+        self.bannerFrame.setFixedSize(1171, 360)
         self.bannerLayout = QVBoxLayout(self.bannerFrame)
+        self.bannerLayout.setContentsMargins(0, 0, 0, 0)
+        self.bannerFrame.setStyleSheet("margin: 0px;")
+        self.bannerLayout.setAlignment(Qt.AlignTop)
+
         self.bannerPic = Image(1171, 291, "banner.jpg", self.bannerFrame)
         self.bannerLayout.addWidget(self.bannerPic)
+
+        self.profilePic = Image(91, 91, "profile.jpg", self.bannerFrame)
+        self.profilePic.move(30, 250)  # Adjust overlap
+
+        self.bannerPic.setStyleSheet("margin: 0px; padding: 0px;")
+        self.profilePic.setStyleSheet("margin: 0px; padding: 0px;")
+
         self.bannerFrame.setLayout(self.bannerLayout)
         self.scroll_layout.addWidget(self.bannerFrame)
+        self.bannerFrame.setStyleSheet("background-color: transparent;")
 
-        # ✅ Profile Picture (Overlapping Banner)
-        self.profilePic = Image(91, 91, "profile.jpg", self.bannerFrame)
-        self.profilePic.move(20, self.bannerFrame.height() - 45)  # Adjust overlap
+        # spacing_banner = QFrame(self.scrollAreaWidgetContents)
+        # spacing_banner.setFixedHeight(20)  # 20px spacing
+        # self.scroll_layout.addWidget(spacing_banner)
 
-        # ✅ Spacing between Banner/Profile and "My Collections"
-        spacing_banner = QFrame(self.scrollAreaWidgetContents)
-        spacing_banner.setFixedHeight(20)  # 20px spacing
-        self.scroll_layout.addWidget(spacing_banner)
-
-        # ✅ Collection Icon & Text on Same Line
         collection_layout = QHBoxLayout()
-        self.collectionIcon = Image(155, 101, "collectionIcon.png", self.scrollAreaWidgetContents)
-        self.collectionText = Text(21, "My Collections", "333333", self.scrollAreaWidgetContents)
+        self.collectionIcon = Image(
+            155, 101, "collectionIcon.png", self.scrollAreaWidgetContents
+        )
+        self.collectionText = Text(
+            21, "My Collections", "333333", self.scrollAreaWidgetContents
+        )
 
-        collection_layout.addWidget(self.collectionIcon)
         collection_layout.addWidget(self.collectionText)
+        collection_layout.addWidget(self.collectionIcon)
         collection_layout.addStretch()  # Pushes content to the left
 
         collection_container = QFrame(self.scrollAreaWidgetContents)
         collection_container.setLayout(collection_layout)
         self.scroll_layout.addWidget(collection_container)
 
-        # ✅ Collection Scroller
         self.collections = HorizontalImageScroller(self.scrollAreaWidgetContents)
         self.scroll_layout.addWidget(self.collections)
 
-        # ✅ Spacing between Collection Scroller and "Recommended Folders"
         spacing_collections = QFrame(self.scrollAreaWidgetContents)
         spacing_collections.setFixedHeight(20)  # 20px spacing
         self.scroll_layout.addWidget(spacing_collections)
 
-        # ✅ Recommended Folders Section
-        self.recommendsText = Text(21, "Recommended folders for you", "333333", self.scrollAreaWidgetContents)
+        self.recommendsText = Text(
+            21, "Recommended folders for you", "333333", self.scrollAreaWidgetContents
+        )
         self.scroll_layout.addWidget(self.recommendsText)
 
         self.recommendFolders = HorizontalImageScroller(self.scrollAreaWidgetContents)
         self.scroll_layout.addWidget(self.recommendFolders)
 
-        # ✅ Spacing between Recommended Folders and "Task" Section
         spacing_recommended = QFrame(self.scrollAreaWidgetContents)
         spacing_recommended.setFixedHeight(20)  # 20px spacing
         self.scroll_layout.addWidget(spacing_recommended)
 
-        # ✅ Task Section (Text + Image on Same Line)
         task_layout = QHBoxLayout()
         self.taskText = Text(21, "Task", "333333", self.scrollAreaWidgetContents)
         self.taskImg = Image(141, 130, "task.png", self.scrollAreaWidgetContents)
@@ -120,16 +127,15 @@ class HomePage(QWidget):
         task_container.setLayout(task_layout)
         self.scroll_layout.addWidget(task_container)
 
-        # ✅ Task Management (Scrollable)
-        self.taskManagement = TaskManagement(50, 1180, 800, 700, self.scrollAreaWidgetContents)
+        self.taskManagement = TaskManagement(
+            50, 1180, 800, 700, self.scrollAreaWidgetContents
+        )
         self.taskManagement.setMinimumHeight(400)
         self.scroll_layout.addWidget(self.taskManagement)
 
-        # ✅ Apply Layout to Scroll Area
         self.scrollAreaWidgetContents.setLayout(self.scroll_layout)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
-        # ✅ Main Layout (Includes Search Bar and Scroll Area)
         main_layout = QVBoxLayout(self)
         main_layout.addWidget(self.searchFrame)
         main_layout.addWidget(self.scrollArea)

@@ -165,7 +165,7 @@ class Image(QLabel):
         self.setFixedSize(width, height)
         img_path = os.path.join(QDir.currentPath(), f"static/images/{img_src}")
         self.load_image(img_path, width, height)
-
+        
     def load_image(self, path, width, height):
         """Loads an image into QLabel while maintaining aspect ratio."""
         if not os.path.exists(path):

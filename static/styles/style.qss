@@ -19,6 +19,7 @@ QFrame {
     padding: 5px;  /* Adjust padding if needed */
 }
 
+
 #taskFrame {
     border-radius: 10px;
 }
