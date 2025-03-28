@@ -22,7 +22,7 @@ from PySide6.QtWidgets import (
 
 from ui.views.components.carousel import HorizontalImageScroller
 from utils.ui import Text, Image, SearchBar
-
+from ui.views.components.calendar import CalendarWidget
 
 class HomePage(QWidget):
     def __init__(self):
@@ -76,10 +76,6 @@ class HomePage(QWidget):
         self.scroll_layout.addWidget(self.bannerFrame)
         self.bannerFrame.setStyleSheet("background-color: transparent;")
 
-        # spacing_banner = QFrame(self.scrollAreaWidgetContents)
-        # spacing_banner.setFixedHeight(20)  # 20px spacing
-        # self.scroll_layout.addWidget(spacing_banner)
-
         collection_layout = QHBoxLayout()
         self.collectionIcon = Image(
             155, 101, "collectionIcon.png", self.scrollAreaWidgetContents
@@ -127,12 +123,23 @@ class HomePage(QWidget):
         task_container.setLayout(task_layout)
         self.scroll_layout.addWidget(task_container)
 
+        task_n_cal_layout = QHBoxLayout()
+        task_n_cal_layout.setSpacing(0)
+
         self.taskManagement = TaskManagement(
             50, 1180, 800, 700, self.scrollAreaWidgetContents
         )
         self.taskManagement.setMinimumHeight(400)
-        self.scroll_layout.addWidget(self.taskManagement)
+        # self.scroll_layout.addWidget(self.taskManagement)
 
+        self.calendar = CalendarWidget()
+        task_n_cal_layout.addWidget(self.taskManagement)
+        task_n_cal_layout.addWidget(self.calendar)
+
+        task_n_cal_container = QWidget(self.scrollAreaWidgetContents)
+        task_n_cal_container.setLayout(task_n_cal_layout)
+
+        self.scroll_layout.addWidget(task_n_cal_container)
         self.scrollAreaWidgetContents.setLayout(self.scroll_layout)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
@@ -198,7 +205,7 @@ class TaskManagement(QWidget):
         task_frame = QFrame()
         task_frame.setObjectName("taskFrame")
         task_frame.setFixedHeight(50)
-        task_frame.setStyleSheet("background-color: #F1F0E9; padding: 2px;")
+        task_frame.setStyleSheet("background-color: #F1F0E9; padding: 2px; margin: 0px;")
 
         task_layout = QHBoxLayout(task_frame)
 
