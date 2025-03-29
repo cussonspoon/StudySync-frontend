@@ -1,9 +1,16 @@
 from PySide6.QtWidgets import (
-    QApplication, QWidget, QLabel, QPushButton, QGridLayout,
-    QVBoxLayout, QHBoxLayout
+    QApplication,
+    QWidget,
+    QLabel,
+    QPushButton,
+    QGridLayout,
+    QVBoxLayout,
+    QHBoxLayout,
 )
-from PySide6.QtCore import Qt, QDate
+from PySide6.QtCore import Qt, QDate, QPoint
 from PySide6.QtGui import QFont, QPalette, QColor
+from PySide6.QtWidgets import QGraphicsDropShadowEffect
+
 import sys
 
 
@@ -23,9 +30,14 @@ class CalendarWidget(QWidget):
         self.setAutoFillBackground(True)
 
         main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(10, 10, 10, 10)  # Add padding
+        main_layout.setSpacing(10)  # Add spacing between elements
 
         # Month-Year Header
         header_layout = QHBoxLayout()
+        header_layout.setContentsMargins(0, 0, 0, 0)
+        header_layout.setSpacing(10)
+
         self.prev_btn = QPushButton("▲")
         self.next_btn = QPushButton("▼")
         self.prev_btn.setFixedSize(20, 20)
@@ -34,15 +46,40 @@ class CalendarWidget(QWidget):
         self.month_label.setAlignment(Qt.AlignCenter)
         self.month_label.setFont(QFont("Arial", 10, QFont.Bold))
         self.month_label.setStyleSheet("color: black; font-size: 14px;")
+
         header_layout.addWidget(self.prev_btn)
         header_layout.addWidget(self.month_label, stretch=1)
         header_layout.addWidget(self.next_btn)
-        self.prev_btn.setStyleSheet("color: black; font-size: 14px;")
-        self.next_btn.setStyleSheet("color: black; font-size: 14px;")
+
+        self.prev_btn.setStyleSheet(
+            """
+            QPushButton {
+                color: black;
+                font-size: 14px;
+                border: none;
+            }
+            QPushButton:hover {
+                color: #BDB395;
+            }
+        """
+        )
+        self.next_btn.setStyleSheet(
+            """
+            QPushButton {
+                color: black;
+                font-size: 14px;
+                border: none;
+            }
+            QPushButton:hover {
+                color: #BDB395;
+            }
+        """
+        )
 
         # Day Grid
         self.grid_layout = QGridLayout()
         self.grid_layout.setSpacing(5)
+        self.grid_layout.setContentsMargins(0, 0, 0, 0)
 
         # Connect signals
         self.prev_btn.clicked.connect(self.prev_month)
@@ -51,6 +88,18 @@ class CalendarWidget(QWidget):
         main_layout.addLayout(header_layout)
         main_layout.addLayout(self.grid_layout)
         self.setLayout(main_layout)
+        self.setStyleSheet(
+            """
+            QWidget {
+                background-color: white;
+                border: none;
+                border-radius: 5px;
+            }
+            QLabel {
+                background-color: transparent;
+            }
+        """
+        )
 
         self.update_calendar()
 
@@ -74,7 +123,7 @@ class CalendarWidget(QWidget):
 
         # Days
         first_day = QDate(self.current_date.year(), self.current_date.month(), 1)
-        start_col = (first_day.dayOfWeek() % 7)
+        start_col = first_day.dayOfWeek() % 7
         days_in_month = first_day.daysInMonth()
 
         row = 1
@@ -83,10 +132,12 @@ class CalendarWidget(QWidget):
             day_label = QLabel(str(day))
             day_label.setAlignment(Qt.AlignCenter)
             day_label.setFont(QFont("Arial", 8))
-            day_label.setFixedSize(40, 40) 
-            if (day == QDate.currentDate().day()
-                    and self.current_date.month() == QDate.currentDate().month()
-                    and self.current_date.year() == QDate.currentDate().year()):
+            day_label.setFixedSize(40, 40)
+            if (
+                day == QDate.currentDate().day()
+                and self.current_date.month() == QDate.currentDate().month()
+                and self.current_date.year() == QDate.currentDate().year()
+            ):
                 day_label.setStyleSheet(
                     "background-color: teal; color: black; border-radius: 20px; font-size: 14px;"
                 )
