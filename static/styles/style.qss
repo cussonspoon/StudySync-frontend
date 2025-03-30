@@ -1,8 +1,8 @@
 QLabel {
+  
     font-family: sans-serif;
     color: #333333; 
-    font-size: 40px; 
-    font-weight: bold;
+    font-weight: normal;
     letter-spacing: 1px;
 }
 
@@ -22,11 +22,23 @@ QLabel#folderNameLabel {
     border: 1px solid #474747;
 }
 
+QFrame {
+    /* border: 1px solid #474747; */
+    /* border: none;  */
+    background-color: #F7F7F7;  /* Optional background color */
+    padding: 5px;  /* Adjust padding if needed */
+}
+
+
+#taskFrame {
+    border-radius: 10px;
+}
+
 /* Sidebar Buttons */
-QPushButton {
+/* QPushButton {
     background-color: transparent;
     border: none;
-}
+} */
 
 QPushButton:hover {
     background-color: rgba(71, 71, 71, 0.2);
@@ -38,9 +50,10 @@ QPushButton:pressed {
 }
 
 /* Dashboard Styling */
-#homePage, #collectionPage, #statsPage, #notification, #communityPage {
-    background-color: #F8F6F1;
+ #homePage, #collectionPage, #statsPage, #notification, #communityPage {
+    background-color: #F6F0F0;
 }
+
 
 QScrollArea {
     background: #F8F6F1;

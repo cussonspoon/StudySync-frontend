@@ -265,9 +265,3 @@ class CollectionPage(QWidget):
         if dialog.exec():
             contest_code = dialog.getContestCode()
             print("Contest Code Entered:", contest_code)  # or handle the code as needed
-
-if __name__ == "__main__":
-    app = QApplication([])
-    window = CollectionPage()
-    window.show()
-    app.exec()
