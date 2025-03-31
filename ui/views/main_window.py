@@ -24,15 +24,18 @@ from ui.views.collection import CollectionPage
 from ui.views.statistic import StatPage
 from ui.views.notification import NotificationPage
 from ui.views.community import CommunityPage
+from ui.views.quiz import QuizPage
 
 from enum import Enum
 
-class Page(Enum): 
+
+class Page(Enum):
     HOME = 1
     COLLECTION = 2
     STAT = 3
     NOTIFICATION = 4
     COMMUNITY = 5
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -43,22 +46,22 @@ class Ui_MainWindow(object):
         MainWindow.setMaximumSize(QSize(1300, 831))
 
         self.centralwidget = QWidget(MainWindow)
-        self.centralwidget.setObjectName(u"centralwidget")
+        self.centralwidget.setObjectName("centralwidget")
         self.sidebar = QFrame(self.centralwidget)
-        self.sidebar.setObjectName(u"sidebar")
+        self.sidebar.setObjectName("sidebar")
         self.sidebar.setGeometry(QRect(0, 0, 91, 831))
         self.sidebar.setFrameShape(QFrame.Shape.StyledPanel)
         self.sidebar.setFrameShadow(QFrame.Shadow.Raised)
         self.sidebar.setLineWidth(0)
 
         self.top = QFrame(self.sidebar)
-        self.top.setObjectName(u"top")
+        self.top.setObjectName("top")
         self.top.setGeometry(QRect(10, 10, 71, 121))
         self.top.setFrameShape(QFrame.Shape.NoFrame)
         self.top.setFrameShadow(QFrame.Shadow.Raised)
 
         self.logo = QLabel(self.top)
-        self.logo.setObjectName(u"logo")
+        self.logo.setObjectName("logo")
         self.logo.setGeometry(QRect(10, 10, 61, 71))
         img_path = QDir.currentPath() + "/static/images/logo.png"
         self.logo.setPixmap(QPixmap(img_path))
@@ -66,7 +69,7 @@ class Ui_MainWindow(object):
         self.logo.setIndent(0)
   
         self.menus = QFrame(self.sidebar)
-        self.menus.setObjectName(u"menus")
+        self.menus.setObjectName("menus")
         self.menus.setGeometry(QRect(10, 140, 71, 471))
         font = QFont()
         font.setKerning(True)
@@ -87,7 +90,7 @@ class Ui_MainWindow(object):
         self.home.setIconSize(QSize(50, 50))
 
         self.collection = QPushButton(self.menus)
-        self.collection.setObjectName(u"collection")
+        self.collection.setObjectName("collection")
         self.collection.setGeometry(QRect(10, 110, 51, 61))
         icon1 = QIcon()
         img_path = QDir.currentPath() + "/static/images/collection.png"
@@ -96,7 +99,7 @@ class Ui_MainWindow(object):
         self.collection.setIconSize(QSize(50, 50))
 
         self.stats = QPushButton(self.menus)
-        self.stats.setObjectName(u"stats")
+        self.stats.setObjectName("stats")
         self.stats.setGeometry(QRect(10, 200, 51, 61))
         icon2 = QIcon()
         img_path = QDir.currentPath() + "/static/images/stat.png"
@@ -105,7 +108,7 @@ class Ui_MainWindow(object):
         self.stats.setIconSize(QSize(50, 50))
 
         self.noti = QPushButton(self.menus)
-        self.noti.setObjectName(u"noti")
+        self.noti.setObjectName("noti")
         self.noti.setGeometry(QRect(10, 290, 51, 61))
         icon3 = QIcon()
         img_path = QDir.currentPath() + "/static/images/noti.png"
@@ -114,7 +117,7 @@ class Ui_MainWindow(object):
         self.noti.setIconSize(QSize(50, 50))
 
         self.community = QPushButton(self.menus)
-        self.community.setObjectName(u"community")
+        self.community.setObjectName("community")
         self.community.setGeometry(QRect(10, 380, 51, 61))
         icon4 = QIcon()
         img_path = QDir.currentPath() + "/static/images/community.png"
@@ -123,13 +126,13 @@ class Ui_MainWindow(object):
         self.community.setIconSize(QSize(50, 50))
 
         self.bottom = QFrame(self.sidebar)
-        self.bottom.setObjectName(u"bottom")
+        self.bottom.setObjectName("bottom")
         self.bottom.setGeometry(QRect(10, 620, 71, 141))
         self.bottom.setFrameShape(QFrame.Shape.NoFrame)
         self.bottom.setFrameShadow(QFrame.Shadow.Raised)
 
         self.logout = QPushButton(self.bottom)
-        self.logout.setObjectName(u"logout")
+        self.logout.setObjectName("logout")
         self.logout.setGeometry(QRect(0, 70, 71, 61))
         icon5 = QIcon()
         img_path = QDir.currentPath() + "/static/images/logout.png"
@@ -155,9 +158,55 @@ class Ui_MainWindow(object):
         self.page_collection.setObjectName("collectionPage")
         self.page_collection_scroll.setWidget(self.page_collection)
 
+        quiz_data = [
+            {
+                "question": "What is the capital of France?",
+                "choices": [
+                    {
+                        "choice": "Paris",
+                        "is_answer": True,
+                    },
+                    {
+                        "choice": "London",
+                        "is_answer": False,
+                    },
+                    {
+                        "choice": "Berlin",
+                        "is_answer": False,
+                    },
+                    {
+                        "choice": "Madrid",
+                        "is_answer": False,
+                    },
+                ],
+                "correct_choice": 0,
+            },
+            {
+                "question": "Which programming language is used for web?",
+                "choices": [
+                    {
+                        "choice": "Python",
+                        "is_answer": False,
+                    },
+                    {
+                        "choice": "JavaScript",
+                        "is_answer": True,
+                    },
+                    {
+                        "choice": "C++",
+                        "is_answer": False,
+                    },
+                    {
+                        "choice": "Go",
+                        "is_answer": False,
+                    },
+                ],
+                "correct_choice": 1,
+            },
+        ]
         self.page_stats_scroll = QScrollArea()
         self.page_stats_scroll.setWidgetResizable(True)
-        self.page_stats = StatPage()
+        self.page_stats = QuizPage(quiz_data=quiz_data)
         self.page_stats.setObjectName("statsPage")
         self.page_stats_scroll.setWidget(self.page_stats)
 
@@ -190,12 +239,13 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QMetaObject.connectSlotsByName(MainWindow)
 
-    def switchPage(self, page: Page): 
+    def switchPage(self, page: Page):
         self.contentArea.setCurrentIndex(page.value - 1)
 
-
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
+        MainWindow.setWindowTitle(
+            QCoreApplication.translate("MainWindow", "MainWindow", None)
+        )
         self.logo.setText("")
         self.home.setText("")
         self.collection.setText("")
