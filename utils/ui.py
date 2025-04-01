@@ -202,13 +202,13 @@ class SearchBar(QWidget):
             QLineEdit {
                 background-color: #E6E6E6;
                 border: none;
-                padding: 8px;
+                padding: 10px;
                 border-radius: 5px;
                 font-size: 14px;
-                color: black; /* Text color when typing */
+                color: black;
             }
             QLineEdit::placeholder {
-                color: #8D8D8D; /* Placeholder text color */
+                color: #8D8D8D;
             }
         """)
 
@@ -222,7 +222,7 @@ class SearchBar(QWidget):
             }
         """)
 
-        self.setFixedSize(300, 40)  # Set fixed size for search bar
+        self.setFixedSize(500, 60)  # Set fixed size for search bar
 
 class QuizQuestionCard(QWidget):
     def __init__(self, question_text="Sample Question?"):
