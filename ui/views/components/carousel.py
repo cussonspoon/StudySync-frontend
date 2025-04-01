@@ -105,7 +105,6 @@ class HorizontalImageScroller(QWidget):
                 border: none;
                 background-color: white;
                 border-radius: 10px;
-                outline: none;
             }
             QScrollBar:horizontal {
                 border: none;
@@ -138,7 +137,7 @@ class HorizontalImageScroller(QWidget):
         # Create a container widget for folders
         self.scroll_widget = QWidget()
         self.scroll_widget.setStyleSheet(
-            "background-color: white; border-radius: 10px; border: none; outline: none;"
+            "background-color: white; border-radius: 10px;"
         )
         self.scroll_layout = QHBoxLayout(self.scroll_widget)
         self.scroll_layout.setSpacing(20)  # Add spacing between folders
