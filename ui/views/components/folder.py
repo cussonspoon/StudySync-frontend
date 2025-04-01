@@ -4,11 +4,9 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QFrame,
     QLabel,
-    QApplication,
 )
 from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt, QSize
-import sys
 
 
 class Folder(QWidget):
@@ -19,7 +17,7 @@ class Folder(QWidget):
     def setupUi(self, name, count, date, avatar_url, img_url):
         # Main layout for the folder widget
         layout = QVBoxLayout(self)
-        layout.setSpacing(5)
+        layout.setSpacing(0)  # Set to 0 to remove spacing
         layout.setContentsMargins(0, 0, 0, 0)  # Remove margins for proper alignment
 
         # Frame for the preview
@@ -53,7 +51,8 @@ class Folder(QWidget):
 
         # Folder name with icon
         name_layout = QHBoxLayout()
-        name_layout.setSpacing(5)
+        name_layout.setSpacing(3)
+        name_layout.setContentsMargins(0, 0, 0, 0)
 
         profile_icon = QLabel()
         profile_icon.setFixedSize(16, 16)
@@ -79,6 +78,8 @@ class Folder(QWidget):
                 font-size: 10px; 
                 font-weight: normal;
                 color: #666666;
+                margin-top: -4px;
+                margin-bottom: -4px;
             }
         """
         )
@@ -86,7 +87,8 @@ class Folder(QWidget):
 
         # Items count with icon
         count_layout = QHBoxLayout()
-        count_layout.setSpacing(5)
+        count_layout.setSpacing(3)
+        count_layout.setContentsMargins(0, -4, 0, 0)  # Increased negative top margin
 
         count_icon = QLabel()
         count_icon.setFixedSize(16, 16)
@@ -102,34 +104,3 @@ class Folder(QWidget):
         count_layout.addWidget(label_count)
         count_layout.addStretch()
         layout.addLayout(count_layout)
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-
-    # Create main window
-    main_window = QWidget()
-    main_window.setWindowTitle("Folder Test")
-    main_window.setMinimumWidth(1200)  # Set minimum width to fit all folders
-
-    # Create horizontal layout
-    layout = QHBoxLayout(main_window)
-    layout.setSpacing(20)  # Add spacing between folders
-    layout.setContentsMargins(20, 20, 20, 20)  # Add margins around the layout
-
-    # Create 5 folders
-    for i in range(5):
-        folder = Folder(
-            f"Folder {i+1}",
-            str(10 + i),
-            "2024-01-01",
-            "static/images/profile.jpg",
-            "static/images/pic1.jpg",
-        )
-        layout.addWidget(folder)
-
-    # Add stretch to push folders to the left
-    layout.addStretch()
-
-    main_window.show()
-    sys.exit(app.exec())

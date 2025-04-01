@@ -27,7 +27,7 @@ from ui.views.community import CommunityPage
 
 from enum import Enum
 
-class Page(Enum): 
+class Page(Enum):
     HOME = 1
     COLLECTION = 2
     STAT = 3
