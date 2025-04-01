@@ -24,6 +24,7 @@ from PySide6.QtWidgets import (
 from ui.views.components.carousel import HorizontalImageScroller
 from utils.ui import Text, Image, SearchBar
 from ui.views.components.calendar import CalendarWidget
+from ui.views.components.folder import Folder
 
 
 class HomePage(QWidget):
@@ -35,11 +36,33 @@ class HomePage(QWidget):
         self.setObjectName("Form")
         self.setStyleSheet("background-color: #FAFAFA;")
 
-        self.searchFrame = QFrame(self)
-        self.searchFrame.setFixedHeight(111)
+        # Create a container for search frame and shadow
+        search_container = QWidget(self)
+        search_container_layout = QVBoxLayout(search_container)
+        search_container_layout.setContentsMargins(0, 0, 0, 0)
+        search_container_layout.setSpacing(0)
+
+        self.searchFrame = QFrame()
+        self.searchFrame.setFixedHeight(80)
         self.searchFrame.setStyleSheet(
-            "background-color:  #F8F6F1; margin: 0px; padding: 0px;"
+            "background-color: #F8F6F1; margin: 0px; padding: 0px;"
         )
+
+        # Create shadow frame
+        shadow_frame = QFrame()
+        shadow_frame.setFixedHeight(2)  # Reduced from 8 to 2
+        shadow_frame.setStyleSheet(
+            """
+            QFrame {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 rgba(0, 0, 0, 0.08),
+                    stop:1 rgba(0, 0, 0, 0));
+            }
+        """
+        )
+
+        search_container_layout.addWidget(self.searchFrame)
+        search_container_layout.addWidget(shadow_frame)
 
         search_layout = QVBoxLayout(self.searchFrame)
         search_layout.setAlignment(Qt.AlignCenter)
@@ -144,7 +167,7 @@ class HomePage(QWidget):
             """
             QFrame {
                 background-color: white;
-                border: 1px solid #474747;
+                border: none;
                 border-radius: 5px;
             }
         """
@@ -178,9 +201,9 @@ class HomePage(QWidget):
         task_n_cal_container.setStyleSheet(
             """
             QWidget {
-                border: 1px solid #474747;
-                border-radius: 5px;
-                background-color: white;
+                border: none;
+                border-radius: 10px;
+                background-color: #FAFAFA;
             }
         """
         )
@@ -193,7 +216,7 @@ class HomePage(QWidget):
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)  # Remove default margins
         main_layout.setSpacing(0)  # Remove spacing between widgets
-        main_layout.addWidget(self.searchFrame)
+        main_layout.addWidget(search_container)
         main_layout.addWidget(self.scrollArea)
         self.setLayout(main_layout)
         self.setStyleSheet(
@@ -314,7 +337,7 @@ class TaskManagement(QWidget):
                 outline: none; 
             }
             QLineEdit:focus {
-                border: 1px solid #BDB395; 
+                border: 0px solid #BDB395; 
                 outline: none;
             }
         """

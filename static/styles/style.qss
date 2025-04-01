@@ -13,12 +13,12 @@ QLabel {
 }
 
 QFrame {
-    border: 1px solid #474747;
+    border: 0px solid #474747;
     /* border: none;  */
     background-color: #F7F7F7;  /* Optional background color */
     padding: 5px;  /* Adjust padding if needed */
 }
-
+/* 
 QBoxLayout {
     border: 1px solid #474747;
 }
@@ -29,7 +29,7 @@ QHBoxLayout {
 
 QVBoxLayout {
     border: 1px solid #474747;
-}
+} */
 
 
 #taskFrame {
