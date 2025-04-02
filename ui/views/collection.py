@@ -15,6 +15,9 @@ from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QFont, QPixmap
 from ui.views.components.note_window import popup_notewindow
 from ui.views.components.folder import Folder
+from ui.views.components.flashcard_window import popup_flashcardwindow
+from ui.views.components.flashcard_components.models import Flashcard, TermWord, get_sample_flashcards
+from datetime import datetime
 
 
 class JoinContestDialog(QDialog):
@@ -194,6 +197,10 @@ class CollectionPage(QWidget):
         placeholder_note_button.clicked.connect(self.showNoteWindow)
         main_layout.addWidget(placeholder_note_button)
         
+        placeholder_flashcard_button = QPushButton("Placeholder Flashcard")
+        placeholder_flashcard_button.clicked.connect(self.showFlashcardWindow)
+        main_layout.addWidget(placeholder_flashcard_button)
+        
 
         # Join Contest Button aligned to the right
         join_contest_button = QPushButton("Join contest")
@@ -256,6 +263,20 @@ class CollectionPage(QWidget):
         if note_dialog.exec():
             note_data = note_dialog.getNoteData()
             print("Note Data:", note_data)  # You can handle the note data here
+            
+    def showFlashcardWindow(self):
+        # Get sample flashcards from the API
+        flashcards = get_sample_flashcards()
+        
+        if flashcards:
+            # Create and show the flashcard window with the first flashcard set
+            flashcard_dialog = popup_flashcardwindow(flashcards[0], self)
+            if flashcard_dialog.exec():
+                # Get the results when the dialog is closed
+                results = flashcard_dialog.getFlashcardData()
+                print("Flashcard Results:", results)
+        else:
+            print("No flashcard sets available")
 
     def create_folder_widget(self, name, count, date, avatar_url, img_url):
         return Folder(name, count, date, avatar_url, img_url)
