@@ -64,7 +64,16 @@ class Folder(QWidget):
         name_layout.addWidget(profile_icon)
 
         label_name = QLabel(name)
-        label_name.setObjectName("folderNameLabel")
+        label_name.setStyleSheet(
+            """
+            QLabel {
+                font-family: sans-serif;
+                font-size: 14px;
+                font-weight: bold;
+                color: black;
+            }
+        """
+        )
         name_layout.addWidget(label_name)
         name_layout.addStretch()
         layout.addLayout(name_layout)
@@ -77,7 +86,7 @@ class Folder(QWidget):
                 font-family: sans-serif;
                 font-size: 10px; 
                 font-weight: normal;
-                color: #666666;
+                color: black;
                 margin-top: -4px;
                 margin-bottom: -4px;
             }
@@ -100,7 +109,16 @@ class Folder(QWidget):
         count_layout.addWidget(count_icon)
 
         label_count = QLabel("Items(" + count + ")")
-        label_count.setObjectName("folderNameLabel")
+        label_count.setStyleSheet(
+            """
+            QLabel {
+                font-family: sans-serif;
+                font-size: 12px;
+                font-weight: normal;
+                color: black;
+            }
+        """
+        )
         count_layout.addWidget(label_count)
         count_layout.addStretch()
         layout.addLayout(count_layout)

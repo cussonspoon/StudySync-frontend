@@ -26,83 +26,12 @@ from utils.ui import Text, Image, SearchBar
 from ui.views.components.calendar import CalendarWidget
 from ui.views.components.folder import Folder
 
+
 class HomePage(QWidget):
     def __init__(self):
-        self.folders = [
-            {
-                "name": "Folder 1",
-                "count": "10",
-                "date": "2024-01-01",
-                "avatar": "static/images/profile.jpg",
-                "image": "static/images/pic1.jpg",
-            },
-            {
-                "name": "Folder 2",
-                "count": "15",
-                "date": "2024-01-02",
-                "avatar": "static/images/profile.jpg",
-                "image": "static/images/pic2.jpg",
-            },
-            {
-                "name": "Folder 3",
-                "count": "20",
-                "date": "2024-01-03",
-                "avatar": "static/images/profile.jpg",
-                "image": "static/images/pic3.jpg",
-            },
-            {
-                "name": "Folder 4",
-                "count": "25",
-                "date": "2024-01-04",
-                "avatar": "static/images/profile.jpg",
-                "image": "static/images/pic1.jpg",
-            },
-            {
-                "name": "Folder 5",
-                "count": "30",
-                "date": "2024-01-05",
-                "avatar": "static/images/profile.jpg",
-                "image": "static/images/pic2.jpg",
-            },
-            {
-                "name": "Folder 6",
-                "count": "35",
-                "date": "2024-01-06",
-                "avatar": "static/images/profile.jpg",
-                "image": "static/images/pic3.jpg",
-            },
-            {
-                "name": "Folder 7",
-                "count": "40",
-                "date": "2024-01-07",
-                "avatar": "static/images/profile.jpg",
-                "image": "static/images/pic1.jpg",
-            },
-            {
-                "name": "Folder 8",
-                "count": "45",
-                "date": "2024-01-08",
-                "avatar": "static/images/profile.jpg",
-                "image": "static/images/pic2.jpg",
-            },
-            {
-                "name": "Folder 9",
-                "count": "50",
-                "date": "2024-01-09",
-                "avatar": "static/images/profile.jpg",
-                "image": "static/images/pic3.jpg",
-            },
-            {
-                "name": "Folder 10",
-                "count": "55",
-                "date": "2024-01-10",
-                "avatar": "static/images/profile.jpg",
-                "image": "static/images/pic1.jpg",
-            },
-        ]
         super().__init__()
+        self.folders = []
         self.setupUi()
-
 
     def setupUi(self):
         self.setObjectName("Form")
@@ -190,7 +119,9 @@ class HomePage(QWidget):
         collection_container.setMaximumWidth(1171)  # Match banner width
         self.scroll_layout.addWidget(collection_container)
 
-        self.collections = HorizontalImageScroller(self.folders, self.scrollAreaWidgetContents)
+        self.collections = HorizontalImageScroller(
+            self.folders, self.scrollAreaWidgetContents
+        )
         self.collections.setMaximumWidth(1171)  # Match banner width
         self.scroll_layout.addWidget(self.collections)
 
@@ -203,7 +134,9 @@ class HomePage(QWidget):
         )
         self.scroll_layout.addWidget(self.recommendsText)
 
-        self.recommendFolders = HorizontalImageScroller(self.folders, self.scrollAreaWidgetContents)
+        self.recommendFolders = HorizontalImageScroller(
+            self.folders, self.scrollAreaWidgetContents
+        )
         self.recommendFolders.setMaximumWidth(1171)  # Match banner width
         self.scroll_layout.addWidget(self.recommendFolders)
 
@@ -456,19 +389,3 @@ class TaskManagement(QWidget):
             if item.widget() == task_frame:
                 item.widget().deleteLater()
                 break
-
-
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("StudySync Dashboard")  # Set Window Title
-        self.setGeometry(100, 100, 1200, 771)  # Set Window Size
-        self.ui = HomePage()
-        self.setCentralWidget(self.ui)
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec())

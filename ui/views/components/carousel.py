@@ -18,82 +18,10 @@ from ui.views.components.folder import Folder
 class HorizontalImageScroller(QWidget):
     def __init__(self, folders, parent=None):
         super().__init__(parent)
-
-        # Sample folder data
         self.folders = folders
-        # self.folders = [
-        #     {
-        #         "name": "Folder 1",
-        #         "count": "10",
-        #         "date": "2024-01-01",
-        #         "avatar": "static/images/profile.jpg",
-        #         "image": "static/images/pic1.jpg",
-        #     },
-        #     {
-        #         "name": "Folder 2",
-        #         "count": "15",
-        #         "date": "2024-01-02",
-        #         "avatar": "static/images/profile.jpg",
-        #         "image": "static/images/pic2.jpg",
-        #     },
-        #     {
-        #         "name": "Folder 3",
-        #         "count": "20",
-        #         "date": "2024-01-03",
-        #         "avatar": "static/images/profile.jpg",
-        #         "image": "static/images/pic3.jpg",
-        #     },
-        #     {
-        #         "name": "Folder 4",
-        #         "count": "25",
-        #         "date": "2024-01-04",
-        #         "avatar": "static/images/profile.jpg",
-        #         "image": "static/images/pic1.jpg",
-        #     },
-        #     {
-        #         "name": "Folder 5",
-        #         "count": "30",
-        #         "date": "2024-01-05",
-        #         "avatar": "static/images/profile.jpg",
-        #         "image": "static/images/pic2.jpg",
-        #     },
-        #     {
-        #         "name": "Folder 6",
-        #         "count": "35",
-        #         "date": "2024-01-06",
-        #         "avatar": "static/images/profile.jpg",
-        #         "image": "static/images/pic3.jpg",
-        #     },
-        #     {
-        #         "name": "Folder 7",
-        #         "count": "40",
-        #         "date": "2024-01-07",
-        #         "avatar": "static/images/profile.jpg",
-        #         "image": "static/images/pic1.jpg",
-        #     },
-        #     {
-        #         "name": "Folder 8",
-        #         "count": "45",
-        #         "date": "2024-01-08",
-        #         "avatar": "static/images/profile.jpg",
-        #         "image": "static/images/pic2.jpg",
-        #     },
-        #     {
-        #         "name": "Folder 9",
-        #         "count": "50",
-        #         "date": "2024-01-09",
-        #         "avatar": "static/images/profile.jpg",
-        #         "image": "static/images/pic3.jpg",
-        #     },
-        #     {
-        #         "name": "Folder 10",
-        #         "count": "55",
-        #         "date": "2024-01-10",
-        #         "avatar": "static/images/profile.jpg",
-        #         "image": "static/images/pic1.jpg",
-        #     },
-        # ]
+        self.setupUI()
 
+    def setupUI(self):
         # Create a scrollable area
         self.scroll_area = QScrollArea(self)
         self.scroll_area.setWidgetResizable(True)
@@ -140,21 +68,12 @@ class HorizontalImageScroller(QWidget):
             "background-color: white; border-radius: 10px;"
         )
         self.scroll_layout = QHBoxLayout(self.scroll_widget)
-        self.scroll_layout.setSpacing(20)  # Add spacing between folders
+        self.scroll_layout.setSpacing(
+            40
+        )  # Increased spacing between folders from 20 to 40
         self.scroll_layout.setContentsMargins(
-            20, 20, 20, 20
+            40, 20, 40, 20  # Increased left and right margins from 20 to 40
         )  # Add margins around the layout
-
-        # Create and add folders
-        for folder_data in self.folders:
-            folder = Folder(
-                folder_data["name"],
-                folder_data["count"],
-                folder_data["date"],
-                folder_data["avatar"],
-                folder_data["image"],
-            )
-            self.scroll_layout.addWidget(folder)
 
         # Add stretch to push folders to the left
         self.scroll_layout.addStretch()
@@ -165,18 +84,46 @@ class HorizontalImageScroller(QWidget):
         main_layout.addWidget(self.scroll_area)
         self.setLayout(main_layout)
 
+        # Create and add folders
+        self.update_folders(self.folders)
+
+    def update_folders(self, folders):
+        """Update the folders displayed in the scroller."""
+        # Clear existing folders
+        while self.scroll_layout.count():
+            item = self.scroll_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        # Remove the stretch
+        self.scroll_layout.takeAt(self.scroll_layout.count() - 1)
+
+        # Add new folders
+        for folder_data in folders:
+            folder = Folder(
+                folder_data["name"],
+                folder_data["count"],
+                folder_data["date"],
+                folder_data["avatar"],
+                folder_data["image"],
+            )
+            self.scroll_layout.addWidget(folder)
+
+        # Add stretch back
+        self.scroll_layout.addStretch()
+
     def scroll_left(self):
         """Scroll left by one folder."""
         self.scroll_area.horizontalScrollBar().setValue(
             self.scroll_area.horizontalScrollBar().value()
-            - 220  # Width of folder + spacing
+            - 240  # Increased from 220 to account for new spacing
         )
 
     def scroll_right(self):
         """Scroll right by one folder."""
         self.scroll_area.horizontalScrollBar().setValue(
             self.scroll_area.horizontalScrollBar().value()
-            + 220  # Width of folder + spacing
+            + 240  # Increased from 220 to account for new spacing
         )
 
 
