@@ -1,6 +1,7 @@
 from services.folder_service import get_folders
 from services.task_service import get_tasks
 from services.task_service import create_task
+from services.folder_service import search_folder
 
 
 class HomeController:
@@ -42,6 +43,12 @@ class HomeController:
         # Delete task
         print("Deleting task")  # Debug print
         # Will implement actual delete later
+
+    def searchFolders(self, search_text):
+        # Call the search service
+        results = search_folder(search_text)
+        print(f"Search results from service: {results}")  # Debug print
+        return results
 
     # def setupSearch(self):
     #     self.home_page.searchBar.textChanged.connect(self.searchFolders)

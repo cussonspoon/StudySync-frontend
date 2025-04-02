@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
     QScrollArea,
     QSizePolicy,
     QSpacerItem,
+    QGridLayout,
 )
 
 from ui.views.components.carousel import HorizontalImageScroller
@@ -32,7 +33,9 @@ class HomePage(QWidget):
         super().__init__()
         self.folders = []
         self.tasks = []
+        self.search_results = []
         self.setupUi()
+        self.setupSearchMechanism()
 
     def setupUi(self):
         self.setObjectName("Form")
@@ -276,6 +279,194 @@ class HomePage(QWidget):
         if hasattr(self, "taskManagement"):
             self.taskManagement.load_tasks(tasks)
 
+    def setupSearchMechanism(self):
+        # Create a container for search results that appears below search bar
+        self.search_results_container = QFrame(self)
+        self.search_results_container.setStyleSheet(
+            """
+            QFrame {
+                background-color: white;
+                border: 1px solid #E0E0E0;
+                border-radius: 4px;
+                z-index: 999;
+            }
+            """
+        )
+        self.search_results_container.hide()
+        self.search_results_container.raise_()
+
+        self.search_results_layout = QVBoxLayout(self.search_results_container)
+        self.search_results_layout.setContentsMargins(0, 0, 0, 0)
+        self.search_results_layout.setSpacing(0)
+
+        # Try to find the QLineEdit in the SearchBar
+        for child in self.searchBar.children():
+            if isinstance(child, QLineEdit):
+                child.textChanged.connect(self.on_search_text_changed)
+                print("Connected to search input")  # Debug print
+                break
+
+        # Add debug prints
+        print(
+            "SearchBar children:",
+            [type(child).__name__ for child in self.searchBar.children()],
+        )
+
+    def on_search_text_changed(self, text):
+        print(f"Search text changed: {text}")  # Debug print
+        if not text:
+            self.search_results_container.hide()
+            self.show_normal_content()
+            return
+
+        # Get search results from service for each character typed
+        if self.home_controller:
+            print(f"Calling searchFolders with text: {text}")  # Debug print
+            self.search_results = self.home_controller.searchFolders(text)
+            print(f"Got search results: {self.search_results}")  # Debug print
+            self.update_search_results()
+        else:
+            print("No home_controller available")  # Debug print
+
+    def update_search_results(self):
+        # Clear previous results
+        while self.search_results_layout.count():
+            item = self.search_results_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        if self.search_results:
+            # Show immediate results under search bar
+            for folder in self.search_results[:3]:  # Show top 3 results
+                result_btn = QPushButton(folder["name"])
+                result_btn.setFixedHeight(40)  # Set fixed height for each result
+                result_btn.setStyleSheet(
+                    """
+                    QPushButton {
+                        text-align: left;
+                        padding: 8px 16px;
+                        border: none;
+                        background: transparent;
+                        font-size: 14px;
+                        color: black;
+                    }
+                    QPushButton:hover {
+                        background-color: #F5F5F5;
+                    }
+                    """
+                )
+                result_btn.clicked.connect(
+                    lambda checked, f=folder: self.show_search_results([f])
+                )
+                self.search_results_layout.addWidget(result_btn)
+
+            # Show "Show all results" button if there are more results
+            if len(self.search_results) > 3:
+                show_all_btn = QPushButton(
+                    f"Show all {len(self.search_results)} results"
+                )
+                show_all_btn.setFixedHeight(40)  # Set fixed height
+                show_all_btn.setStyleSheet(
+                    """
+                    QPushButton {
+                        text-align: left;
+                        padding: 8px 16px;
+                        border-top: 1px solid #E0E0E0;
+                        background: transparent;
+                        color: #1a73e8;
+                        font-size: 14px;
+                    }
+                    QPushButton:hover {
+                        background-color: #F5F5F5;
+                    }
+                    """
+                )
+                show_all_btn.clicked.connect(
+                    lambda: self.show_search_results(self.search_results)
+                )
+                self.search_results_layout.addWidget(show_all_btn)
+
+            # Calculate total height based on number of items
+            num_items = min(len(self.search_results), 3) + (
+                1 if len(self.search_results) > 3 else 0
+            )
+            total_height = num_items * 40  # 40px per item
+
+        else:
+            # Show "No results found" message
+            no_results = QLabel("No results found")
+            no_results.setFixedHeight(40)  # Set fixed height
+            no_results.setStyleSheet(
+                """
+                QLabel {
+                    padding: 8px 16px;
+                    color: #666666;
+                    font-size: 14px;
+                }
+                """
+            )
+            self.search_results_layout.addWidget(no_results)
+            total_height = 40  # Single item height for no results
+
+        # Position and show the container
+        search_bar_pos = self.searchBar.mapTo(self, self.searchBar.rect().bottomLeft())
+        self.search_results_container.move(search_bar_pos.x(), search_bar_pos.y() + 5)
+        self.search_results_container.setFixedWidth(self.searchBar.width())
+        self.search_results_container.setFixedHeight(total_height)  # Set dynamic height
+        self.search_results_container.raise_()
+        self.search_results_container.show()
+
+    def show_search_results(self, results):
+        # Hide the search results dropdown
+        self.search_results_container.hide()
+
+        # Hide normal content
+        self.hide_normal_content()
+
+        # Clear any existing search result folders
+        if hasattr(self, "search_results_grid"):
+            self.search_results_grid.deleteLater()
+
+        # Create grid layout for search results
+        self.search_results_grid = QWidget(self.scrollAreaWidgetContents)
+        grid_layout = QGridLayout(self.search_results_grid)
+        grid_layout.setSpacing(20)
+
+        # Add folders to grid, 4 per row
+        for i, folder in enumerate(results):
+            folder_widget = Folder(
+                folder["name"],
+                folder["count"],
+                folder["date"],
+                folder["avatar"],
+                folder["image"],
+            )
+            row = i // 4
+            col = i % 4
+            grid_layout.addWidget(folder_widget, row, col)
+
+        self.scroll_layout.addWidget(self.search_results_grid)
+
+    def hide_normal_content(self):
+        # Hide all normal content widgets
+        self.bannerFrame.hide()
+        self.collections.hide()
+        self.recommendFolders.hide()
+        self.taskManagement.hide()
+        self.calendar.parent().hide()
+
+    def show_normal_content(self):
+        # Show all normal content widgets
+        self.bannerFrame.show()
+        self.collections.show()
+        self.recommendFolders.show()
+        self.taskManagement.show()
+        self.calendar.parent().show()
+
+        # Remove search results grid if it exists
+        if hasattr(self, "search_results_grid"):
+            self.search_results_grid.deleteLater()
+
 
 class TaskManagement(QWidget):
     def __init__(self, pos_x, pos_y, width, length, tasks, parent=None):
@@ -469,5 +660,8 @@ class TaskUI(QWidget):
             self.home_controller.deleteTask()
             # Remove this task widget from its parent layout
             if self.parent():
+                self.parent().layout().removeWidget(self)
+                self.deleteLater()  # Schedule this widget for deletion
+
                 self.parent().layout().removeWidget(self)
                 self.deleteLater()  # Schedule this widget for deletion

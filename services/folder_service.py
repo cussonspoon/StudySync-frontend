@@ -89,3 +89,24 @@ def update_folder(folder):
 
 def delete_folder(folder):
     return folder
+
+def search_folder(folder_name): 
+    #implement search folder api
+    
+    folder = [{
+        "name": "History",
+        "count": "10",
+        "date": "2024-01-01",
+        "avatar": "static/images/profile.jpg",
+        "image": "static/images/pic1.jpg",
+    }, {
+        "name": "History123",
+        "count": "10",
+        "date": "2024-01-01",
+        "avatar": "static/images/profile.jpg",
+        "image": "static/images/pic1.jpg"}]
+    
+    if folder_name == "History":
+        return folder
+    else:
+        return []
