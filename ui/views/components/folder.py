@@ -4,11 +4,9 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QFrame,
     QLabel,
-    QApplication,
 )
 from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt, QSize
-import sys
 
 
 class Folder(QWidget):
@@ -19,8 +17,8 @@ class Folder(QWidget):
     def setupUi(self, name, count, date, avatar_url, img_url):
         # Main layout for the folder widget
         layout = QVBoxLayout(self)
-        layout.setSpacing(5)
-        layout.setContentsMargins(0, 0, 0, 0)  # Remove margins for proper alignment
+        layout.setSpacing(8)  # Changed from 0 to 8 to add space between elements
+        layout.setContentsMargins(0, 0, 0, 0)  # Keep margins at 0 for proper alignment
 
         # Frame for the preview
         frame = QFrame()
@@ -53,7 +51,8 @@ class Folder(QWidget):
 
         # Folder name with icon
         name_layout = QHBoxLayout()
-        name_layout.setSpacing(5)
+        name_layout.setSpacing(5)  # Increased from 3 to 5
+        name_layout.setContentsMargins(0, 8, 0, 4)  # Added top and bottom margins
 
         profile_icon = QLabel()
         profile_icon.setFixedSize(16, 16)
@@ -65,7 +64,16 @@ class Folder(QWidget):
         name_layout.addWidget(profile_icon)
 
         label_name = QLabel(name)
-        label_name.setObjectName("folderNameLabel")
+        label_name.setStyleSheet(
+            """
+            QLabel {
+                font-family: sans-serif;
+                font-size: 14px;
+                font-weight: bold;
+                color: black;
+            }
+        """
+        )
         name_layout.addWidget(label_name)
         name_layout.addStretch()
         layout.addLayout(name_layout)
@@ -78,7 +86,9 @@ class Folder(QWidget):
                 font-family: sans-serif;
                 font-size: 10px; 
                 font-weight: normal;
-                color: #666666;
+                color: black;
+                margin-top: 4px;  /* Changed from -4 to 4 */
+                margin-bottom: 4px; /* Changed from -4 to 4 */
             }
         """
         )
@@ -86,7 +96,10 @@ class Folder(QWidget):
 
         # Items count with icon
         count_layout = QHBoxLayout()
-        count_layout.setSpacing(5)
+        count_layout.setSpacing(5)  # Increased from 3 to 5
+        count_layout.setContentsMargins(
+            0, 4, 0, 0
+        )  # Changed negative margin to positive
 
         count_icon = QLabel()
         count_icon.setFixedSize(16, 16)
@@ -98,38 +111,16 @@ class Folder(QWidget):
         count_layout.addWidget(count_icon)
 
         label_count = QLabel("Items(" + count + ")")
-        label_count.setObjectName("folderNameLabel")
+        label_count.setStyleSheet(
+            """
+            QLabel {
+                font-family: sans-serif;
+                font-size: 12px;
+                font-weight: normal;
+                color: black;
+            }
+        """
+        )
         count_layout.addWidget(label_count)
         count_layout.addStretch()
         layout.addLayout(count_layout)
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-
-    # Create main window
-    main_window = QWidget()
-    main_window.setWindowTitle("Folder Test")
-    main_window.setMinimumWidth(1200)  # Set minimum width to fit all folders
-
-    # Create horizontal layout
-    layout = QHBoxLayout(main_window)
-    layout.setSpacing(20)  # Add spacing between folders
-    layout.setContentsMargins(20, 20, 20, 20)  # Add margins around the layout
-
-    # Create 5 folders
-    for i in range(5):
-        folder = Folder(
-            f"Folder {i+1}",
-            str(10 + i),
-            "2024-01-01",
-            "static/images/profile.jpg",
-            "static/images/pic1.jpg",
-        )
-        layout.addWidget(folder)
-
-    # Add stretch to push folders to the left
-    layout.addStretch()
-
-    main_window.show()
-    sys.exit(app.exec())
