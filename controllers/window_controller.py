@@ -9,6 +9,7 @@ from ui.views.components.folder import Folder
 from services.folder_service import get_folders
 from controllers.home_controller import HomeController
 from enum import Enum
+from controllers.collection_controller import Collection_Controller
 
 
 class Page(Enum):
@@ -24,6 +25,17 @@ class WindowController:
         self.ui = ui
         # Initialize HomeController first
         self.home_controller = HomeController(self.ui.page_home_scroll.widget())
+
+        # Initialize Collection Controller
+        self.collection_controller = Collection_Controller(
+            self.ui.page_collection_scroll.widget()
+        )
+
+        # Set controllers on their respective pages
+        self.ui.page_home_scroll.widget().set_controller(self.home_controller)
+        self.ui.page_collection_scroll.widget().set_controller(
+            self.collection_controller
+        )
 
         # Then setup pages and connect signals
         self.setupPages()
@@ -48,4 +60,7 @@ class WindowController:
     def switchPage(self, index):
         self.ui.contentArea.setCurrentIndex(index)
         if index == Page.HOME.value:
-            self.home_controller.loadFolders()  # Load folders when switching to home page
+            self.home_controller.loadFolders()
+            self.home_controller.loadTasks()
+        elif index == Page.COLLECTION.value:
+            self.collection_controller.loadFolders()

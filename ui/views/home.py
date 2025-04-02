@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
     QScrollArea,
     QSizePolicy,
     QSpacerItem,
+    QGridLayout,
 )
 
 from ui.views.components.carousel import HorizontalImageScroller
@@ -31,7 +32,10 @@ class HomePage(QWidget):
     def __init__(self):
         super().__init__()
         self.folders = []
+        self.tasks = []
+        self.search_results = []
         self.setupUi()
+        self.setupSearchMechanism()
 
     def setupUi(self):
         self.setObjectName("Form")
@@ -161,7 +165,7 @@ class HomePage(QWidget):
         task_n_cal_layout.setSpacing(0)
 
         self.taskManagement = TaskManagement(
-            0, 0, 800, 700, self.scrollAreaWidgetContents
+            0, 0, 800, 700, self.tasks, self.scrollAreaWidgetContents
         )
         self.taskManagement.setMinimumHeight(400)
         self.taskManagement.setMaximumWidth(800)  # Limit task management width
@@ -258,25 +262,247 @@ class HomePage(QWidget):
         """
         )
 
+    def set_controller(self, controller):
+        self.home_controller = controller
+        # Connect the controller to TaskManagement
+        if hasattr(self, "taskManagement"):
+            self.taskManagement.set_controller(controller)
+
     def update_scroll_height(self):
         """Adjusts the scroll area height when tasks are added."""
         total_height = self.scroll_layout.sizeHint().height() + 20  # Add extra padding
         self.scrollAreaWidgetContents.setMinimumHeight(total_height)
 
+    def update_tasks(self, tasks):
+        """Updates the task list and refreshes the task management UI"""
+        self.tasks = tasks
+        if hasattr(self, "taskManagement"):
+            self.taskManagement.load_tasks(tasks)
+
+    def setupSearchMechanism(self):
+        # Create a container for search results that appears below search bar
+        self.search_results_container = QFrame(self)
+        self.search_results_container.setStyleSheet(
+            """
+            QFrame {
+                background-color: white;
+                border: 1px solid #E0E0E0;
+                border-radius: 4px;
+                z-index: 999;
+            }
+            """
+        )
+        self.search_results_container.hide()
+        self.search_results_container.raise_()
+
+        self.search_results_layout = QVBoxLayout(self.search_results_container)
+        self.search_results_layout.setContentsMargins(0, 0, 0, 0)
+        self.search_results_layout.setSpacing(0)
+
+        # Try to find the QLineEdit in the SearchBar
+        for child in self.searchBar.children():
+            if isinstance(child, QLineEdit):
+                child.textChanged.connect(self.on_search_text_changed)
+                print("Connected to search input")  # Debug print
+                break
+
+        # Add debug prints
+        print(
+            "SearchBar children:",
+            [type(child).__name__ for child in self.searchBar.children()],
+        )
+
+    def on_search_text_changed(self, text):
+        print(f"Search text changed: {text}")  # Debug print
+        if not text:
+            self.search_results_container.hide()
+            self.show_normal_content()
+            return
+
+        # Get search results from service for each character typed
+        if self.home_controller:
+            print(f"Calling searchFolders with text: {text}")  # Debug print
+            self.search_results = self.home_controller.searchFolders(text)
+            print(f"Got search results: {self.search_results}")  # Debug print
+            self.update_search_results()
+        else:
+            print("No home_controller available")  # Debug print
+
+    def update_search_results(self):
+        # Clear previous results
+        while self.search_results_layout.count():
+            item = self.search_results_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        if self.search_results:
+            # Show immediate results under search bar
+            for folder in self.search_results[:3]:  # Show top 3 results
+                result_btn = QPushButton(folder["name"])
+                result_btn.setFixedHeight(40)  # Set fixed height for each result
+                result_btn.setStyleSheet(
+                    """
+                    QPushButton {
+                        text-align: left;
+                        padding: 8px 16px;
+                        border: none;
+                        background: transparent;
+                        font-size: 14px;
+                        color: black;
+                    }
+                    QPushButton:hover {
+                        background-color: #F5F5F5;
+                    }
+                    """
+                )
+                result_btn.clicked.connect(
+                    lambda checked, f=folder: self.show_search_results([f])
+                )
+                self.search_results_layout.addWidget(result_btn)
+
+            # Show "Show all results" button if there are more results
+            if len(self.search_results) > 3:
+                show_all_btn = QPushButton(
+                    f"Show all {len(self.search_results)} results"
+                )
+                show_all_btn.setFixedHeight(40)  # Set fixed height
+                show_all_btn.setStyleSheet(
+                    """
+                    QPushButton {
+                        text-align: left;
+                        padding: 8px 16px;
+                        border-top: 1px solid #E0E0E0;
+                        background: transparent;
+                        color: #1a73e8;
+                        font-size: 14px;
+                    }
+                    QPushButton:hover {
+                        background-color: #F5F5F5;
+                    }
+                    """
+                )
+                show_all_btn.clicked.connect(
+                    lambda: self.show_search_results(self.search_results)
+                )
+                self.search_results_layout.addWidget(show_all_btn)
+
+            # Calculate total height based on number of items
+            num_items = min(len(self.search_results), 3) + (
+                1 if len(self.search_results) > 3 else 0
+            )
+            total_height = num_items * 40  # 40px per item
+
+        else:
+            # Show "No results found" message
+            no_results = QLabel("No results found")
+            no_results.setFixedHeight(40)  # Set fixed height
+            no_results.setStyleSheet(
+                """
+                QLabel {
+                    padding: 8px 16px;
+                    color: #666666;
+                    font-size: 14px;
+                }
+                """
+            )
+            self.search_results_layout.addWidget(no_results)
+            total_height = 40  # Single item height for no results
+
+        # Position and show the container
+        search_bar_pos = self.searchBar.mapTo(self, self.searchBar.rect().bottomLeft())
+        self.search_results_container.move(search_bar_pos.x(), search_bar_pos.y() + 5)
+        self.search_results_container.setFixedWidth(self.searchBar.width())
+        self.search_results_container.setFixedHeight(total_height)  # Set dynamic height
+        self.search_results_container.raise_()
+        self.search_results_container.show()
+
+    def show_search_results(self, results):
+        # Hide the search results dropdown
+        self.search_results_container.hide()
+
+        # Hide ALL content first
+        self.hide_normal_content()
+
+        # Safely remove existing search results grid
+        if (
+            hasattr(self, "search_results_grid")
+            and self.search_results_grid is not None
+        ):
+            try:
+                self.search_results_grid.hide()
+                self.scroll_layout.removeWidget(self.search_results_grid)
+                self.search_results_grid.deleteLater()
+            except RuntimeError:
+                pass
+            self.search_results_grid = None
+
+        # Create grid layout for search results
+        self.search_results_grid = QWidget(self.scrollAreaWidgetContents)
+        self.search_results_grid.setStyleSheet("background-color: transparent;")
+        grid_layout = QGridLayout(self.search_results_grid)
+        grid_layout.setSpacing(20)
+        grid_layout.setContentsMargins(20, 20, 20, 20)
+
+        # Add folders directly to grid, 4 per row
+        for i, folder in enumerate(results):
+            folder_widget = Folder(
+                folder["name"],
+                folder["count"],
+                folder["date"],
+                folder["avatar"],
+                folder["image"],
+            )
+            row = i // 4
+            col = i % 4
+            grid_layout.addWidget(folder_widget, row, col)
+
+        # Add the grid to the scroll area
+        self.scroll_layout.addWidget(self.search_results_grid)
+
+    def hide_normal_content(self):
+        # Hide ALL widgets in the main scroll area
+        for i in range(self.scroll_layout.count()):
+            widget = self.scroll_layout.itemAt(i).widget()
+            if widget:
+                widget.hide()
+
+    def show_normal_content(self):
+        # Show all widgets in the main scroll area
+        for i in range(self.scroll_layout.count()):
+            widget = self.scroll_layout.itemAt(i).widget()
+            if widget and widget != self.search_results_grid:
+                widget.show()
+
+        # Safely remove search results grid
+        if (
+            hasattr(self, "search_results_grid")
+            and self.search_results_grid is not None
+        ):
+            try:
+                self.search_results_grid.hide()
+                self.scroll_layout.removeWidget(self.search_results_grid)
+                self.search_results_grid.deleteLater()
+            except RuntimeError:
+                pass  # Widget already deleted
+            self.search_results_grid = None
+
 
 class TaskManagement(QWidget):
-    def __init__(self, pos_x, pos_y, width, length, parent=None):
+    def __init__(self, pos_x, pos_y, width, length, tasks, parent=None):
         super().__init__(parent)
         self.setWindowTitle("To-Do List")
         self.setGeometry(pos_x, pos_y, width, length)
         self.setFixedSize(width, length)
+        self.tasks = tasks
+        self.home_controller = None
+        self.setupUi()
 
+    def setupUi(self):
         self.layout = QVBoxLayout(self)
 
         # Scrollable
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
-        # self.scroll_area.setFixedSize(width - 50, length - 100)
 
         self.scroll_widget = QWidget()
         self.task_container = QVBoxLayout(self.scroll_widget)
@@ -286,7 +512,6 @@ class TaskManagement(QWidget):
         # Add Task Button
         self.add_task_btn = QPushButton("+ Add Task")
         self.add_task_btn.clicked.connect(self.add_task)
-
         self.add_task_btn.setStyleSheet(
             """
             QPushButton {
@@ -310,7 +535,50 @@ class TaskManagement(QWidget):
         self.layout.addWidget(self.add_task_btn)
         self.layout.addWidget(self.scroll_area)
 
+        # Load initial tasks
+        if self.tasks:
+            self.load_tasks(self.tasks)
+
+    def set_controller(self, controller):
+        self.home_controller = controller
+
+    def load_tasks(self, tasks):
+        # Clear existing tasks
+        while self.task_container.count():
+            item = self.task_container.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        # Add tasks from the list
+        for task in tasks:
+            task_ui = TaskUI(task["task_detail"], task["status"], self)
+            task_ui.set_controller(self.home_controller)
+            self.task_container.addWidget(task_ui)
+
     def add_task(self):
+        if self.home_controller:
+            # Create a new task UI first
+            task_ui = TaskUI("", "In progress", self)
+            task_ui.set_controller(self.home_controller)
+            self.task_container.addWidget(task_ui)
+            # Then notify the controller
+            self.home_controller.createTask()
+
+
+class TaskUI(QWidget):
+    def __init__(self, task_detail="", status="In progress", parent=None):
+        super().__init__(parent)
+        self.task_detail = task_detail
+        self.status = status
+        self.home_controller = None
+        self.setupUi()
+
+    def set_controller(self, controller):
+        self.home_controller = controller
+
+    def setupUi(self):
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
 
         task_frame = QFrame()
         task_frame.setObjectName("taskFrame")
@@ -320,20 +588,28 @@ class TaskManagement(QWidget):
         )
 
         task_layout = QHBoxLayout(task_frame)
-        task_layout.setAlignment(Qt.AlignVCenter)  # Center all items vertically
+        task_layout.setAlignment(Qt.AlignVCenter)
 
-        circle_btn = QPushButton("○")  # Outer circle
-        circle_btn.setFixedSize(20, 20)
-        circle_btn.setStyleSheet("color: gray; border: none; font-size: 18px;")
-        circle_btn.clicked.connect(lambda: self.toggle_status(status_label, circle_btn))
+        # Store circle button as class attribute
+        self.circle_btn = QPushButton("○")
+        self.circle_btn.setFixedSize(20, 20)
+        self.circle_btn.setStyleSheet("color: gray; border: none; font-size: 18px;")
+        self.circle_btn.clicked.connect(self.toggle_status)
 
-        task_input = QLineEdit()
-        task_input.setPlaceholderText("Enter your task here...")
-        task_input.setFont(QFont("Arial", 16))
-        task_input.setMinimumWidth(400)
-        task_input.setFixedHeight(25)
+        self.task_input = QLineEdit()
+        if self.task_detail:
+            self.task_input.setText(self.task_detail)
+        else:
+            self.task_input.setPlaceholderText("Enter your task here...")
+            # Focus the input when it's a new task
+            self.task_input.setFocus()
 
-        task_input.setStyleSheet(
+        self.task_input.setFont(QFont("Arial", 16))
+        self.task_input.setMinimumWidth(400)
+        self.task_input.setFixedHeight(25)
+        self.task_input.textChanged.connect(self.on_text_changed)
+
+        self.task_input.setStyleSheet(
             """
             QLineEdit {
                 border: none; 
@@ -348,44 +624,63 @@ class TaskManagement(QWidget):
         """
         )
 
-        # Status Label (Rightmost)
-        status_label = QLabel("In Progress")
-        status_label.setFont(QFont("Arial", 12))
-        status_label.setStyleSheet("color: green;")
+        self.status_label = QLabel(self.status)
+        self.status_label.setFont(QFont("Arial", 12))
+        self.status_label.setStyleSheet("color: green;")
 
-        cancel_btn = QPushButton("✕")  # Changed to a better cross icon
-        cancel_btn.setFixedSize(20, 20)  # Made size consistent with circle button
+        cancel_btn = QPushButton("✕")
+        cancel_btn.setFixedSize(20, 20)
         cancel_btn.setStyleSheet("color: gray; border: none; font-size: 16px;")
-        cancel_btn.clicked.connect(lambda: self.delete_task(task_frame))
+        cancel_btn.clicked.connect(self.delete_task)
 
         separator = QFrame()
         separator.setFrameShape(QFrame.HLine)
         separator.setStyleSheet("background-color: #BDB395; height: 1px; border: none;")
 
-        task_layout.addWidget(circle_btn)
-        task_layout.addWidget(task_input)
-        task_layout.addWidget(status_label)
+        task_layout.addWidget(self.circle_btn)
+        task_layout.addWidget(self.task_input)
+        task_layout.addWidget(self.status_label)
         task_layout.addWidget(cancel_btn)
         task_layout.addWidget(separator)
 
-        self.task_container.insertWidget(self.task_container.count(), task_frame)
+        main_layout.addWidget(task_frame)
 
-    def toggle_status(self, label, circle_btn):
-        """Toggles the status between 'In Progress' (green) and 'Done' (red)."""
-        if label.text() == "In Progress":
-            label.setText("Done")
-            label.setStyleSheet("color: red;")
-            circle_btn.setText("◉")  # Changed to a circle with smaller inner circle
-            circle_btn.setStyleSheet("color: red; border: none; font-size: 16px;")
-        else:
-            label.setText("In Progress")
-            label.setStyleSheet("color: green;")
-            circle_btn.setText("○")  # Empty circle
-            circle_btn.setStyleSheet("color: gray; border: none; font-size: 18px;")
+    def on_text_changed(self):
+        if self.home_controller:
+            # Pass the current text to the controller
+            text = self.task_input.text()
+            self.home_controller.updateTask(text)
 
-    def delete_task(self, task_frame):
-        for i in reversed(range(self.task_container.count())):
-            item = self.task_container.itemAt(i)
-            if item.widget() == task_frame:
-                item.widget().deleteLater()
-                break
+    def toggle_status(self):
+        if self.home_controller:
+            # Pass the current text when updating status
+            self.home_controller.updateTask(self.task_input.text())
+            current_status = self.status_label.text()
+
+            if current_status == "In progress":
+                # Change to Done state
+                self.status_label.setText("Done")
+                self.status_label.setStyleSheet("color: #FF0000;")  # Bright red
+                self.circle_btn.setText("◉")
+                self.circle_btn.setStyleSheet(
+                    "color: #FF0000; border: none; font-size: 16px;"
+                )
+            else:
+                # Change to In progress state
+                self.status_label.setText("In progress")
+                self.status_label.setStyleSheet("color: #00AA00;")  # Bright green
+                self.circle_btn.setText("○")
+                self.circle_btn.setStyleSheet(
+                    "color: gray; border: none; font-size: 18px;"
+                )
+
+    def delete_task(self):
+        if self.home_controller:
+            self.home_controller.deleteTask()
+            # Remove this task widget from its parent layout
+            if self.parent():
+                self.parent().layout().removeWidget(self)
+                self.deleteLater()  # Schedule this widget for deletion
+
+                self.parent().layout().removeWidget(self)
+                self.deleteLater()  # Schedule this widget for deletion

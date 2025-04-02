@@ -1,6 +1,8 @@
 #call folder api
 
-# import requests
+import requests
+
+# CRUD folders
 
 def get_folders():
     # response = requests.get("http://127.0.0.1:5000/folders")
@@ -78,3 +80,33 @@ def get_folders():
         ]
     return folders
     # return response.json()
+
+def create_folder(folder):
+    return folder
+
+def update_folder(folder):
+    return folder
+
+def delete_folder(folder):
+    return folder
+
+def search_folder(folder_name): 
+    #implement search folder api
+
+    folder = [{
+        "name": "History",
+        "count": "10",
+        "date": "2024-01-01",
+        "avatar": "static/images/profile.jpg",
+        "image": "static/images/pic1.jpg",
+    }, {
+        "name": "History123",
+        "count": "10",
+        "date": "2024-01-01",
+        "avatar": "static/images/profile.jpg",
+        "image": "static/images/pic1.jpg"}]
+    
+    if folder_name == "History":
+        return folder
+    else:
+        return []

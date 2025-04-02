@@ -15,6 +15,9 @@ from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QFont, QPixmap
 from ui.views.components.note_window import popup_notewindow
 from ui.views.components.folder import Folder
+from ui.views.components.flashcard_window import popup_flashcardwindow
+from ui.views.components.flashcard_components.models import Flashcard, TermWord, get_sample_flashcards
+from datetime import datetime
 
 
 class JoinContestDialog(QDialog):
@@ -23,6 +26,7 @@ class JoinContestDialog(QDialog):
             parent,
             Qt.WindowSystemMenuHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint,
         )
+        self.folders = []
         self.setModal(True)
         self.setWindowTitle("Join contest code")
         self.setupUi()
@@ -92,8 +96,8 @@ class JoinContestDialog(QDialog):
 class CollectionPage(QWidget):
     def __init__(self):
         super().__init__()
+        self.folders = []
         self.setupUi()
-        # Set background color for the entire page
         self.setStyleSheet(
             """
             QWidget {
@@ -102,10 +106,29 @@ class CollectionPage(QWidget):
         """
         )
 
+    def set_controller(self, controller):
+        self.collection_controller = controller
+
+    def update_folders(self, folders):
+        """Updates the grid with new folders"""
+        # Clear existing folders from grid
+        for i in reversed(range(self.grid_layout.count())):
+            self.grid_layout.itemAt(i).widget().deleteLater()
+
+        # Add new folders
+        for i, folder in enumerate(folders):
+            folder_widget = self.create_folder_widget(
+                folder["name"],
+                folder["count"],
+                folder["date"],
+                folder["avatar"],
+                folder["image"],
+            )
+            self.grid_layout.addWidget(folder_widget, i // 4, i % 4)
+
     def setupUi(self):
         main_layout = QVBoxLayout(self)
-        # Reduce the top margin here
-        main_layout.setContentsMargins(25, 10, 10, 10)  # Reduced from 100 to 10
+        main_layout.setContentsMargins(25, 10, 10, 10)
         main_layout.setSpacing(5)
 
         # Header layout for "My Collection" and image
@@ -116,6 +139,13 @@ class CollectionPage(QWidget):
         header_label = QLabel("My Collection")
         header_label.setFont(QFont("Arial", 16, QFont.Bold))
         header_layout.addWidget(header_label, alignment=Qt.AlignLeft)
+        header_label.setStyleSheet(
+            """
+            QLabel {
+                color: black;
+            }
+            """
+        )
 
         # Image next to the header
         image_label = QLabel()
@@ -182,30 +212,22 @@ class CollectionPage(QWidget):
         toggle_layout.addWidget(private_button)
         toggle_layout.addWidget(public_button)
         toggle_layout.addStretch(1)
-        
+
         placeholder_note_button = QPushButton("Placeholder Note")
         placeholder_note_button.clicked.connect(self.showNoteWindow)
         main_layout.addWidget(placeholder_note_button)
-        
 
-        # Join Contest Button aligned to the right
-        join_contest_button = QPushButton("Join contest")
-        join_contest_button.clicked.connect(self.showJoinContestDialog)
-        main_layout.addWidget(join_contest_button, alignment=Qt.AlignRight)
-        join_contest_button.setStyleSheet(
-            """
-            QPushButton {
-                background-color: #ffc99a;
-                border-radius: 15px;
-                padding: 5px 15px;
-                font-size: 12px;
-                color: #333;
-            }
-            QPushButton:hover {
-                background-color: #E6C3AC;
-            }
-        """
-        )
+        placeholder_flashcard_button = QPushButton("Placeholder Flashcard")
+        placeholder_flashcard_button.clicked.connect(self.showFlashcardWindow)
+        main_layout.addWidget(placeholder_flashcard_button)
+        
+        # Store grid_layout as instance variable so we can update it
+        self.grid_layout = QGridLayout()
+        self.grid_layout.setSpacing(10)
+        self.grid_layout.setVerticalSpacing(30)
+        main_layout.addLayout(self.grid_layout)
+
+        # Create add folder button
         add_folder_button = QPushButton("+")
         add_folder_button.setStyleSheet(
             """
@@ -219,36 +241,33 @@ class CollectionPage(QWidget):
             QPushButton:hover {
                 background-color: #79AD47;
             }
-        """
+            """
         )
+        print("Connecting add folder button")  # Debug print
+        add_folder_button.clicked.connect(self.on_add_folder_clicked)
         toggle_layout.addStretch(1)
-        toggle_layout.addWidget(join_contest_button)
         toggle_layout.addWidget(add_folder_button)
         toggle_layout.addWidget(placeholder_note_button)
-
-        # Grid Layout for folders
-        grid_layout = QGridLayout()
-        grid_layout.setSpacing(10)  # Horizontal spacing between columns
-        grid_layout.setVerticalSpacing(30)  # Increased vertical spacing between rows
-        main_layout.addStretch(1)
-        main_layout.addLayout(grid_layout)
-        for i in range(8):
-            folder_widget = self.create_folder_widget(
-                "Folder name",
-                "9 items",
-                "Thursday, January 30, 2025",
-                "static/images/logo.png",
-                "static/images/folderimgplaceholder.jpg",
-            )
-            grid_layout.addWidget(folder_widget, i // 4, i % 4)
-
-        main_layout.addStretch(1)
 
     def showNoteWindow(self):
         note_dialog = popup_notewindow(self)
         if note_dialog.exec():
             note_data = note_dialog.getNoteData()
             print("Note Data:", note_data)  # You can handle the note data here
+            
+    def showFlashcardWindow(self):
+        # Get sample flashcards from the API
+        flashcards = get_sample_flashcards()
+        
+        if flashcards:
+            # Create and show the flashcard window with the first flashcard set
+            flashcard_dialog = popup_flashcardwindow(flashcards[0], self)
+            if flashcard_dialog.exec():
+                # Get the results when the dialog is closed
+                results = flashcard_dialog.getFlashcardData()
+                print("Flashcard Results:", results)
+        else:
+            print("No flashcard sets available")
 
     def create_folder_widget(self, name, count, date, avatar_url, img_url):
         return Folder(name, count, date, avatar_url, img_url)
@@ -258,3 +277,11 @@ class CollectionPage(QWidget):
         if dialog.exec():
             contest_code = dialog.getContestCode()
             print("Contest Code Entered:", contest_code)  # or handle the code as needed
+
+    def on_add_folder_clicked(self):
+        print("Add folder button clicked")  # Debug print
+        if hasattr(self, "collection_controller"):
+            print("Calling controller's createFolder")  # Debug print
+            self.collection_controller.createFolder()
+        else:
+            print("No collection controller found")  # Debug print
