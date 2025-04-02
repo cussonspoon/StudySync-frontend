@@ -30,6 +30,7 @@ from ui.views.components.folder import Folder
 class HomePage(QWidget):
     def __init__(self):
         super().__init__()
+        self.folders = []
         self.setupUi()
 
     def setupUi(self):
@@ -118,7 +119,9 @@ class HomePage(QWidget):
         collection_container.setMaximumWidth(1171)  # Match banner width
         self.scroll_layout.addWidget(collection_container)
 
-        self.collections = HorizontalImageScroller(self.scrollAreaWidgetContents)
+        self.collections = HorizontalImageScroller(
+            self.folders, self.scrollAreaWidgetContents
+        )
         self.collections.setMaximumWidth(1171)  # Match banner width
         self.scroll_layout.addWidget(self.collections)
 
@@ -131,7 +134,9 @@ class HomePage(QWidget):
         )
         self.scroll_layout.addWidget(self.recommendsText)
 
-        self.recommendFolders = HorizontalImageScroller(self.scrollAreaWidgetContents)
+        self.recommendFolders = HorizontalImageScroller(
+            self.folders, self.scrollAreaWidgetContents
+        )
         self.recommendFolders.setMaximumWidth(1171)  # Match banner width
         self.scroll_layout.addWidget(self.recommendFolders)
 
@@ -384,19 +389,3 @@ class TaskManagement(QWidget):
             if item.widget() == task_frame:
                 item.widget().deleteLater()
                 break
-
-
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("StudySync Dashboard")  # Set Window Title
-        self.setGeometry(100, 100, 1200, 771)  # Set Window Size
-        self.ui = HomePage()
-        self.setCentralWidget(self.ui)
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec())
