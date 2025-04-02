@@ -15,7 +15,6 @@ from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QFont, QPixmap
 from ui.views.components.folder import Folder
 
-
 class JoinContestDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(
