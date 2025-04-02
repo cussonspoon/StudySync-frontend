@@ -1,6 +1,6 @@
 #call folder api
 
-# import requests
+import requests
 
 # CRUD folders
 
@@ -92,7 +92,7 @@ def delete_folder(folder):
 
 def search_folder(folder_name): 
     #implement search folder api
-    
+
     folder = [{
         "name": "History",
         "count": "10",

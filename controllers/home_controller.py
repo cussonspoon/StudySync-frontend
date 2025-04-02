@@ -47,7 +47,6 @@ class HomeController:
     def searchFolders(self, search_text):
         # Call the search service
         results = search_folder(search_text)
-        print(f"Search results from service: {results}")  # Debug print
         return results
 
     # def setupSearch(self):
