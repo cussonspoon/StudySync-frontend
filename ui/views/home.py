@@ -420,19 +420,30 @@ class HomePage(QWidget):
         # Hide the search results dropdown
         self.search_results_container.hide()
 
-        # Hide normal content
+        # Hide ALL content first
         self.hide_normal_content()
 
-        # Clear any existing search result folders
-        if hasattr(self, "search_results_grid"):
-            self.search_results_grid.deleteLater()
+        # Safely remove existing search results grid
+        if (
+            hasattr(self, "search_results_grid")
+            and self.search_results_grid is not None
+        ):
+            try:
+                self.search_results_grid.hide()
+                self.scroll_layout.removeWidget(self.search_results_grid)
+                self.search_results_grid.deleteLater()
+            except RuntimeError:
+                pass
+            self.search_results_grid = None
 
         # Create grid layout for search results
         self.search_results_grid = QWidget(self.scrollAreaWidgetContents)
+        self.search_results_grid.setStyleSheet("background-color: transparent;")
         grid_layout = QGridLayout(self.search_results_grid)
         grid_layout.setSpacing(20)
+        grid_layout.setContentsMargins(20, 20, 20, 20)
 
-        # Add folders to grid, 4 per row
+        # Add folders directly to grid, 4 per row
         for i, folder in enumerate(results):
             folder_widget = Folder(
                 folder["name"],
@@ -445,27 +456,35 @@ class HomePage(QWidget):
             col = i % 4
             grid_layout.addWidget(folder_widget, row, col)
 
+        # Add the grid to the scroll area
         self.scroll_layout.addWidget(self.search_results_grid)
 
     def hide_normal_content(self):
-        # Hide all normal content widgets
-        self.bannerFrame.hide()
-        self.collections.hide()
-        self.recommendFolders.hide()
-        self.taskManagement.hide()
-        self.calendar.parent().hide()
+        # Hide ALL widgets in the main scroll area
+        for i in range(self.scroll_layout.count()):
+            widget = self.scroll_layout.itemAt(i).widget()
+            if widget:
+                widget.hide()
 
     def show_normal_content(self):
-        # Show all normal content widgets
-        self.bannerFrame.show()
-        self.collections.show()
-        self.recommendFolders.show()
-        self.taskManagement.show()
-        self.calendar.parent().show()
+        # Show all widgets in the main scroll area
+        for i in range(self.scroll_layout.count()):
+            widget = self.scroll_layout.itemAt(i).widget()
+            if widget and widget != self.search_results_grid:
+                widget.show()
 
-        # Remove search results grid if it exists
-        if hasattr(self, "search_results_grid"):
-            self.search_results_grid.deleteLater()
+        # Safely remove search results grid
+        if (
+            hasattr(self, "search_results_grid")
+            and self.search_results_grid is not None
+        ):
+            try:
+                self.search_results_grid.hide()
+                self.scroll_layout.removeWidget(self.search_results_grid)
+                self.search_results_grid.deleteLater()
+            except RuntimeError:
+                pass  # Widget already deleted
+            self.search_results_grid = None
 
 
 class TaskManagement(QWidget):
