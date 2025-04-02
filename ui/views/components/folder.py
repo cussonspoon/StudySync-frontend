@@ -17,8 +17,8 @@ class Folder(QWidget):
     def setupUi(self, name, count, date, avatar_url, img_url):
         # Main layout for the folder widget
         layout = QVBoxLayout(self)
-        layout.setSpacing(0)  # Set to 0 to remove spacing
-        layout.setContentsMargins(0, 0, 0, 0)  # Remove margins for proper alignment
+        layout.setSpacing(8)  # Changed from 0 to 8 to add space between elements
+        layout.setContentsMargins(0, 0, 0, 0)  # Keep margins at 0 for proper alignment
 
         # Frame for the preview
         frame = QFrame()
@@ -51,8 +51,8 @@ class Folder(QWidget):
 
         # Folder name with icon
         name_layout = QHBoxLayout()
-        name_layout.setSpacing(3)
-        name_layout.setContentsMargins(0, 0, 0, 0)
+        name_layout.setSpacing(5)  # Increased from 3 to 5
+        name_layout.setContentsMargins(0, 8, 0, 4)  # Added top and bottom margins
 
         profile_icon = QLabel()
         profile_icon.setFixedSize(16, 16)
@@ -87,8 +87,8 @@ class Folder(QWidget):
                 font-size: 10px; 
                 font-weight: normal;
                 color: black;
-                margin-top: -4px;
-                margin-bottom: -4px;
+                margin-top: 4px;  /* Changed from -4 to 4 */
+                margin-bottom: 4px; /* Changed from -4 to 4 */
             }
         """
         )
@@ -96,8 +96,10 @@ class Folder(QWidget):
 
         # Items count with icon
         count_layout = QHBoxLayout()
-        count_layout.setSpacing(3)
-        count_layout.setContentsMargins(0, -4, 0, 0)  # Increased negative top margin
+        count_layout.setSpacing(5)  # Increased from 3 to 5
+        count_layout.setContentsMargins(
+            0, 4, 0, 0
+        )  # Changed negative margin to positive
 
         count_icon = QLabel()
         count_icon.setFixedSize(16, 16)

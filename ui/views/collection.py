@@ -15,6 +15,7 @@ from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QFont, QPixmap
 from ui.views.components.folder import Folder
 
+
 class JoinContestDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(
@@ -25,6 +26,13 @@ class JoinContestDialog(QDialog):
         self.setWindowTitle("Join contest code")
         self.setupUi()
         self.setFixedSize(385, 133)
+        self.setStyleSheet(
+            """
+            QDialog {
+                background-color: #F8F6F1;
+            }
+            """
+        )
 
     def setupUi(self):
         layout = QVBoxLayout(self)
@@ -84,6 +92,14 @@ class CollectionPage(QWidget):
     def __init__(self):
         super().__init__()
         self.setupUi()
+        # Set background color for the entire page
+        self.setStyleSheet(
+            """
+            QWidget {
+                background-color: #FAFAFA;
+            }
+        """
+        )
 
     def setupUi(self):
         main_layout = QVBoxLayout(self)
@@ -205,7 +221,8 @@ class CollectionPage(QWidget):
 
         # Grid Layout for folders
         grid_layout = QGridLayout()
-        grid_layout.setSpacing(10)
+        grid_layout.setSpacing(10)  # Horizontal spacing between columns
+        grid_layout.setVerticalSpacing(30)  # Increased vertical spacing between rows
         main_layout.addStretch(1)
         main_layout.addLayout(grid_layout)
         for i in range(8):
