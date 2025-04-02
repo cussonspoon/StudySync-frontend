@@ -31,6 +31,7 @@ class HomePage(QWidget):
     def __init__(self):
         super().__init__()
         self.folders = []
+        self.tasks = []
         self.setupUi()
 
     def setupUi(self):
@@ -161,7 +162,7 @@ class HomePage(QWidget):
         task_n_cal_layout.setSpacing(0)
 
         self.taskManagement = TaskManagement(
-            0, 0, 800, 700, self.scrollAreaWidgetContents
+            0, 0, 800, 700, self.tasks, self.scrollAreaWidgetContents
         )
         self.taskManagement.setMinimumHeight(400)
         self.taskManagement.setMaximumWidth(800)  # Limit task management width
@@ -258,25 +259,40 @@ class HomePage(QWidget):
         """
         )
 
+    def set_controller(self, controller):
+        self.home_controller = controller
+        # Connect the controller to TaskManagement
+        if hasattr(self, "taskManagement"):
+            self.taskManagement.set_controller(controller)
+
     def update_scroll_height(self):
         """Adjusts the scroll area height when tasks are added."""
         total_height = self.scroll_layout.sizeHint().height() + 20  # Add extra padding
         self.scrollAreaWidgetContents.setMinimumHeight(total_height)
 
+    def update_tasks(self, tasks):
+        """Updates the task list and refreshes the task management UI"""
+        self.tasks = tasks
+        if hasattr(self, "taskManagement"):
+            self.taskManagement.load_tasks(tasks)
+
 
 class TaskManagement(QWidget):
-    def __init__(self, pos_x, pos_y, width, length, parent=None):
+    def __init__(self, pos_x, pos_y, width, length, tasks, parent=None):
         super().__init__(parent)
         self.setWindowTitle("To-Do List")
         self.setGeometry(pos_x, pos_y, width, length)
         self.setFixedSize(width, length)
+        self.tasks = tasks
+        self.home_controller = None
+        self.setupUi()
 
+    def setupUi(self):
         self.layout = QVBoxLayout(self)
 
         # Scrollable
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
-        # self.scroll_area.setFixedSize(width - 50, length - 100)
 
         self.scroll_widget = QWidget()
         self.task_container = QVBoxLayout(self.scroll_widget)
@@ -286,7 +302,6 @@ class TaskManagement(QWidget):
         # Add Task Button
         self.add_task_btn = QPushButton("+ Add Task")
         self.add_task_btn.clicked.connect(self.add_task)
-
         self.add_task_btn.setStyleSheet(
             """
             QPushButton {
@@ -310,7 +325,50 @@ class TaskManagement(QWidget):
         self.layout.addWidget(self.add_task_btn)
         self.layout.addWidget(self.scroll_area)
 
+        # Load initial tasks
+        if self.tasks:
+            self.load_tasks(self.tasks)
+
+    def set_controller(self, controller):
+        self.home_controller = controller
+
+    def load_tasks(self, tasks):
+        # Clear existing tasks
+        while self.task_container.count():
+            item = self.task_container.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        # Add tasks from the list
+        for task in tasks:
+            task_ui = TaskUI(task["task_detail"], task["status"], self)
+            task_ui.set_controller(self.home_controller)
+            self.task_container.addWidget(task_ui)
+
     def add_task(self):
+        if self.home_controller:
+            # Create a new task UI first
+            task_ui = TaskUI("", "In progress", self)
+            task_ui.set_controller(self.home_controller)
+            self.task_container.addWidget(task_ui)
+            # Then notify the controller
+            self.home_controller.createTask()
+
+
+class TaskUI(QWidget):
+    def __init__(self, task_detail="", status="In progress", parent=None):
+        super().__init__(parent)
+        self.task_detail = task_detail
+        self.status = status
+        self.home_controller = None
+        self.setupUi()
+
+    def set_controller(self, controller):
+        self.home_controller = controller
+
+    def setupUi(self):
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
 
         task_frame = QFrame()
         task_frame.setObjectName("taskFrame")
@@ -320,20 +378,28 @@ class TaskManagement(QWidget):
         )
 
         task_layout = QHBoxLayout(task_frame)
-        task_layout.setAlignment(Qt.AlignVCenter)  # Center all items vertically
+        task_layout.setAlignment(Qt.AlignVCenter)
 
-        circle_btn = QPushButton("○")  # Outer circle
-        circle_btn.setFixedSize(20, 20)
-        circle_btn.setStyleSheet("color: gray; border: none; font-size: 18px;")
-        circle_btn.clicked.connect(lambda: self.toggle_status(status_label, circle_btn))
+        # Store circle button as class attribute
+        self.circle_btn = QPushButton("○")
+        self.circle_btn.setFixedSize(20, 20)
+        self.circle_btn.setStyleSheet("color: gray; border: none; font-size: 18px;")
+        self.circle_btn.clicked.connect(self.toggle_status)
 
-        task_input = QLineEdit()
-        task_input.setPlaceholderText("Enter your task here...")
-        task_input.setFont(QFont("Arial", 16))
-        task_input.setMinimumWidth(400)
-        task_input.setFixedHeight(25)
+        self.task_input = QLineEdit()
+        if self.task_detail:
+            self.task_input.setText(self.task_detail)
+        else:
+            self.task_input.setPlaceholderText("Enter your task here...")
+            # Focus the input when it's a new task
+            self.task_input.setFocus()
 
-        task_input.setStyleSheet(
+        self.task_input.setFont(QFont("Arial", 16))
+        self.task_input.setMinimumWidth(400)
+        self.task_input.setFixedHeight(25)
+        self.task_input.textChanged.connect(self.on_text_changed)
+
+        self.task_input.setStyleSheet(
             """
             QLineEdit {
                 border: none; 
@@ -348,44 +414,60 @@ class TaskManagement(QWidget):
         """
         )
 
-        # Status Label (Rightmost)
-        status_label = QLabel("In Progress")
-        status_label.setFont(QFont("Arial", 12))
-        status_label.setStyleSheet("color: green;")
+        self.status_label = QLabel(self.status)
+        self.status_label.setFont(QFont("Arial", 12))
+        self.status_label.setStyleSheet("color: green;")
 
-        cancel_btn = QPushButton("✕")  # Changed to a better cross icon
-        cancel_btn.setFixedSize(20, 20)  # Made size consistent with circle button
+        cancel_btn = QPushButton("✕")
+        cancel_btn.setFixedSize(20, 20)
         cancel_btn.setStyleSheet("color: gray; border: none; font-size: 16px;")
-        cancel_btn.clicked.connect(lambda: self.delete_task(task_frame))
+        cancel_btn.clicked.connect(self.delete_task)
 
         separator = QFrame()
         separator.setFrameShape(QFrame.HLine)
         separator.setStyleSheet("background-color: #BDB395; height: 1px; border: none;")
 
-        task_layout.addWidget(circle_btn)
-        task_layout.addWidget(task_input)
-        task_layout.addWidget(status_label)
+        task_layout.addWidget(self.circle_btn)
+        task_layout.addWidget(self.task_input)
+        task_layout.addWidget(self.status_label)
         task_layout.addWidget(cancel_btn)
         task_layout.addWidget(separator)
 
-        self.task_container.insertWidget(self.task_container.count(), task_frame)
+        main_layout.addWidget(task_frame)
 
-    def toggle_status(self, label, circle_btn):
-        """Toggles the status between 'In Progress' (green) and 'Done' (red)."""
-        if label.text() == "In Progress":
-            label.setText("Done")
-            label.setStyleSheet("color: red;")
-            circle_btn.setText("◉")  # Changed to a circle with smaller inner circle
-            circle_btn.setStyleSheet("color: red; border: none; font-size: 16px;")
-        else:
-            label.setText("In Progress")
-            label.setStyleSheet("color: green;")
-            circle_btn.setText("○")  # Empty circle
-            circle_btn.setStyleSheet("color: gray; border: none; font-size: 18px;")
+    def on_text_changed(self):
+        if self.home_controller:
+            # Pass the current text to the controller
+            text = self.task_input.text()
+            self.home_controller.updateTask(text)
 
-    def delete_task(self, task_frame):
-        for i in reversed(range(self.task_container.count())):
-            item = self.task_container.itemAt(i)
-            if item.widget() == task_frame:
-                item.widget().deleteLater()
-                break
+    def toggle_status(self):
+        if self.home_controller:
+            # Pass the current text when updating status
+            self.home_controller.updateTask(self.task_input.text())
+            current_status = self.status_label.text()
+
+            if current_status == "In progress":
+                # Change to Done state
+                self.status_label.setText("Done")
+                self.status_label.setStyleSheet("color: #FF0000;")  # Bright red
+                self.circle_btn.setText("◉")
+                self.circle_btn.setStyleSheet(
+                    "color: #FF0000; border: none; font-size: 16px;"
+                )
+            else:
+                # Change to In progress state
+                self.status_label.setText("In progress")
+                self.status_label.setStyleSheet("color: #00AA00;")  # Bright green
+                self.circle_btn.setText("○")
+                self.circle_btn.setStyleSheet(
+                    "color: gray; border: none; font-size: 18px;"
+                )
+
+    def delete_task(self):
+        if self.home_controller:
+            self.home_controller.deleteTask()
+            # Remove this task widget from its parent layout
+            if self.parent():
+                self.parent().layout().removeWidget(self)
+                self.deleteLater()  # Schedule this widget for deletion

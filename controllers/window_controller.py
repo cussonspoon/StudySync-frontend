@@ -25,6 +25,9 @@ class WindowController:
         # Initialize HomeController first
         self.home_controller = HomeController(self.ui.page_home_scroll.widget())
 
+        # Set the controller on the HomePage
+        self.ui.page_home_scroll.widget().set_controller(self.home_controller)
+
         # Then setup pages and connect signals
         self.setupPages()
         self.ui.home.clicked.connect(lambda: self.switchPage(Page.HOME.value))
@@ -49,3 +52,4 @@ class WindowController:
         self.ui.contentArea.setCurrentIndex(index)
         if index == Page.HOME.value:
             self.home_controller.loadFolders()  # Load folders when switching to home page
+            self.home_controller.loadTasks()

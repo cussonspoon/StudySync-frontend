@@ -2,6 +2,8 @@
 
 # import requests
 
+# CRUD folders
+
 def get_folders():
     # response = requests.get("http://127.0.0.1:5000/folders")
     folders = [
@@ -78,3 +80,12 @@ def get_folders():
         ]
     return folders
     # return response.json()
+
+def create_folder(folder):
+    return folder
+
+def update_folder(folder):
+    return folder
+
+def delete_folder(folder):
+    return folder

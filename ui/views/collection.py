@@ -116,6 +116,13 @@ class CollectionPage(QWidget):
         header_label = QLabel("My Collection")
         header_label.setFont(QFont("Arial", 16, QFont.Bold))
         header_layout.addWidget(header_label, alignment=Qt.AlignLeft)
+        header_label.setStyleSheet(
+            """
+            QLabel {
+                color: black;
+            }
+            """
+        )
 
         # Image next to the header
         image_label = QLabel()
