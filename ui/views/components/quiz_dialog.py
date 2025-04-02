@@ -21,6 +21,7 @@ input_style = """
                 font-weight: normal;
                 padding: 15px;
                 border-radius: 10px;
+                color: black;
             }
             """
 
@@ -29,6 +30,7 @@ header_style = """
                 font-size: 20px;
                 font-weight: bold;
                 margin-bottom: 10px;
+                color: black;
             }
             """
 

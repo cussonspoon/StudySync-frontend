@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QFont, QPixmap
+from ui.views.components.note_window import popup_notewindow
 from ui.views.components.folder import Folder
 
 
@@ -26,6 +27,13 @@ class JoinContestDialog(QDialog):
         self.setWindowTitle("Join contest code")
         self.setupUi()
         self.setFixedSize(385, 133)
+        self.setStyleSheet(
+            """
+            QDialog {
+                background-color: #F8F6F1;
+            }
+            """
+        )
 
     def setupUi(self):
         layout = QVBoxLayout(self)
@@ -85,6 +93,14 @@ class CollectionPage(QWidget):
     def __init__(self):
         super().__init__()
         self.setupUi()
+        # Set background color for the entire page
+        self.setStyleSheet(
+            """
+            QWidget {
+                background-color: #FAFAFA;
+            }
+        """
+        )
 
     def setupUi(self):
         main_layout = QVBoxLayout(self)
@@ -166,6 +182,11 @@ class CollectionPage(QWidget):
         toggle_layout.addWidget(private_button)
         toggle_layout.addWidget(public_button)
         toggle_layout.addStretch(1)
+        
+        placeholder_note_button = QPushButton("Placeholder Note")
+        placeholder_note_button.clicked.connect(self.showNoteWindow)
+        main_layout.addWidget(placeholder_note_button)
+        
 
         # Join Contest Button aligned to the right
         join_contest_button = QPushButton("Join contest")
@@ -203,10 +224,12 @@ class CollectionPage(QWidget):
         toggle_layout.addStretch(1)
         toggle_layout.addWidget(join_contest_button)
         toggle_layout.addWidget(add_folder_button)
+        toggle_layout.addWidget(placeholder_note_button)
 
         # Grid Layout for folders
         grid_layout = QGridLayout()
-        grid_layout.setSpacing(10)
+        grid_layout.setSpacing(10)  # Horizontal spacing between columns
+        grid_layout.setVerticalSpacing(30)  # Increased vertical spacing between rows
         main_layout.addStretch(1)
         main_layout.addLayout(grid_layout)
         for i in range(8):
@@ -220,6 +243,12 @@ class CollectionPage(QWidget):
             grid_layout.addWidget(folder_widget, i // 4, i % 4)
 
         main_layout.addStretch(1)
+
+    def showNoteWindow(self):
+        note_dialog = popup_notewindow(self)
+        if note_dialog.exec():
+            note_data = note_dialog.getNoteData()
+            print("Note Data:", note_data)  # You can handle the note data here
 
     def create_folder_widget(self, name, count, date, avatar_url, img_url):
         return Folder(name, count, date, avatar_url, img_url)

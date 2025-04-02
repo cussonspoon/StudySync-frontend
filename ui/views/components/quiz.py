@@ -17,23 +17,7 @@ class Quiz(QWidget):
         super().__init__()
 
         # Quiz data: questions, options, and correct answers
-        self.questions = [
-            {
-                "question": "What is the capital of France?",
-                "options": ["Paris", "London", "Rome", "Berlin"],
-                "answer": "Paris",
-            },
-            {
-                "question": "What is 5 + 3?",
-                "options": ["5", "8", "10", "15"],
-                "answer": "8",
-            },
-            {
-                "question": "Which planet is known as the Red Planet?",
-                "options": ["Earth", "Venus", "Mars", "Jupiter"],
-                "answer": "Mars",
-            },
-        ]
+        self.quiz_data = quiz_data or []
         self.current_question_index = 0
         self.score = 0
 
@@ -177,13 +161,13 @@ class Quiz(QWidget):
 
     def load_question(self):
         """Load the current question and update the UI."""
-        if self.current_question_index < len(self.questions):
+        if self.current_question_index < len(self.quiz_data):
             self.reset_button.hide()  # Hide reset button while quiz is running
-            question_data = self.questions[self.current_question_index]
+            question_data = self.quiz_data[self.current_question_index]
             self.question_label.setText(question_data["question"])
 
-            for i, option in enumerate(question_data["options"]):
-                self.option_buttons[i].setText(option)
+            for i, option in enumerate(question_data["choices"]):
+                self.option_buttons[i].setText(option["choice"])
                 self.option_buttons[i].setChecked(False)
                 self.option_buttons[i].show()
 
@@ -198,7 +182,7 @@ class Quiz(QWidget):
 
         if selected_button:
             selected_answer = selected_button.text()
-            correct_answer = self.questions[self.current_question_index]["answer"]
+            correct_answer = self.quiz_data[self.current_question_index]["correct_choice"]
 
             if selected_answer == correct_answer:
                 self.score += 1  # Increase score if answer is correct
@@ -215,7 +199,7 @@ class Quiz(QWidget):
     def display_result(self):
         """Show final score and hide unnecessary UI elements."""
         self.question_label.setText(
-            f"Quiz Finished! Your score: {self.score}/{len(self.questions)}"
+            f"Quiz Finished! Your score: {self.score}/{len(self.quiz_data)}"
         )
 
         # Hide all option buttons and submit button
@@ -228,7 +212,7 @@ class Quiz(QWidget):
 
     def next_question(self):
         """Move to the next question."""
-        if self.current_question_index < len(self.questions):
+        if self.current_question_index < len(self.quiz_data):
             self.current_question_index += 1
             self.load_question()
 
