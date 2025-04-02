@@ -227,7 +227,7 @@ class CollectionPage(QWidget):
         self.grid_layout.setVerticalSpacing(30)
         main_layout.addLayout(self.grid_layout)
 
-        # Connect add folder button to controller
+        # Create add folder button
         add_folder_button = QPushButton("+")
         add_folder_button.setStyleSheet(
             """
@@ -241,8 +241,9 @@ class CollectionPage(QWidget):
             QPushButton:hover {
                 background-color: #79AD47;
             }
-        """
+            """
         )
+        print("Connecting add folder button")  # Debug print
         add_folder_button.clicked.connect(self.on_add_folder_clicked)
         toggle_layout.addStretch(1)
         toggle_layout.addWidget(add_folder_button)
@@ -278,5 +279,9 @@ class CollectionPage(QWidget):
             print("Contest Code Entered:", contest_code)  # or handle the code as needed
 
     def on_add_folder_clicked(self):
+        print("Add folder button clicked")  # Debug print
         if hasattr(self, "collection_controller"):
+            print("Calling controller's createFolder")  # Debug print
             self.collection_controller.createFolder()
+        else:
+            print("No collection controller found")  # Debug print
