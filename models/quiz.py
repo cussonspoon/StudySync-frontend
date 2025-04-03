@@ -21,15 +21,15 @@ class Question:
 class Quiz:
     id: str
     title: str
-    quiz_type: str
-    mode: str
-    total_questions: int
-    total_likes: int
-    total_points: int
-    points_to_pass: int
-    time_limit: int
-    folder_id: str
-    created_at: str
+    quiz_type: str = None
+    mode: str = None
+    total_questions: int = None
+    total_likes: int = None
+    total_points: int = None
+    points_to_pass: int = None
+    time_limit: int = None
+    folder_id: str = None
+    created_at: str = None
 
     # def calculate_score(self, answers: List[int]) -> float:
     #     """Calculate the score based on user's answers"""

@@ -30,8 +30,23 @@ class QuizStart(QWidget):
         layout = QVBoxLayout()
         layout.setSpacing(20)
 
-        spacer = QSpacerItem(30, 30, QSizePolicy.Minimum, QSizePolicy.Fixed)
-        layout.addItem(spacer)
+        self.quiz_title = QLabel("Quiz Title")
+        self.quiz_title.setStyleSheet(
+            """
+            QLabel {
+                font-size: 24px;
+                font-weight: bold;
+                color: black;
+                background-color: #ecf0f1;
+                padding: 10px;
+                border-radius: 5px;
+            }
+            """      
+        )
+        layout.addWidget(self.quiz_title)
+
+        # spacer = QSpacerItem(30, 30, QSizePolicy.Minimum, QSizePolicy.Fixed)
+        # layout.addItem(spacer)
         # Question Label
         self.question_label = QLabel()
         self.question_label.setStyleSheet(
@@ -43,6 +58,7 @@ class QuizStart(QWidget):
                 padding-left: 0;
                 border: none;
                 margin-bottom: 20px;
+                color: black;
             }
             """
         )
@@ -167,6 +183,7 @@ class QuizStart(QWidget):
             self.reset_button.hide()  # Hide reset button while quiz is running
             question_data = self.questions[self.current_question_index]
             self.question_label.setText(question_data.question)
+            self.quiz_title.setText(f"Quiz {self.current_question_index + 1}")
 
             for i, option in enumerate(question_data.choices):
                 self.option_buttons[i].setText(option.choice)
@@ -184,10 +201,13 @@ class QuizStart(QWidget):
 
         if selected_button:
             selected_answer = selected_button.text()
-            correct_answer = self.questions[self.current_question_index].choices[0].choice
 
-            if selected_answer == correct_answer:
-                self.score += 1  # Increase score if answer is correct  
+            for answer in self.questions[self.current_question_index].choices:
+                if answer.is_answer:
+                    correct_answer = answer.choice
+                    if selected_answer == correct_answer:
+                        self.score += 1  # Only increase score if answer is correct
+                        break  # Exit loop once we find the correct answer
 
             self.current_question_index += 1  # Move to next question
             self.load_question()
@@ -201,9 +221,9 @@ class QuizStart(QWidget):
     def display_result(self):
         """Show final score and hide unnecessary UI elements."""
         self.question_label.setText(
-            f"Quiz Finished! Your score: {self.score}/{len(self.questions)}"
+            f"Your score: {self.score}/{len(self.questions)}"
         )
-
+        self.quiz_title.setText(f"Completed Quiz")
         # Hide all option buttons and submit button
         for button in self.option_buttons:
             button.hide()

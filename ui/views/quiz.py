@@ -12,41 +12,23 @@ from PySide6.QtWidgets import (
     QRadioButton,
     QFrame,
     QSizePolicy,
+    QMessageBox,
 )
-from PySide6.QtCore import QRect, Qt
+from PySide6.QtCore import QRect, Qt, QSize
+from PySide6.QtGui import QIcon
 from utils.ui import QuizQuestionCard
 from ..views.components.quiz_dialog import QuizDialog
-from ..views.components.quiz import QuizStart
+from .components.quiz_start import QuizStart
 from models.quiz import Question, Quiz, Choice
 from controllers.quiz_controller import QuizController
 from typing import List
 
 class QuizPage(QWidget):
-    def __init__(self, parent=None, quiz: Quiz = None, quiz_controller: QuizController = None):
+    def __init__(self, parent=None, quiz: Quiz = None):
         super().__init__(parent)
-        self.quiz = quiz
-        self.quiz_controller = quiz_controller
+        self.quiz = Quiz(id="b6e3886a-7c02-40f5-bdf6-fb8b50c9118c", title="Quiz 1", quiz_type="quiz", mode="normal")
+        self.quiz_controller = QuizController(self.quiz)
         self.questions = []
-        
-        if self.quiz_controller:
-            self.questions = self.quiz_controller.get_questions()
-            self.quiz_controller.set_quiz(self.quiz)
-        else:
-            # Initialize with empty quiz if none provided
-            if not self.quiz:
-                self.quiz = Quiz(
-                    id="",
-                    title="New Quiz",
-                    quiz_type="quiz",
-                    mode="normal",
-                    total_questions=0,
-                    total_likes=0,
-                    total_points=0,
-                    points_to_pass=70,
-                    time_limit=300,
-                    folder_id="",
-                    created_at=""
-                )
         
         self.init_ui()
 
@@ -143,11 +125,13 @@ class QuizPage(QWidget):
         self.add_button_layout.setSpacing(10)
 
         # 📌 Add Button
-        self.add_button = QPushButton("Add Question")
+        self.add_button = QPushButton()
+        self.add_button.setIcon(QIcon("static/images/plus.svg")) 
+        self.add_button.setIconSize(QSize(24, 24))
         self.add_button.setStyleSheet(
-            "padding: 10px; font-size: 18px; background-color: #4CAF50; color: white; border-radius: 10px;"
+            "padding: 10px; background-color: #4CAF50; color: white; border-radius: 10px;"
         )
-        self.add_button.setFixedSize(200, 50)
+        self.add_button.setFixedSize(50, 50)
         self.add_button.clicked.connect(lambda: self.show_question_dialog(dialog_type="add"))
         
         self.start_quiz_button = QPushButton("Start Quiz")
@@ -156,8 +140,18 @@ class QuizPage(QWidget):
         )
         self.start_quiz_button.setFixedSize(200, 50)
         self.start_quiz_button.clicked.connect(lambda: self.start_quiz())
+
+        self.refresh_button = QPushButton()    
+        self.refresh_button.setIcon(QIcon("static/images/refresh.svg"))
+        self.refresh_button.setIconSize(QSize(24, 24))
+        self.refresh_button.setStyleSheet(
+            "padding: 10px; background-color: #4CAF50; border-radius: 10px; color: white;"
+        )
+        self.refresh_button.setFixedSize(50, 50)
+        self.refresh_button.clicked.connect(lambda: self.refresh_questions())
         
         self.add_button_layout.addWidget(self.add_button)
+        self.add_button_layout.addWidget(self.refresh_button)
         self.add_button_layout.addWidget(self.start_quiz_button)
         
         self.main_layout.addLayout(self.add_button_layout)
@@ -166,16 +160,18 @@ class QuizPage(QWidget):
         self.main_layout.addWidget(self.scrollArea)
 
         # 📌 Load Initial Questions
-        if self.questions:
-            self.load_questions(self.questions)
+        self.load_questions()
 
     def go_back(self):
         """Closes the quiz page widget."""
         self.close()
 
-    def load_questions(self, questions: List[Question]):
+    def load_questions(self):
         """Loads all questions into the list view."""
-        for question in questions:
+
+        self.questions = self.quiz_controller.get_questions(self.quiz.id)
+
+        for question in self.questions:
             # Convert Question object to display format
             question_data = {
                 "question": question.question,
@@ -240,17 +236,15 @@ class QuizPage(QWidget):
         
     def add_question(self, question_data):
         """Adds a new question to the quiz data and UI."""
-        # Convert the question data to a Question object
-        question = Question(
-            id="",  # Empty string for new questions
-            question=question_data["question"],
-            created_at="",
-            quiz_id=self.quiz.id,
-            choices=[Choice(id="", choice=choice["choice"], is_answer=choice["is_answer"], question_id="") for choice in question_data["choices"]]
-        )
-        self.questions.append(question)
-        self.add_question_to_ui(question_data)
-        self.dialog.accept()
+        try:
+            reply = self.quiz_controller.post_question(self.quiz.id, question_data["question"])            
+            question_id = reply["id"]
+            for choice in question_data["choices"]:
+                self.quiz_controller.post_choice(question_id, choice["choice"], choice["is_answer"])
+            self.dialog.accept()  # Close the dialog after successful save
+            self.refresh_questions()
+        except Exception as e:
+            print("Error adding question:", str(e))
 
     def add_question_to_ui(self, question_data):
         """Creates a UI row for a question with answer choices, edit and remove buttons."""
@@ -311,6 +305,12 @@ class QuizPage(QWidget):
         # Clean up existing questions
         self._cleanup_layout(self.questions_layout)
         self.questions_layout.deleteLater()
+        
+        # Create a new questions layout
+        self.questions_layout = QVBoxLayout()
+        self.questions_layout.setSpacing(20)
+        self.layout.addLayout(self.questions_layout)
+        
         # Reload questions
         self.load_questions()
 
@@ -318,15 +318,20 @@ class QuizPage(QWidget):
         """Starts the quiz."""
         # Convert dictionary questions to Question objects
         question_objects = []
-        for question_dict in self.questions:
-            question = Question(
-                id="",  # Empty string for new questions
-                question=question_dict["question"],
-                created_at="",
-                quiz_id=self.quiz.id,
-                choices=[Choice(id="", choice=choice["choice"], is_answer=choice["is_answer"], question_id="") for choice in question_dict["choices"]]
-            )
-            question_objects.append(question)
+        for question in self.questions:
+            # If question is already a Question object, use it directly
+            if isinstance(question, Question):
+                question_objects.append(question)
+            # If it's a dictionary, convert it to a Question object
+            elif isinstance(question, dict):
+                question_obj = Question(
+                    id="",  # Empty string for new questions
+                    question=question["question"],
+                    created_at="",
+                    quiz_id=self.quiz.id,
+                    choices=[Choice(id="", choice=choice["choice"], is_answer=choice["is_answer"], question_id="") for choice in question["choices"]]
+                )
+                question_objects.append(question_obj)
             
         self.quiz_window = QuizStart(questions=question_objects)
         self.quiz_window.show()
