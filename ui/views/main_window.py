@@ -16,6 +16,7 @@ from ui.views.collection import CollectionPage
 from ui.views.statistic import StatPage
 from ui.views.notification import NotificationPage
 from ui.views.community import CommunityPage
+from ui.views.user_profile import UserProfilePage
 
 
 class Ui_MainWindow(object):
@@ -96,12 +97,17 @@ class Ui_MainWindow(object):
         self.page_stats_scroll = self.createScrollPage(StatPage())
         self.page_noti_scroll = self.createScrollPage(NotificationPage())
         self.page_community_scroll = self.createScrollPage(CommunityPage())
+        self.page_profile_scroll = self.createScrollPage(UserProfilePage())
 
         self.contentArea.addWidget(self.page_home_scroll)
         self.contentArea.addWidget(self.page_collection_scroll)
         self.contentArea.addWidget(self.page_stats_scroll)
         self.contentArea.addWidget(self.page_noti_scroll)
         self.contentArea.addWidget(self.page_community_scroll)
+        self.contentArea.addWidget(self.page_profile_scroll)
+
+        # Connect logo to user profile
+        self.logo.mousePressEvent = lambda event: self.contentArea.setCurrentWidget(self.page_profile_scroll)
 
         MainWindow.setCentralWidget(self.centralwidget)
 
