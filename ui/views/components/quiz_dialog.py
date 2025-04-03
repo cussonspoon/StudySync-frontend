@@ -12,6 +12,8 @@ from PySide6.QtWidgets import (
     QRadioButton,
     QButtonGroup,
 )
+from PySide6.QtCore import Qt
+from models.quiz import Question
 
 input_style = """
             QLineEdit {
@@ -93,13 +95,13 @@ radio_btn_style =  """
 
 
 class QuizDialog(QDialog):
-    def __init__(self, quiz=None, parent=None, on_submit=None, dialog_type: str = "edit"):
+    def __init__(self, question: Question = None, parent=None, on_submit=None, dialog_type: str = "edit"):
         super().__init__(parent)
         self.setWindowTitle(dialog_type.capitalize() + " Quiz")
         self.setFixedSize(400, 500)
         self.setStyleSheet("background-color: #f7f7f7;")
         self.setModal(True)
-        self.quiz = quiz
+        self.question = question
         self.on_submit = on_submit
         layout = QVBoxLayout(self)
         layout.setSpacing(5)
@@ -109,7 +111,8 @@ class QuizDialog(QDialog):
         question_header = QLabel("Question:")
         question_header.setStyleSheet(header_style)
         layout.addWidget(question_header)
-        self.title_input = QLineEdit(self.quiz["question"] if self.quiz else "")
+        self.title_input = QLineEdit()
+        self.title_input.setText(self.question.question if self.question else "")
         self.title_input.setStyleSheet(input_style)
         layout.addWidget(self.title_input)
 
@@ -123,11 +126,12 @@ class QuizDialog(QDialog):
 
         # Choice 1 with radio button
         choice1_layout = QHBoxLayout()
-        self.choice_1 = QLineEdit(self.quiz["choices"][0]["choice"] if self.quiz else "")
+        self.choice_1 = QLineEdit()
+        self.choice_1.setText(self.question.choices[0].choice if self.question and self.question.choices and len(self.question.choices) > 0 else "")
         self.choice_1.setStyleSheet(input_style)
         self.radio_1 = QRadioButton()
         self.radio_1.setStyleSheet(radio_btn_style)
-        self.radio_1.setChecked(self.quiz["choices"][0]["is_answer"] if self.quiz else False)
+        self.radio_1.setChecked(self.question.choices[0].is_answer if self.question and self.question.choices and len(self.question.choices) > 0 else False)
         self.answer_group.addButton(self.radio_1)
         choice1_layout.addWidget(self.choice_1)
         choice1_layout.addWidget(self.radio_1)
@@ -135,11 +139,12 @@ class QuizDialog(QDialog):
 
         # Choice 2 with radio button
         choice2_layout = QHBoxLayout()
-        self.choice_2 = QLineEdit(self.quiz["choices"][1]["choice"] if self.quiz else "")
+        self.choice_2 = QLineEdit()
+        self.choice_2.setText(self.question.choices[1].choice if self.question and self.question.choices and len(self.question.choices) > 1 else "")
         self.choice_2.setStyleSheet(input_style)
         self.radio_2 = QRadioButton()
         self.radio_2.setStyleSheet(radio_btn_style)
-        self.radio_2.setChecked(self.quiz["choices"][1]["is_answer"] if self.quiz else False)
+        self.radio_2.setChecked(self.question.choices[1].is_answer if self.question and self.question.choices and len(self.question.choices) > 1 else False)
         self.answer_group.addButton(self.radio_2)
         choice2_layout.addWidget(self.choice_2)
         choice2_layout.addWidget(self.radio_2)
@@ -147,11 +152,12 @@ class QuizDialog(QDialog):
 
         # Choice 3 with radio button
         choice3_layout = QHBoxLayout()
-        self.choice_3 = QLineEdit(self.quiz["choices"][2]["choice"] if self.quiz else "")
+        self.choice_3 = QLineEdit()
+        self.choice_3.setText(self.question.choices[2].choice if self.question and self.question.choices and len(self.question.choices) > 2 else "")
         self.choice_3.setStyleSheet(input_style)
         self.radio_3 = QRadioButton()
         self.radio_3.setStyleSheet(radio_btn_style)
-        self.radio_3.setChecked(self.quiz["choices"][2]["is_answer"] if self.quiz else False)
+        self.radio_3.setChecked(self.question.choices[2].is_answer if self.question and self.question.choices and len(self.question.choices) > 2 else False)
         self.answer_group.addButton(self.radio_3)
         choice3_layout.addWidget(self.choice_3)
         choice3_layout.addWidget(self.radio_3)
@@ -159,11 +165,12 @@ class QuizDialog(QDialog):
 
         # Choice 4 with radio button
         choice4_layout = QHBoxLayout()
-        self.choice_4 = QLineEdit(self.quiz["choices"][3]["choice"] if self.quiz else "")
+        self.choice_4 = QLineEdit()
+        self.choice_4.setText(self.question.choices[3].choice if self.question and self.question.choices and len(self.question.choices) > 3 else "")
         self.choice_4.setStyleSheet(input_style)
         self.radio_4 = QRadioButton()
         self.radio_4.setStyleSheet(radio_btn_style)
-        self.radio_4.setChecked(self.quiz["choices"][3]["is_answer"] if self.quiz else False)
+        self.radio_4.setChecked(self.question.choices[3].is_answer if self.question and self.question.choices and len(self.question.choices) > 3 else False)
         self.answer_group.addButton(self.radio_4)
         choice4_layout.addWidget(self.choice_4)
         choice4_layout.addWidget(self.radio_4)
@@ -182,20 +189,12 @@ class QuizDialog(QDialog):
         layout.addLayout(btn_layout)
 
     def add_question(self):
-        text = self.new_question_input.text().strip()
+        text = self.title_input.text().strip()
         if text:
             self.question_list.addItem(text)
-            self.new_question_input.clear()
+            self.title_input.clear()
         else:
             QMessageBox.warning(self, "Warning", "Question cannot be empty.")
-
-    def remove_question(self):
-        selected_items = self.question_list.selectedItems()
-        if selected_items:
-            for item in selected_items:
-                self.question_list.takeItem(self.question_list.row(item))
-        else:
-            QMessageBox.warning(self, "Warning", "Select a question to remove.")
 
     def get_quiz_data(self):
         return {

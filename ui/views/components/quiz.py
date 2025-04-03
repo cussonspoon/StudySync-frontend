@@ -10,14 +10,16 @@ from PySide6.QtWidgets import (
     QSizePolicy,
     QFrame,
 )
+from models.quiz import Question
+from typing import List
 
 
-class Quiz(QWidget):
-    def __init__(self, parent=None, quiz_data=None):
+class QuizStart(QWidget):
+    def __init__(self, parent=None, questions: List[Question] = None):
         super().__init__()
 
         # Quiz data: questions, options, and correct answers
-        self.quiz_data = quiz_data or []
+        self.questions = questions or []
         self.current_question_index = 0
         self.score = 0
 
@@ -161,13 +163,13 @@ class Quiz(QWidget):
 
     def load_question(self):
         """Load the current question and update the UI."""
-        if self.current_question_index < len(self.quiz_data):
+        if self.current_question_index < len(self.questions):
             self.reset_button.hide()  # Hide reset button while quiz is running
-            question_data = self.quiz_data[self.current_question_index]
-            self.question_label.setText(question_data["question"])
+            question_data = self.questions[self.current_question_index]
+            self.question_label.setText(question_data.question)
 
-            for i, option in enumerate(question_data["choices"]):
-                self.option_buttons[i].setText(option["choice"])
+            for i, option in enumerate(question_data.choices):
+                self.option_buttons[i].setText(option.choice)
                 self.option_buttons[i].setChecked(False)
                 self.option_buttons[i].show()
 
@@ -182,10 +184,10 @@ class Quiz(QWidget):
 
         if selected_button:
             selected_answer = selected_button.text()
-            correct_answer = self.quiz_data[self.current_question_index]["correct_choice"]
+            correct_answer = self.questions[self.current_question_index].choices[0].choice
 
             if selected_answer == correct_answer:
-                self.score += 1  # Increase score if answer is correct
+                self.score += 1  # Increase score if answer is correct  
 
             self.current_question_index += 1  # Move to next question
             self.load_question()
@@ -199,7 +201,7 @@ class Quiz(QWidget):
     def display_result(self):
         """Show final score and hide unnecessary UI elements."""
         self.question_label.setText(
-            f"Quiz Finished! Your score: {self.score}/{len(self.quiz_data)}"
+            f"Quiz Finished! Your score: {self.score}/{len(self.questions)}"
         )
 
         # Hide all option buttons and submit button
@@ -212,7 +214,7 @@ class Quiz(QWidget):
 
     def next_question(self):
         """Move to the next question."""
-        if self.current_question_index < len(self.quiz_data):
+        if self.current_question_index < len(self.questions):
             self.current_question_index += 1
             self.load_question()
 
@@ -221,3 +223,5 @@ class Quiz(QWidget):
         if self.current_question_index > 0:
             self.current_question_index -= 1
             self.load_question()
+    
+    

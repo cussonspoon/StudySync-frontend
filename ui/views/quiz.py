@@ -16,22 +16,45 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import QRect, Qt
 from utils.ui import QuizQuestionCard
 from ..views.components.quiz_dialog import QuizDialog
-from ..views.components.quiz import Quiz
-
-
+from ..views.components.quiz import QuizStart
+from models.quiz import Question, Quiz, Choice
+from controllers.quiz_controller import QuizController
+from typing import List
 
 class QuizPage(QWidget):
-    def __init__(self, parent=None, quiz_data=None):
+    def __init__(self, parent=None, quiz: Quiz = None, quiz_controller: QuizController = None):
         super().__init__(parent)
-        self.quiz_data = quiz_data if quiz_data else []  # Store questions
-        self.init_ui()
+        self.quiz = quiz
+        self.quiz_controller = quiz_controller
+        self.questions = []
         
-       
+        if self.quiz_controller:
+            self.questions = self.quiz_controller.get_questions()
+            self.quiz_controller.set_quiz(self.quiz)
+        else:
+            # Initialize with empty quiz if none provided
+            if not self.quiz:
+                self.quiz = Quiz(
+                    id="",
+                    title="New Quiz",
+                    quiz_type="quiz",
+                    mode="normal",
+                    total_questions=0,
+                    total_likes=0,
+                    total_points=0,
+                    points_to_pass=70,
+                    time_limit=300,
+                    folder_id="",
+                    created_at=""
+                )
+        
+        self.init_ui()
 
     def init_ui(self):
         self.setObjectName("Form")
         self.setStyleSheet("background-color: #FAFAFA;")
         self.setFixedWidth(1200)  # Set fixed width for the entire page
+        self.setFixedHeight(800)
         
         # Set size policy to expand in both directions
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
@@ -60,7 +83,7 @@ class QuizPage(QWidget):
         self.main_layout.addLayout(back_button_container)
 
         # 📌 Quiz Name
-        self.quiz_name = QLabel("Quiz Name")
+        self.quiz_name = QLabel(self.quiz.title)
         self.quiz_name.setObjectName("quiz_name")
         self.quiz_name.setStyleSheet(
             "background-color: rgb(217, 217, 217);\n"
@@ -143,63 +166,89 @@ class QuizPage(QWidget):
         self.main_layout.addWidget(self.scrollArea)
 
         # 📌 Load Initial Questions
-        self.load_questions()
+        if self.questions:
+            self.load_questions(self.questions)
 
     def go_back(self):
-        """Handles the back button click event. Placeholder for navigation logic."""
-        print("Back button clicked!")  # Replace with actual navigation logic
+        """Closes the quiz page widget."""
+        self.close()
 
-    def load_questions(self):
+    def load_questions(self, questions: List[Question]):
         """Loads all questions into the list view."""
-        for question_data in self.quiz_data:
-            print(question_data)
+        for question in questions:
+            # Convert Question object to display format
+            question_data = {
+                "question": question.question,
+                "choices": [
+                    {"choice": choice.choice, "is_answer": choice.is_answer}
+                    for choice in question.choices
+                ]
+            }
             self.add_question_to_ui(question_data)
 
-    def show_question_dialog(self, quiz_data=None, dialog_type: str = "add"):
+    def show_question_dialog(self, question: Question = None, dialog_type: str = "add"):
         """Shows a dialog to create or edit a question."""
+        # Convert dictionary to Question object if needed
+        if isinstance(question, dict):
+            temp_question = Question(
+                id="",  # Empty string for new questions
+                question=question["question"],
+                created_at="",
+                quiz_id=self.quiz.id,
+                choices=[Choice(id="", choice=choice["choice"], is_answer=choice["is_answer"], question_id="") for choice in question["choices"]]
+            )
+            question = temp_question
+            
         if dialog_type == "add":
-            self.dialog = QuizDialog(quiz=quiz_data, parent=self, on_submit=self.add_question, dialog_type=dialog_type)
+            self.dialog = QuizDialog(question=question, parent=self, on_submit=self.add_question, dialog_type=dialog_type)
         elif dialog_type == "edit":
-            self.dialog = QuizDialog(quiz=quiz_data, parent=self, on_submit=self.save_question, dialog_type=dialog_type)
+            self.dialog = QuizDialog(question=question, parent=self, on_submit=self.save_question, dialog_type=dialog_type)
 
         self.dialog.exec_()
-        if self.dialog.result() == QDialog.Accepted:
-            self.load_questions()
 
     def save_question(
-        self, question_text, choices, correct_choice, question_data=None
+        self, question_text, choices, question_data=None
     ):
         """Saves a new question or edits an existing one."""
         if (
             not question_text.strip()
             or any(not choice.strip() for choice in choices)
-            or correct_choice == -1
         ):
             return  # Prevent adding empty questions
 
         if question_data:
             # Editing an existing question
-            question_data["question"] = question_text
-            question_data["choices"] = choices
-            question_data["correct_choice"] = correct_choice
+            question_data.question = question_text
+            question_data.choices = choices
             self.refresh_questions()
         else:
             # Adding a new question
-            new_question_data = {
+            new_question = Question(
+                id="",  # Empty string for new questions
+                question=question_text,
+                created_at="",
+                quiz_id=self.quiz.id,
+                choices=[Choice(id="", choice=choice["choice"], is_answer=choice["is_answer"], question_id="") for choice in choices]
+            )
+            self.questions.append(new_question)
+            self.add_question_to_ui({
                 "question": question_text,
-                "choices": choices,
-                "correct_choice": correct_choice,
-            }
-            self.quiz_data.append(new_question_data)
-            self.add_question_to_ui(new_question_data)
+                "choices": choices
+            })
 
         self.dialog.accept()
         
     def add_question(self, question_data):
         """Adds a new question to the quiz data and UI."""
-        self.quiz_data.append(question_data)
-        # create all choices with quiz_id
-        # create correct choice with question_id
+        # Convert the question data to a Question object
+        question = Question(
+            id="",  # Empty string for new questions
+            question=question_data["question"],
+            created_at="",
+            quiz_id=self.quiz.id,
+            choices=[Choice(id="", choice=choice["choice"], is_answer=choice["is_answer"], question_id="") for choice in question_data["choices"]]
+        )
+        self.questions.append(question)
         self.add_question_to_ui(question_data)
         self.dialog.accept()
 
@@ -208,18 +257,9 @@ class QuizPage(QWidget):
         question_row = QVBoxLayout()
 
         # Question Label
-        print(question_data)
         question_label = QuizQuestionCard(question_data["question"])
         question_label.setStyleSheet("font-size: 18px;")
         question_row.addWidget(question_label)
-
-        # Choices Labels
-        # for i, choice in enumerate(question_data["choices"]):
-        #     choice_label = QLabel(
-        #         f"- {choice} {'✔' if i == question_data['correct_choice'] else ''}"
-        #     )
-        #     choice_label.setStyleSheet("font-size: 18px; padding-left: 10px;")
-        #     question_row.addWidget(choice_label)
 
         # Edit & Remove Buttons
         buttons_layout = QHBoxLayout()
@@ -229,7 +269,7 @@ class QuizPage(QWidget):
         edit_button.setStyleSheet(
             "padding: 8px; font-size: 14px; background-color: blue; color: white; border-radius: 5px;"
         )
-        edit_button.clicked.connect(lambda: self.show_question_dialog(quiz_data=question_data, dialog_type="edit"))
+        edit_button.clicked.connect(lambda: self.show_question_dialog(question=question_data, dialog_type="edit"))
         buttons_layout.addWidget(edit_button)
 
         remove_button = QPushButton("Remove")
@@ -259,7 +299,7 @@ class QuizPage(QWidget):
         """Removes a question from the UI and the data list."""
         # Remove from data
         question_text = question_label.question_text
-        self.quiz_data = [q for q in self.quiz_data if q["question"] != question_text]
+        self.questions = [q for q in self.questions if q.question != question_text]
 
         # Clean up UI
         self._cleanup_layout(question_row)
@@ -276,5 +316,17 @@ class QuizPage(QWidget):
 
     def start_quiz(self):
         """Starts the quiz."""
-        self.quiz_window = Quiz(quiz_data=self.quiz_data)
+        # Convert dictionary questions to Question objects
+        question_objects = []
+        for question_dict in self.questions:
+            question = Question(
+                id="",  # Empty string for new questions
+                question=question_dict["question"],
+                created_at="",
+                quiz_id=self.quiz.id,
+                choices=[Choice(id="", choice=choice["choice"], is_answer=choice["is_answer"], question_id="") for choice in question_dict["choices"]]
+            )
+            question_objects.append(question)
+            
+        self.quiz_window = QuizStart(questions=question_objects)
         self.quiz_window.show()
