@@ -126,7 +126,6 @@ class HorizontalImageScroller(QWidget):
             + 240  # Increased from 220 to account for new spacing
         )
 
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = HorizontalImageScroller()

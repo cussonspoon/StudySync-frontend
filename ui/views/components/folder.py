@@ -4,9 +4,11 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QFrame,
     QLabel,
+    QApplication
 )
 from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt, QSize
+import sys
 
 
 class Folder(QWidget):
@@ -124,3 +126,25 @@ class Folder(QWidget):
         count_layout.addWidget(label_count)
         count_layout.addStretch()
         layout.addLayout(count_layout)
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+
+    window = QWidget()
+    layout = QVBoxLayout(window)
+
+    # Example folder widget
+    folder_widget = Folder(
+        name="My Folder",
+        count="12",
+        date="2025-04-03",
+        avatar_url="static/images/avatar.png",     # Replace with valid path
+        img_url="static/images/folderbg.png",      # Replace with valid path
+    )
+    layout.addWidget(folder_widget)
+
+    window.setWindowTitle("Test Folder Widget")
+    window.resize(300, 300)
+    window.show()
+    sys.exit(app.exec())

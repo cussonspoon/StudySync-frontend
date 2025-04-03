@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
     QScrollArea,
     QStackedWidget,
     QWidget,
+    QMainWindow,
 )
 
 from ui.views.home import HomePage
@@ -16,6 +17,7 @@ from ui.views.collection import CollectionPage
 from ui.views.statistic import StatPage
 from ui.views.notification import NotificationPage
 from ui.views.community import CommunityPage
+from ui.views.folder import FolderDetailPage
 
 
 class Ui_MainWindow(object):
@@ -71,6 +73,27 @@ class Ui_MainWindow(object):
             "community", "community.png", QRect(10, 380, 51, 61)
         )
 
+        # Add test button to sidebar
+        self.test_folder = QPushButton(self.menus)
+        self.test_folder.setText("Test Folder")
+        self.test_folder.setGeometry(QRect(10, 470, 51, 61))
+        self.test_folder.setObjectName("test_folder")
+        self.test_folder.setStyleSheet(
+            """
+            QPushButton {
+                background-color: #87db8a;
+                border: none;
+                border-radius: 10px;
+                padding: 5px;
+                color: black;
+                font-size: 10px;
+            }
+            QPushButton:hover {
+                background-color: #79AD47;
+            }
+        """
+        )
+
         self.bottom = QFrame(self.sidebar)
         self.bottom.setGeometry(QRect(10, 620, 71, 141))
         self.bottom.setFrameShape(QFrame.Shape.NoFrame)
@@ -96,12 +119,22 @@ class Ui_MainWindow(object):
         self.page_stats_scroll = self.createScrollPage(StatPage())
         self.page_noti_scroll = self.createScrollPage(NotificationPage())
         self.page_community_scroll = self.createScrollPage(CommunityPage())
+        self.page_folder_scroll = self.createScrollPage(FolderDetailPage())
 
         self.contentArea.addWidget(self.page_home_scroll)
         self.contentArea.addWidget(self.page_collection_scroll)
         self.contentArea.addWidget(self.page_stats_scroll)
         self.contentArea.addWidget(self.page_noti_scroll)
         self.contentArea.addWidget(self.page_community_scroll)
+        self.contentArea.addWidget(self.page_folder_scroll)
+
+        # Connect back button in FolderDetailPage to return to collection
+        folder_page = self.page_folder_scroll.widget()
+        back_btn = folder_page.findChild(QPushButton)
+        if back_btn:
+            back_btn.clicked.connect(
+                lambda: self.contentArea.setCurrentWidget(self.page_collection_scroll)
+            )
 
         MainWindow.setCentralWidget(self.centralwidget)
 
@@ -157,3 +190,46 @@ class Ui_MainWindow(object):
         self.noti.setText("")
         self.community.setText("")
         self.logout.setText("")
+
+        self.logout.setText("")
+
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+
+        # Connect menu buttons
+        self.ui.home.clicked.connect(
+            lambda: self.ui.contentArea.setCurrentWidget(self.ui.page_home_scroll)
+        )
+        self.ui.collection.clicked.connect(
+            lambda: self.ui.contentArea.setCurrentWidget(self.ui.page_collection_scroll)
+        )
+        self.ui.stats.clicked.connect(
+            lambda: self.ui.contentArea.setCurrentWidget(self.ui.page_stats_scroll)
+        )
+        self.ui.noti.clicked.connect(
+            lambda: self.ui.contentArea.setCurrentWidget(self.ui.page_noti_scroll)
+        )
+        self.ui.community.clicked.connect(
+            lambda: self.ui.contentArea.setCurrentWidget(self.ui.page_community_scroll)
+        )
+
+        # Connect test folder button directly to page switch
+        self.ui.test_folder.clicked.connect(
+            lambda: self.ui.contentArea.setCurrentWidget(self.ui.page_folder_scroll)
+        )
+
+        # Initialize folder page only once
+        self.folder_page = FolderDetailPage()
+        self.ui.page_folder_scroll.setWidget(self.folder_page)
+
+        # Get the CollectionPage widget and connect folder click
+        collection_page = self.ui.page_collection_scroll.widget()
+        collection_page.folder_clicked.connect(self.show_folder_page)
+
+    def show_folder_page(self):
+        print("Showing folder page")
+        self.ui.contentArea.setCurrentWidget(self.ui.page_folder_scroll)

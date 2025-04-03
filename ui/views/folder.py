@@ -45,14 +45,37 @@ class FolderDetailPage(QWidget):
     def __init__(self):
         super().__init__()
 
+        self.setStyleSheet(
+            """
+            QWidget {
+                background-color: #FAFAFA;
+                color: black;  /* Set default text color to black */
+            }
+            QLabel {
+                color: black;  /* Ensure all labels are black */
+            }
+        """
+        )
+
+        # Create main horizontal layout to hold sidebar and content
+        main_horizontal_layout = QHBoxLayout(self)
+        main_horizontal_layout.setContentsMargins(0, 0, 0, 0)
+        main_horizontal_layout.setSpacing(0)
+
+        content_widget = QWidget()
+
+        # Move existing main_layout to content_widget
+        self.main_layout = QVBoxLayout(content_widget)
+        self.main_layout.setAlignment(Qt.AlignTop)
+
         # === Scroll Area ===
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
+        scroll.setWidget(content_widget)
+        scroll.setStyleSheet("QScrollArea { border: none; }")
 
-        content = QWidget()
-        self.main_layout = QVBoxLayout(content)
-        self.main_layout.setAlignment(Qt.AlignTop)
-        scroll.setWidget(content)
+        # Add sidebar and scroll area to main horizontal layout
+        main_horizontal_layout.addWidget(scroll)
 
         # === Banner ===
         banner = QFrame()
@@ -65,10 +88,13 @@ class FolderDetailPage(QWidget):
         )  # Add top margin to center content
 
         self.folder_name = QLabel("📁 Folder Name")
-        self.folder_name.setStyleSheet("font-size: 24px; font-weight: bold;")
+        self.folder_name.setStyleSheet(
+            "font-size: 24px; font-weight: bold; color: black;"
+        )
         self.folder_name.setAlignment(Qt.AlignCenter)
 
         created_label = QLabel("Created Thursday, January 30, 2025")
+        created_label.setStyleSheet("color: black;")
         created_label.setAlignment(Qt.AlignCenter)
 
         upload_btn = QPushButton("📷 Upload image")
@@ -89,11 +115,13 @@ class FolderDetailPage(QWidget):
 
         # === Owner & Collaborators ===
         owner_label = QLabel("Owner")
+        owner_label.setStyleSheet("color: black;")
         owner_tag = Tag("Arhway", "#FBC490")
 
         self.main_layout.addSpacing(20)
 
         collaborator_label = QLabel("Collaborators")
+        collaborator_label.setStyleSheet("color: black;")
         collaborator_layout = QHBoxLayout()
         collaborator_layout.setContentsMargins(0, 0, 0, 0)
         self.collaborators = []
@@ -109,6 +137,7 @@ class FolderDetailPage(QWidget):
         # Visibility and Action Buttons Row
         visibility_row = QHBoxLayout()
         visibility = QLabel("Visibility: Private")
+        visibility.setStyleSheet("color: black;")
         visibility_row.addWidget(visibility)
         visibility_row.addStretch()  # Push buttons to the right
 
@@ -161,10 +190,6 @@ class FolderDetailPage(QWidget):
         self.main_layout.addLayout(visibility_row)
         self.main_layout.addWidget(self.content_area)  # Add content area last
 
-        # === Overall Layout ===
-        layout = QVBoxLayout(self)
-        layout.addWidget(scroll)
-
     def add_collaborator(self):
         # Simple example to add collaborator
         tag = Tag(f"User{len(self.collaborators)+1}", "#D5F5E3", removable=True)
@@ -177,6 +202,9 @@ class FolderDetailPage(QWidget):
     def show_create_dialog(self):
         dialog = CreateModeDialog(self)
         dialog.exec()
+
+    def set_back_callback(self, callback):
+        self.back_btn.clicked.connect(callback)
 
 
 class CreateModeDialog(QDialog):
@@ -256,7 +284,13 @@ class CreateModeDialog(QDialog):
         content_card = QLabel()
         content_card.setFixedHeight(50)
         content_card.setStyleSheet(
-            "background-color: #F2F2F2; border-radius: 5px; padding: 10px; margin: 5px 0px;"
+            """
+            background-color: #F2F2F2;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 5px 0px;
+            color: black;
+            """
         )
 
         # Set content based on mode
@@ -273,16 +307,16 @@ class CreateModeDialog(QDialog):
         self.accept()
 
 
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Folder Detail")
-        self.setMinimumSize(1000, 700)
-        self.setCentralWidget(FolderDetailPage())
+# class MainWindow(QMainWindow):
+#     def __init__(self):
+#         super().__init__()
+#         self.setWindowTitle("Folder Detail")
+#         self.setMinimumSize(1000, 700)
+#         self.setCentralWidget(FolderDetailPage())
 
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec())
+# if __name__ == "__main__":
+#     app = QApplication(sys.argv)
+#     window = MainWindow()
+#     window.show()
+#     sys.exit(app.exec())

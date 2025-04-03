@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QDialogButtonBox,
 )
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt, QSize, Signal
 from PySide6.QtGui import QFont, QPixmap
 from ui.views.components.note_window import popup_notewindow
 from ui.views.components.folder import Folder
@@ -98,6 +98,8 @@ class JoinContestDialog(QDialog):
 
 
 class CollectionPage(QWidget):
+    folder_clicked = Signal(str, int, str)  # Modified to pass name, count, date
+
     def __init__(self):
         super().__init__()
         self.folders = []
@@ -277,7 +279,9 @@ class CollectionPage(QWidget):
             print("No flashcard sets available")
 
     def create_folder_widget(self, name, count, date, avatar_url, img_url):
-        return Folder(name, count, date, avatar_url, img_url)
+        folder = Folder(name, count, date, avatar_url, img_url)
+        folder.mousePressEvent = lambda e: self.on_folder_click(name, count, date)
+        return folder
 
     def showJoinContestDialog(self):
         dialog = JoinContestDialog()
@@ -292,3 +296,7 @@ class CollectionPage(QWidget):
             self.collection_controller.createFolder()
         else:
             print("No collection controller found")  # Debug print
+
+    def on_folder_click(self, name, count, date):
+        print(f"Folder clicked: {name}, count: {count}, date: {date}")  # Debug print
+        self.folder_clicked.emit(name, count, date)
