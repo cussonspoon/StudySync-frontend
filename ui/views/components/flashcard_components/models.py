@@ -46,6 +46,41 @@ SAMPLE_FLASHCARDS = [
                 definition="A programming structure that repeats a block of code",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
+            ),
+            TermWord(
+                id=4,
+                word="Array",
+                definition="A data structure that stores a collection of elements in a contiguous block of memory",
+                created_at=datetime.now(),
+                updated_at=datetime.now()
+            ),
+            TermWord(
+                id=5,
+                word="Object",
+                definition="An instance of a class that bundles data and methods that operate on that data",
+                created_at=datetime.now(),
+                updated_at=datetime.now()
+            ),
+            TermWord(
+                id=6,
+                word="Class",
+                definition="A blueprint for creating objects that defines their properties and behaviors",
+                created_at=datetime.now(),
+                updated_at=datetime.now()
+            ),
+            TermWord(
+                id=7,
+                word="Inheritance",
+                definition="A mechanism that allows a class to inherit properties and methods from another class",
+                created_at=datetime.now(),
+                updated_at=datetime.now()
+            ),
+            TermWord(
+                id=8,
+                word="Polymorphism",
+                definition="The ability of different classes to be treated as instances of the same class through inheritance",
+                created_at=datetime.now(),
+                updated_at=datetime.now()
             )
         ],
         created_at=datetime.now(),
@@ -57,16 +92,37 @@ SAMPLE_FLASHCARDS = [
         description="Essential Python programming concepts",
         terms=[
             TermWord(
-                id=4,
+                id=9,
                 word="List Comprehension",
                 definition="A concise way to create lists based on existing lists",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             ),
             TermWord(
-                id=5,
+                id=10,
                 word="Dictionary",
                 definition="A data structure that stores key-value pairs",
+                created_at=datetime.now(),
+                updated_at=datetime.now()
+            ),
+            TermWord(
+                id=11,
+                word="Generator",
+                definition="A function that returns an iterator using the yield keyword",
+                created_at=datetime.now(),
+                updated_at=datetime.now()
+            ),
+            TermWord(
+                id=12,
+                word="Decorator",
+                definition="A design pattern that allows adding new functionality to existing objects without modifying their structure",
+                created_at=datetime.now(),
+                updated_at=datetime.now()
+            ),
+            TermWord(
+                id=13,
+                word="Lambda",
+                definition="An anonymous function that can have any number of arguments but can only have one expression",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             )

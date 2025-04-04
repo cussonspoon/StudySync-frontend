@@ -35,6 +35,8 @@ class MainWindow(QMainWindow):
 
         # Show login page first
         self.stacked_widget.setCurrentWidget(self.login_page)
+        #Pirate to UI
+        # self.stacked_widget.setCurrentWidget(self.main_ui)
 
         # Controller
         self.controller = WindowController(self.ui)
