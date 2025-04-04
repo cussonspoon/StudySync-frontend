@@ -295,6 +295,7 @@ class FolderService:
             print(f"Error getting public folders: {str(e)}")
             raise
 
+    
 
 # def get_folders():
 #     # response = requests.get("http://127.0.0.1:5000/folders")
