@@ -20,11 +20,11 @@ class FolderService:
         if folder_data is not None:  # Only fetch items if we have a folder
             self._items = self.fetch_items()
 
-    def fetch_items(self):
+    def fetch_items(self, id):
         """Fetch all items in a folder"""
         try:
-            print(f"Fetching items for folder ID: {self._folder.id}")
-            response = requests.get(f"{API_BASE_URL}/folder/{self._folder.id}")
+            print(f"Fetching items for folder ID: {id}")
+            response = requests.get(f"{API_BASE_URL}/folder/{id}")
             print(f"Response status: {response.status_code}")
             print(f"Response content: {response.text}")
 

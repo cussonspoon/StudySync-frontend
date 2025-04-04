@@ -17,6 +17,8 @@ from PySide6.QtGui import QPixmap, QAction, QIcon
 import sys
 from PySide6.QtWidgets import QDialog, QButtonGroup
 from PySide6.QtGui import QFont
+
+from services.folder_service import FolderService
 from .components.mode_card import ContentCard
 from .components.note_window import popup_notewindow
 
@@ -49,6 +51,11 @@ class Tag(QFrame):
 class FolderDetailPage(QWidget):
     def __init__(self):
         super().__init__()
+        self.items = []
+        self.folder_id = None
+        self.folder_total_items = None
+        self.folder_created_at = None
+        self.folder_img_url = None
 
         self.setStyleSheet(
             """
@@ -67,7 +74,6 @@ class FolderDetailPage(QWidget):
 
         # Create main horizontal layout to hold content
         main_horizontal_layout = QHBoxLayout(self)
-        # main_horizontal_layout.setContentsMargins(10, 10, 10, 10)
         main_horizontal_layout.setSpacing(0)
 
         content_widget = QWidget()
@@ -75,13 +81,12 @@ class FolderDetailPage(QWidget):
 
         # Move existing main_layout to content_widget
         self.main_layout = QVBoxLayout(content_widget)
-        # self.main_layout.setContentsMargins(10, 10, 10, 10)
         self.main_layout.setSpacing(2)
 
         # === Scroll Area ===
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setWidget(content_widget)  # Changed to use content_widget directly
+        scroll.setWidget(content_widget)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         # Add scroll area to main horizontal layout
@@ -111,9 +116,9 @@ class FolderDetailPage(QWidget):
         )
         self.folder_name.setAlignment(Qt.AlignCenter)
 
-        created_label = QLabel("Created Thursday, January 30, 2025")
-        created_label.setStyleSheet("color: black;")
-        created_label.setAlignment(Qt.AlignCenter)
+        self.created_label = QLabel("")  # Store as instance variable
+        self.created_label.setStyleSheet("color: black;")
+        self.created_label.setAlignment(Qt.AlignCenter)
 
         upload_btn = QPushButton("📷 Upload image")
         upload_btn.setFixedSize(130, 30)
@@ -122,7 +127,7 @@ class FolderDetailPage(QWidget):
         )
 
         banner_layout.addWidget(self.folder_name)
-        banner_layout.addWidget(created_label)
+        banner_layout.addWidget(self.created_label)
         banner_layout.addWidget(upload_btn, alignment=Qt.AlignRight)
 
         # Add banner to main layout
@@ -236,63 +241,66 @@ class FolderDetailPage(QWidget):
     def set_back_callback(self, callback):
         self.back_btn.clicked.connect(callback)
 
+    def load_items(self):
+        print(f"Loading items for folder ID: {self.folder_id}")  # Debug print
+        # Clear existing items from the content layout
+        while self.content_layout.count():
+            item = self.content_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
 
-# class ContentCard(QFrame):
-#     def __init__(self, name, mode, parent=None):
-#         super().__init__(parent)
-#         self.setFixedHeight(100)
-#         self.setStyleSheet(
-#             """
-#             QFrame {
-#                 background-color: white;
-#                 border: 0px solid #E0E0E0;
-#                 border-radius: 8px;
-#             }
-#             QLabel {
-#                 color: black;
-#                 background: transparent;
-#             }
-#             """
-#         )
+        # Create a FolderService instan ce with None as initial folder data
+        folder_service = FolderService(None)
+        response = folder_service.fetch_items(self.folder_id)
+        print(f"API Response: {response}")  # Debug print
 
-#         # Create horizontal layout for the card
-#         card_layout = QHBoxLayout(self)
-#         card_layout.setContentsMargins(10, 10, 10, 10)
-#         card_layout.setSpacing(15)
+        if not response:
+            print("No response from API")  # Debug print
+            return
 
-#         # Add icon/image placeholder
-#         icon = QLabel()
-#         icon.setFixedSize(80, 80)
-#         icon.setStyleSheet("background-color: #E0E0E0; border-radius: 4px;")
-#         card_layout.addWidget(icon)
+        # Load notes
+        notes = response.get("notes", [])
+        print(f"Found {len(notes)} notes")  # Debug print
+        for note in notes:
+            card = ContentCard(name=note["name"], mode="📄 Note", parent=self)
+            self.content_layout.addWidget(card)
 
-#         # Create vertical layout for text content
-#         text_layout = QVBoxLayout()
-#         text_layout.setSpacing(2)
+        # Load flashcards
+        flashcards = response.get("flashcards", [])
+        print(f"Found {len(flashcards)} flashcards")  # Debug print
+        for flashcard in flashcards:
+            card = ContentCard(name=flashcard["name"], mode="🗂️ Flashcard", parent=self)
+            self.content_layout.addWidget(card)
 
-#         # Add title
-#         title = QLabel(name.upper())
-#         title.setStyleSheet("font-size: 16px; font-weight: bold;")
-#         text_layout.addWidget(title)
+        # Load quizzes
+        quizzes = response.get("quizzes", [])
+        print(f"Found {len(quizzes)} quizzes")  # Debug print
+        for quiz in quizzes:
+            card = ContentCard(
+                name=quiz["title"],  # Note: quizzes use 'title' instead of 'name'
+                mode="❓ Quiz",
+                parent=self,
+            )
+            self.content_layout.addWidget(card)
 
-#         # Add subtitle based on mode
-#         if "Note" in mode:
-#             subtitle = QLabel("Note")
-#         elif "Flashcard" in mode:
-#             subtitle = QLabel("Flashcard set - 0 terms")
-#         elif "Quiz" in mode:
-#             subtitle = QLabel("Quiz - 0 Questions")
-#         subtitle.setStyleSheet("font-size: 14px; color: #666666;")
-#         text_layout.addWidget(subtitle)
+        # Update the total items count
+        self.folder_total_items = len(notes) + len(flashcards) + len(quizzes)
+        print(f"Total items: {self.folder_total_items}")  # Debug print
 
-#         # Add "by User"
-#         by_user = QLabel("by User")
-#         by_user.setStyleSheet("font-size: 12px; color: #666666;")
-#         text_layout.addWidget(by_user)
+    def update_created_label(self):
+        if self.folder_created_at:
+            # Convert the ISO string to a more readable format
+            from datetime import datetime
 
-#         # Add text layout to card
-#         card_layout.addLayout(text_layout)
-#         card_layout.addStretch()
+            try:
+                date = datetime.fromisoformat(
+                    self.folder_created_at.replace("Z", "+00:00")
+                )
+                formatted_date = date.strftime("%B %d, %Y")
+                self.created_label.setText(f"Created on {formatted_date}")
+            except Exception as e:
+                print(f"Error formatting date: {e}")
+                self.created_label.setText(f"Created on {self.folder_created_at}")
 
 
 class CreateModeDialog(QDialog):
@@ -367,12 +375,7 @@ class CreateModeDialog(QDialog):
 
         mode = selected_button.text()
         parent = self.parent()
-
-        # Create new content card using ContentCard class
-        content_card = ContentCard(name, mode, parent)
-
-        # Insert at the top of the content area
-        parent.content_layout.insertWidget(0, content_card)
+        folder_id = parent.folder_id  # Get the current folder's ID
 
         # Show appropriate window based on mode
         if "Note" in mode:
@@ -381,10 +384,41 @@ class CreateModeDialog(QDialog):
             note_dialog.title_input.setPlainText(name)  # Set the title
             if note_dialog.exec():
                 note_data = note_dialog.getNoteData()
-                print("Note Data:", note_data)  # You can handle the note data here
+                # Create note in backend
+                try:
+                    folder_service = FolderService(None)
+                    created_note = folder_service.create_note(
+                        folder_id, name, note_data
+                    )
+                    if created_note:
+                        # Only add to UI if backend creation was successful
+                        card = ContentCard(name=name, mode="📄 Note", parent=parent)
+                        parent.content_layout.insertWidget(0, card)
+                except Exception as e:
+                    print(f"Error creating note: {e}")
+
         elif "Flashcard" in mode:
-            pass
+            try:
+                folder_service = FolderService(None)
+                created_flashcard = folder_service.create_flashcard(folder_id, name)
+                if created_flashcard:
+                    # Only add to UI if backend creation was successful
+                    card = ContentCard(name=name, mode="🗂️ Flashcard", parent=parent)
+                    parent.content_layout.insertWidget(0, card)
+            except Exception as e:
+                print(f"Error creating flashcard: {e}")
+
         elif "Quiz" in mode:
-            pass
-        else:
-            self.accept()
+            try:
+                folder_service = FolderService(None)
+                created_quiz = folder_service.create_quiz(folder_id, name)
+                if created_quiz:
+                    # Only add to UI if backend creation was successful
+                    card = ContentCard(name=name, mode="❓ Quiz", parent=parent)
+                    parent.content_layout.insertWidget(0, card)
+            except Exception as e:
+                print(f"Error creating quiz: {e}")
+
+        # Refresh the folder's items to ensure we're showing the correct state
+        parent.load_items()
+        self.accept()

@@ -62,6 +62,16 @@ class Collection_Controller:
         # Use the UI's contentArea to switch pages
         self.ui.contentArea.setCurrentWidget(self.ui.page_folder_scroll)
         folder_page = self.ui.page_folder_scroll.widget()
+
         folder_page.folder_name.setText(f"📁 {folder.name}")
+        folder_page.folder_id = folder.id
+        folder_page.folder_total_items = folder.count
+        folder_page.folder_created_at = folder.date
+        folder_page.folder_img_url = folder.img_url
+        folder_page.update_created_label()
+
+        # Load the folder's items after setting up the page
+        folder_page.load_items()
+
         self.ui.page_folder_scroll.show()
         self.ui.page_folder_scroll.widget().show()
