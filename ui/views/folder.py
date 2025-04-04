@@ -10,13 +10,15 @@ from PySide6.QtWidgets import (
     QFrame,
     QLineEdit,
     QMenu,
-    QSizePolicy
+    QSizePolicy,
 )
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QPixmap, QAction, QIcon
 import sys
 from PySide6.QtWidgets import QDialog, QButtonGroup
 from PySide6.QtGui import QFont
+from .components.mode_card import ContentCard
+from .components.note_window import popup_notewindow
 
 
 class Tag(QFrame):
@@ -95,7 +97,17 @@ class FolderDetailPage(QWidget):
 
         self.folder_name = QLabel("📁 Folder Name")
         self.folder_name.setStyleSheet(
-            "font-size: 24px; font-weight: bold; color: black;"
+            """
+            QLabel {
+                font-size: 24px;
+                font-weight: bold;
+                color: black;
+                margin-top: 40px;
+                margin-bottom: 0px;
+                margin-left: 0px;
+                margin-right: 0px;
+            }
+            """
         )
         self.folder_name.setAlignment(Qt.AlignCenter)
 
@@ -120,7 +132,13 @@ class FolderDetailPage(QWidget):
         self.content_area = QWidget()
         self.content_layout = QVBoxLayout(self.content_area)
         self.content_layout.setAlignment(Qt.AlignTop)
-        self.content_layout.setSpacing(5)
+        # self.content_layout.setSpacing(5)
+
+        # === Information Section ===
+        info_section = QWidget()
+        info_layout = QVBoxLayout(info_section)
+        info_layout.setSpacing(10)
+        info_layout.setContentsMargins(0, 0, 0, 0)
 
         # === Owner & Collaborators ===
         owner_label = QLabel("Owner")
@@ -189,15 +207,17 @@ class FolderDetailPage(QWidget):
         visibility_row.addWidget(plus_btn)
         plus_btn.clicked.connect(self.show_create_dialog)
 
-        # Add to main layout with adjusted spacing
-        self.main_layout.addWidget(owner_label)
-        self.main_layout.addWidget(owner_tag)
-        self.main_layout.addSpacing(5)
-        self.main_layout.addWidget(collaborator_label)
-        self.main_layout.addLayout(collaborator_layout)
+        # Add all components to info layout
+        info_layout.addWidget(owner_label)
+        info_layout.addWidget(owner_tag)
+        info_layout.addSpacing(5)
+        info_layout.addWidget(collaborator_label)
+        info_layout.addLayout(collaborator_layout)
+        info_layout.addSpacing(5)
+        info_layout.addLayout(visibility_row)
 
-        self.main_layout.addSpacing(5)
-        self.main_layout.addLayout(visibility_row)
+        # Add info section to main layout
+        self.main_layout.addWidget(info_section)
         self.main_layout.addWidget(self.content_area)
 
     def add_collaborator(self):
@@ -215,6 +235,64 @@ class FolderDetailPage(QWidget):
 
     def set_back_callback(self, callback):
         self.back_btn.clicked.connect(callback)
+
+
+# class ContentCard(QFrame):
+#     def __init__(self, name, mode, parent=None):
+#         super().__init__(parent)
+#         self.setFixedHeight(100)
+#         self.setStyleSheet(
+#             """
+#             QFrame {
+#                 background-color: white;
+#                 border: 0px solid #E0E0E0;
+#                 border-radius: 8px;
+#             }
+#             QLabel {
+#                 color: black;
+#                 background: transparent;
+#             }
+#             """
+#         )
+
+#         # Create horizontal layout for the card
+#         card_layout = QHBoxLayout(self)
+#         card_layout.setContentsMargins(10, 10, 10, 10)
+#         card_layout.setSpacing(15)
+
+#         # Add icon/image placeholder
+#         icon = QLabel()
+#         icon.setFixedSize(80, 80)
+#         icon.setStyleSheet("background-color: #E0E0E0; border-radius: 4px;")
+#         card_layout.addWidget(icon)
+
+#         # Create vertical layout for text content
+#         text_layout = QVBoxLayout()
+#         text_layout.setSpacing(2)
+
+#         # Add title
+#         title = QLabel(name.upper())
+#         title.setStyleSheet("font-size: 16px; font-weight: bold;")
+#         text_layout.addWidget(title)
+
+#         # Add subtitle based on mode
+#         if "Note" in mode:
+#             subtitle = QLabel("Note")
+#         elif "Flashcard" in mode:
+#             subtitle = QLabel("Flashcard set - 0 terms")
+#         elif "Quiz" in mode:
+#             subtitle = QLabel("Quiz - 0 Questions")
+#         subtitle.setStyleSheet("font-size: 14px; color: #666666;")
+#         text_layout.addWidget(subtitle)
+
+#         # Add "by User"
+#         by_user = QLabel("by User")
+#         by_user.setStyleSheet("font-size: 12px; color: #666666;")
+#         text_layout.addWidget(by_user)
+
+#         # Add text layout to card
+#         card_layout.addLayout(text_layout)
+#         card_layout.addStretch()
 
 
 class CreateModeDialog(QDialog):
@@ -290,28 +368,19 @@ class CreateModeDialog(QDialog):
         mode = selected_button.text()
         parent = self.parent()
 
-        # Create new content card
-        content_card = QLabel()
-        content_card.setFixedHeight(50)
-        content_card.setStyleSheet(
-            """
-            background-color: #F2F2F2;
-            border-radius: 5px;
-            padding: 10px;
-            margin: 5px 0px;
-            color: black;
-            """
-        )
-
-        # Set content based on mode
-        if "Note" in mode:
-            content_card.setText(f"{name}")
-        elif "Flashcard" in mode:
-            content_card.setText(f"{name} - 0 terms")
-        elif "Quiz" in mode:
-            content_card.setText(f"{name} - 0 Questions")
+        # Create new content card using ContentCard class
+        content_card = ContentCard(name, mode, parent)
 
         # Insert at the top of the content area
         parent.content_layout.insertWidget(0, content_card)
 
-        self.accept()
+        # Show appropriate window based on mode
+        if "Note" in mode:
+            self.accept()  # Close the create dialog first
+            note_dialog = popup_notewindow(parent)
+            note_dialog.title_input.setPlainText(name)  # Set the title
+            if note_dialog.exec():
+                note_data = note_dialog.getNoteData()
+                print("Note Data:", note_data)  # You can handle the note data here
+        else:
+            self.accept()
