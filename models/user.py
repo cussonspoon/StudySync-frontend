@@ -6,9 +6,9 @@ from typing import Optional
 class User:
     """User model class to handle user data."""
     id: str
-    name: str
     username: str
     created_at: str
+    profile_img: str
     password: Optional[str] = None  # Optional because we don't want to store passwords in memory
 
     @classmethod
@@ -16,9 +16,9 @@ class User:
         """Creates a User instance from a dictionary."""
         return cls(
             id=data.get("id", ""),
-            name=data.get("name", ""),
             username=data.get("username", ""),
             created_at=data.get("created_at", ""),
+            profile_img=data.get("profile_img", ""),
             password=data.get("password")  # Optional
         )
 
@@ -26,9 +26,9 @@ class User:
         """Converts the User instance to a dictionary."""
         data = {
             "id": self.id,
-            "name": self.name,
             "username": self.username,
-            "created_at": self.created_at
+            "created_at": self.created_at,
+            "profile_img": self.profile_img
         }
         if self.password:
             data["password"] = self.password
@@ -36,7 +36,7 @@ class User:
 
     def __str__(self) -> str:
         """String representation of the User."""
-        return f"User(id={self.id}, name={self.name}, username={self.username})"
+        return f"User(id={self.id}, username={self.username}, profile_img={self.profile_img}x)"
 
     @property
     def created_at_datetime(self) -> datetime:

@@ -7,165 +7,191 @@ from PySide6.QtWidgets import (
     QFormLayout,
     QMessageBox,
     QStackedWidget,
+    QFrame,
+    QCheckBox,
+    QDialog,
 )
-from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QFont
+from PySide6.QtCore import Qt, Signal, QDir
+from PySide6.QtGui import QFont, QPixmap
 from controllers.user_controller import UserController
 from utils.global_vars import set_current_user
 
 
 class LoginPage(QWidget):
-    login_successful = Signal()  # Define the signal at the class level
+    login_successful = Signal()
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self):
+        super().__init__()
         self.user_controller = UserController()
-        self.setup_ui()
+        self.setupUi()
 
-    def setup_ui(self):
-        """Sets up the login page UI."""
-        self.layout = QVBoxLayout()
-        self.layout.setAlignment(Qt.AlignCenter)
-        self.layout.setSpacing(20)
-        self.setLayout(self.layout)
+    def setupUi(self):
+        """Set up the login page UI."""
+        # Main layout
+        self.main_layout = QVBoxLayout(self)
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.main_layout.setSpacing(0)
 
-        # Create stacked widget for login and register forms
-        self.stacked_widget = QStackedWidget()
-        self.layout.addWidget(self.stacked_widget)
+        # Create a container for the login form
+        self.container = QFrame(self)
+        self.container.setObjectName("loginContainer")
+        self.container.setStyleSheet("""
+            QFrame#loginContainer {
+                background-color: #FAFAFA;
+                border-radius: 20px;
+                padding: 40px;
+            }
+        """)
 
-        # Create login page
-        self.login_page = QWidget()
-        self.login_layout = QVBoxLayout()
-        self.login_layout.setAlignment(Qt.AlignCenter)
-        self.login_layout.setSpacing(20)
-        self.login_page.setLayout(self.login_layout)
+        # Container layout
+        self.container_layout = QVBoxLayout(self.container)
+        self.container_layout.setSpacing(30)
+        self.container_layout.setAlignment(Qt.AlignCenter)
+
+        # Logo
+        self.logo = QLabel(self.container)
+        self.logo.setFixedSize(200, 200)
+        img_path = QDir.currentPath() + "/static/images/logo.png"
+        self.logo.setPixmap(QPixmap(img_path))
+        self.logo.setStyleSheet("""
+            QLabel#logo {
+                background-color: #FAFAFA;
+            }
+        """)
+        self.logo.setScaledContents(True)
+        self.logo.setAlignment(Qt.AlignCenter)
+        self.container_layout.addWidget(self.logo)
 
         # Title
-        title = QLabel("StudySync")
-        title.setFont(QFont("Arial", 24, QFont.Bold))
-        title.setAlignment(Qt.AlignCenter)
-        self.login_layout.addWidget(title)
+        self.title = QLabel("Welcome to StudySync", self.container)
+        self.title.setObjectName("loginTitle")
+        self.title.setStyleSheet("""
+            QLabel#loginTitle {
+                font-size: 32px;
+                font-weight: bold;
+                color: #333;
+                text-align: center;
+                background-color: #FAFAFA;
+            }
+        """)
+        self.container_layout.addWidget(self.title)
 
-        # Login form
-        login_form = QFormLayout()
-        login_form.setSpacing(10)
-        login_form.setAlignment(Qt.AlignCenter)
+        # Subtitle
+        self.subtitle = QLabel("Sign in to continue", self.container)
+        self.subtitle.setObjectName("loginSubtitle")
+        self.subtitle.setStyleSheet("""
+            QLabel#loginSubtitle {
+                font-size: 16px;
+                color: #666;
+                text-align: center;
+                background-color: #FAFAFA;
+            }
+        """)
+        self.container_layout.addWidget(self.subtitle)
 
-        self.username_input = QLineEdit()
+        # Form layout
+        self.form_layout = QVBoxLayout()
+        self.form_layout.setSpacing(20)
+
+        # Username input
+        self.username_input = QLineEdit(self.container)
+        self.username_input.setObjectName("usernameInput")
         self.username_input.setPlaceholderText("Username")
-        self.username_input.setFixedWidth(300)
-        login_form.addRow("Username:", self.username_input)
+        self.username_input.setStyleSheet("""
+            QLineEdit#usernameInput {
+                padding: 15px;
+                border: 2px solid #E0E0E0;
+                border-radius: 10px;
+                font-size: 16px;
+                background-color: #FAFAFA;
+            }
+            QLineEdit#usernameInput:focus {
+                border-color: #4A90E2;
+                background-color: white;
+            }
+        """)
+        self.form_layout.addWidget(self.username_input)
 
-        self.password_input = QLineEdit()
+        # Password input
+        self.password_input = QLineEdit(self.container)
+        self.password_input.setObjectName("passwordInput")
         self.password_input.setPlaceholderText("Password")
         self.password_input.setEchoMode(QLineEdit.Password)
-        self.password_input.setFixedWidth(300)
-        login_form.addRow("Password:", self.password_input)
+        self.password_input.setStyleSheet("""
+            QLineEdit#passwordInput {
+                padding: 15px;
+                border: 2px solid #E0E0E0;
+                border-radius: 10px;
+                font-size: 16px;
+                background-color: #FAFAFA;
+            }
+            QLineEdit#passwordInput:focus {
+                border-color: #4A90E2;
+                background-color: white;
+            }
+        """)
+        self.form_layout.addWidget(self.password_input)
 
-        self.login_layout.addLayout(login_form)
-
-        # Login button container
-        login_button_container = QWidget()
-        login_button_layout = QVBoxLayout(login_button_container)
-        login_button_layout.setAlignment(Qt.AlignCenter)
-
-        self.login_button = QPushButton("Login")
-        self.login_button.setFixedWidth(300)
-        self.login_button.setStyleSheet(
-            "padding: 10px; font-size: 16px; background-color: #4CAF50; color: white; border-radius: 5px;"
-        )
+        # Login button
+        self.login_button = QPushButton("Sign In", self.container)
+        self.login_button.setObjectName("loginButton")
+        self.login_button.setStyleSheet("""
+            QPushButton#loginButton {
+                background-color: #4A90E2;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                padding: 15px;
+                font-size: 16px;
+                font-weight: bold;
+            }
+            QPushButton#loginButton:hover {
+                background-color: #357ABD;
+            }
+            QPushButton#loginButton:pressed {
+                background-color: #2C6AA3;
+            }
+        """)
         self.login_button.clicked.connect(self.handle_login)
-        login_button_layout.addWidget(self.login_button)
+        self.form_layout.addWidget(self.login_button)
 
-        self.login_layout.addWidget(login_button_container)
+        # Register link
+        self.register_link = QPushButton("Don't have an account? Sign up", self.container)
+        self.register_link.setObjectName("registerLink")
+        self.register_link.setStyleSheet("""
+            QPushButton#registerLink {
+                background-color: transparent;
+                color: #4A90E2;
+                border: none;
+                font-size: 14px;
+            }
+            QPushButton#registerLink:hover {
+                color: #357ABD;
+                text-decoration: underline;
+            }
+        """)
+        self.register_link.clicked.connect(self.show_register_dialog)
+        self.form_layout.addWidget(self.register_link, alignment=Qt.AlignCenter)
 
-        # Register link container
-        register_link_container = QWidget()
-        register_link_layout = QVBoxLayout(register_link_container)
-        register_link_layout.setAlignment(Qt.AlignCenter)
+        self.container_layout.addLayout(self.form_layout)
+        self.main_layout.addWidget(self.container, alignment=Qt.AlignCenter)
 
-        self.register_link = QPushButton("Don't have an account? Register")
-        self.register_link.setStyleSheet("color: #4CAF50; border: none;")
-        self.register_link.clicked.connect(self.show_register_form)
-        register_link_layout.addWidget(self.register_link)
-
-        self.login_layout.addWidget(register_link_container)
-
-        # Create register page
-        self.register_page = QWidget()
-        self.register_layout = QVBoxLayout()
-        self.register_layout.setAlignment(Qt.AlignCenter)
-        self.register_layout.setSpacing(20)
-        self.register_page.setLayout(self.register_layout)
-
-        # Register title
-        register_title = QLabel("Create Account")
-        register_title.setFont(QFont("Arial", 24, QFont.Bold))
-        register_title.setAlignment(Qt.AlignCenter)
-        self.register_layout.addWidget(register_title)
-
-        # Register form
-        register_form = QFormLayout()
-        register_form.setSpacing(10)
-        register_form.setAlignment(Qt.AlignCenter)
-
-        self.register_username_input = QLineEdit()
-        self.register_username_input.setPlaceholderText("Username")
-        self.register_username_input.setFixedWidth(300)
-        register_form.addRow("Username:", self.register_username_input)
-
-        self.register_password_input = QLineEdit()
-        self.register_password_input.setPlaceholderText("Password")
-        self.register_password_input.setEchoMode(QLineEdit.Password)
-        self.register_password_input.setFixedWidth(300)
-        register_form.addRow("Password:", self.register_password_input)
-
-        self.register_layout.addLayout(register_form)
-
-        # Register button container
-        register_button_container = QWidget()
-        register_button_layout = QVBoxLayout(register_button_container)
-        register_button_layout.setAlignment(Qt.AlignCenter)
-
-        self.register_button = QPushButton("Register")
-        self.register_button.setFixedWidth(300)
-        self.register_button.setStyleSheet(
-            "padding: 10px; font-size: 16px; background-color: #4CAF50; color: white; border-radius: 5px;"
-        )
-        self.register_button.clicked.connect(self.handle_register)
-        register_button_layout.addWidget(self.register_button)
-
-        self.register_layout.addWidget(register_button_container)
-
-        # Login link container
-        login_link_container = QWidget()
-        login_link_layout = QVBoxLayout(login_link_container)
-        login_link_layout.setAlignment(Qt.AlignCenter)
-
-        self.login_link = QPushButton("Already have an account? Login")
-        self.login_link.setStyleSheet("color: #4CAF50; border: none;")
-        self.login_link.clicked.connect(self.show_login_form)
-        login_link_layout.addWidget(self.login_link)
-
-        self.register_layout.addWidget(login_link_container)
-
-        # Add pages to stacked widget
-        self.stacked_widget.addWidget(self.login_page)
-        self.stacked_widget.addWidget(self.register_page)
+        # Set background
+        self.setStyleSheet("""
+            QWidget {
+                background-color: #F8F6F1;
+            }
+        """)
 
     def handle_login(self):
-        """Handles the login process."""
+        """Handle login button click."""
         username = self.username_input.text()
         password = self.password_input.text()
 
-        if not username or not password:
-            QMessageBox.warning(
-                self, "Error", "Please enter both username and password"
-            )
-            return
-
         try:
+            # Attempt login using UserController
             user = self.user_controller.login(username, password)
+
             if user:
                 # Debug print to check user attributes
                 print(
@@ -184,44 +210,207 @@ class LoginPage(QWidget):
                 )
                 self.login_successful.emit()
             else:
-                QMessageBox.warning(self, "Error", "Invalid username or password")
+                # Show error message
+                QMessageBox.warning(self, "Login Failed", "Invalid username or password")
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Login failed: {str(e)}")
+            # Show error message
+            QMessageBox.warning(self, "Error", str(e))
+
+    def show_register_dialog(self):
+        """Show the register dialog."""
+        dialog = RegisterDialog(self)
+        if dialog.exec():
+            # Registration successful, attempt login
+            self.username_input.setText(dialog.username_input.text())
+            self.password_input.setText(dialog.password_input.text())
+            self.handle_login()
+
+class RegisterDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.user_controller = UserController()
+        self.setupUi()
+
+    def setupUi(self):
+        """Set up the register dialog UI."""
+        self.setWindowTitle("Create Account")
+        self.setFixedSize(400, 450)  # Reduced height since we removed the terms checkbox
+        self.setStyleSheet("""
+            QDialog {
+                background-color: #FAFAFA;
+            }
+        """)
+
+        # Main layout
+        self.main_layout = QVBoxLayout(self)
+        self.main_layout.setContentsMargins(40, 40, 40, 40)
+        self.main_layout.setSpacing(30)
+
+        # Title
+        self.title = QLabel("Create Account", self)
+        self.title.setObjectName("registerTitle")
+        self.title.setStyleSheet("""
+            QLabel#registerTitle {
+                font-size: 24px;
+                font-weight: bold;
+                color: #333;
+                text-align: center;
+                background-color: #FAFAFA;
+            }
+        """)
+        self.main_layout.addWidget(self.title)
+
+        # Subtitle
+        self.subtitle = QLabel("Join StudySync today", self)
+        self.subtitle.setObjectName("registerSubtitle")
+        self.subtitle.setStyleSheet("""
+            QLabel#registerSubtitle {
+                font-size: 16px;
+                color: #666;
+                text-align: center;
+                background-color: #FAFAFA;
+            }
+        """)
+        self.main_layout.addWidget(self.subtitle)
+
+        # Form layout
+        self.form_layout = QVBoxLayout()
+        self.form_layout.setSpacing(5)
+        self.form_layout.setAlignment(Qt.AlignCenter)
+        self.form_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Username input
+        self.username_input = QLineEdit(self)
+        self.username_input.setObjectName("usernameInput")
+        self.username_input.setPlaceholderText("Username")
+        self.username_input.setStyleSheet("""
+            QLineEdit#usernameInput {
+                padding: 15px;
+                border: 2px solid #E0E0E0;
+                border-radius: 10px;
+                font-size: 16px;
+                background-color: #FAFAFA;
+            }
+            QLineEdit#usernameInput:focus {
+                border-color: #4A90E2;
+                background-color: white;
+            }
+        """)
+        self.form_layout.addWidget(self.username_input)
+
+        # Password input
+        self.password_input = QLineEdit(self)
+        self.password_input.setObjectName("passwordInput")
+        self.password_input.setPlaceholderText("Password")
+        self.password_input.setEchoMode(QLineEdit.Password)
+        self.password_input.setStyleSheet("""
+            QLineEdit#passwordInput {
+                padding: 15px;
+                border: 2px solid #E0E0E0;
+                border-radius: 10px;
+                font-size: 16px;
+                background-color: #FAFAFA;
+            }
+            QLineEdit#passwordInput:focus {
+                border-color: #4A90E2;
+                background-color: white;
+            }
+        """)
+        self.form_layout.addWidget(self.password_input)
+
+        # Confirm password input
+        self.confirm_password_input = QLineEdit(self)
+        self.confirm_password_input.setObjectName("confirmPasswordInput")
+        self.confirm_password_input.setPlaceholderText("Confirm Password")
+        self.confirm_password_input.setEchoMode(QLineEdit.Password)
+        self.confirm_password_input.setStyleSheet("""
+            QLineEdit#confirmPasswordInput {
+                padding: 15px;
+                border: 2px solid #E0E0E0;
+                border-radius: 10px;
+                font-size: 16px;
+                background-color: #FAFAFA;
+            }
+            QLineEdit#confirmPasswordInput:focus {
+                border-color: #4A90E2;
+                background-color: white;
+            }
+        """)
+        self.form_layout.addWidget(self.confirm_password_input)
+
+        self.main_layout.addLayout(self.form_layout)
+
+        # Register button
+        self.register_button = QPushButton("Create Account", self)
+        self.register_button.setObjectName("registerButton")
+        self.register_button.setStyleSheet("""
+            QPushButton#registerButton {
+                background-color: #4A90E2;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                padding: 15px;
+                font-size: 16px;
+                font-weight: bold;
+            }
+            QPushButton#registerButton:hover {
+                background-color: #357ABD;
+            }
+            QPushButton#registerButton:pressed {
+                background-color: #2C6AA3;
+            }
+        """)
+        self.register_button.clicked.connect(self.handle_register)
+        self.main_layout.addWidget(self.register_button)
+
+        # Login link
+        self.login_link = QPushButton("Already have an account? Sign in", self)
+        self.login_link.setObjectName("loginLink")
+        self.login_link.setStyleSheet("""
+            QPushButton#loginLink {
+                background-color: transparent;
+                color: #4A90E2;
+                border: none;
+                font-size: 14px;
+            }
+            QPushButton#loginLink:hover {
+                color: #357ABD;
+                text-decoration: underline;
+            }
+        """)
+        self.login_link.clicked.connect(self.reject)
+        self.main_layout.addWidget(self.login_link, alignment=Qt.AlignCenter)
 
     def handle_register(self):
-        """Handles the registration process."""
-        username = self.register_username_input.text()
-        password = self.register_password_input.text()
+        """Handle register button click."""
+        username = self.username_input.text()
+        password = self.password_input.text()
+        confirm_password = self.confirm_password_input.text()
 
-        if not username or not password:
-            QMessageBox.warning(
-                self, "Error", "Please enter both username and password"
-            )
+        # Validate inputs
+        if not all([username, password, confirm_password]):
+            QMessageBox.warning(self, "Error", "Please fill in all fields")
+            return
+
+        if password != confirm_password:
+            QMessageBox.warning(self, "Error", "Passwords do not match")
             return
 
         try:
+            # Attempt registration using UserController
             user = self.user_controller.register(username, password)
+
             if user:
                 # Store user data in global
                 set_current_user(
                     {"id": user.id, "username": user.username, "email": user.email}
                 )
                 self.login_successful.emit()
+                # Registration successful
+                self.accept()
             else:
-                QMessageBox.warning(self, "Error", "Registration failed")
+                # Show error message
+                QMessageBox.warning(self, "Registration Failed", "Failed to create account")
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Registration failed: {str(e)}")
-
-    def show_register_form(self):
-        self.stacked_widget.setCurrentIndex(1)
-        self.username_input.hide()
-        self.password_input.hide()
-        self.login_button.hide()
-        self.register_link.hide()
-
-    def show_login_form(self):
-        self.stacked_widget.setCurrentIndex(0)
-        self.username_input.show()
-        self.password_input.show()
-        self.login_button.show()
-        self.register_link.show()
+            # Show error message
+            QMessageBox.warning(self, "Error", str(e))

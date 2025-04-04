@@ -23,6 +23,7 @@ from ui.views.components.flashcard_components.models import (
 )
 from datetime import datetime
 from utils.global_vars import get_current_user
+from ui.views.components.flashcard_components.flashcard_edit import FlashcardEditPage
 
 
 class JoinContestDialog(QDialog):
@@ -223,6 +224,17 @@ class CollectionPage(QWidget):
         toggle_layout.addWidget(public_button)
         toggle_layout.addStretch(1)
 
+        placeholder_note_button = QPushButton("Placeholder Note")
+        placeholder_note_button.clicked.connect(self.showNoteWindow)
+        main_layout.addWidget(placeholder_note_button)
+
+        
+        # Store grid_layout as instance variable so we can update it
+        self.grid_layout = QGridLayout()
+        self.grid_layout.setSpacing(10)
+        self.grid_layout.setVerticalSpacing(30)
+        main_layout.addLayout(self.grid_layout)
+
         # Create add folder button
         add_folder_button = QPushButton("+")
         add_folder_button.setStyleSheet(
@@ -260,6 +272,32 @@ class CollectionPage(QWidget):
 
         main_layout.addStretch(1)
 
+        # Add flashcard button
+        create_flashcard_btn = QPushButton("Create Flashcard")
+        create_flashcard_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #007AFF;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                padding: 10px 20px;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #0056b3;
+            }
+        """)
+        create_flashcard_btn.clicked.connect(self.showFlashcardEdit)
+        main_layout.addWidget(create_flashcard_btn)
+
+        # Existing flashcard button
+        flashcard_btn = QPushButton("View Flashcard")
+        flashcard_btn.clicked.connect(self.showFlashcardWindow)
+        main_layout.addWidget(flashcard_btn)
+
+        main_layout.addStretch()
+
     def showNoteWindow(self):
         note_dialog = popup_notewindow(self)
         if note_dialog.exec():
@@ -267,18 +305,50 @@ class CollectionPage(QWidget):
             print("Note Data:", note_data)  # You can handle the note data here
 
     def showFlashcardWindow(self):
-        # Get sample flashcards from the API
         flashcards = get_sample_flashcards()
-
         if flashcards:
-            # Create and show the flashcard window with the first flashcard set
-            flashcard_dialog = popup_flashcardwindow(flashcards[0], self)
-            if flashcard_dialog.exec():
-                # Get the results when the dialog is closed
-                results = flashcard_dialog.getFlashcardData()
-                print("Flashcard Results:", results)
+            dialog = popup_flashcardwindow(flashcards[0])
+            if dialog.exec():
+                print("Flashcard window closed with:", dialog.results)
         else:
-            print("No flashcard sets available")
+            print("No flashcards available")
+
+    def showFlashcardEdit(self):
+        # Create and show flashcard edit page
+        flashcard_edit = FlashcardEditPage()
+        
+        # Get the main window
+        main_window = self.window()
+        if main_window:
+            # Get the content area widget
+            content_area = main_window.findChild(QWidget, "contentArea")
+            if content_area and hasattr(content_area, "addWidget"):
+                # Add flashcard edit page to content area
+                content_area.addWidget(flashcard_edit)
+                # Switch to flashcard edit page
+                content_area.setCurrentWidget(flashcard_edit)
+                # Connect back button to return to collection page
+                flashcard_edit.back_button.clicked.connect(lambda: self.returnToCollection(flashcard_edit))
+            else:
+                print("Error: Content area not found or is not a stacked widget")
+        else:
+            print("Error: No main window found")
+
+    def returnToCollection(self, flashcard_edit_page):
+        # Get the main window
+        main_window = self.window()
+        if main_window:
+            # Get the content area widget
+            content_area = main_window.findChild(QWidget, "contentArea")
+            if content_area and hasattr(content_area, "removeWidget"):
+                # Remove flashcard edit page from content area
+                content_area.removeWidget(flashcard_edit_page)
+                # Switch back to collection page
+                content_area.setCurrentWidget(self)
+            else:
+                print("Error: Content area not found or is not a stacked widget")
+        else:
+            print("Error: No main window found")
 
     def create_folder_widget(self, id, name, count, date, avatar_url, img_url):
         folder = Folder(id, name, count, date, avatar_url, img_url)
