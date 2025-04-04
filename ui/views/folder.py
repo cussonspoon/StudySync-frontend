@@ -78,13 +78,20 @@ class FolderDetailPage(QWidget):
         # Create main horizontal layout to hold content
         main_horizontal_layout = QHBoxLayout(self)
         main_horizontal_layout.setSpacing(0)
+        main_horizontal_layout.setContentsMargins(0, 0, 0, 0)  # Remove margins
 
         content_widget = QWidget()
-        content_widget.setFixedWidth(1190)
+        content_widget.setMinimumWidth(
+            1209
+        )  # Set to available space (MainWindow width - sidebar width)
+        content_widget.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
+        )  # Allow widget to expand
 
         # Move existing main_layout to content_widget
         self.main_layout = QVBoxLayout(content_widget)
         self.main_layout.setSpacing(2)
+        self.main_layout.setContentsMargins(20, 10, 20, 10)  # Add some padding
 
         # === Scroll Area ===
         scroll = QScrollArea()
@@ -493,7 +500,6 @@ class CreateModeDialog(QDialog):
                         # Refresh the folder contents
                         parent.load_items()
 
-              
             except Exception as e:
                 print(f"Error creating quiz: {e}")
 
