@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QMenu,
     QSizePolicy,
+    QMessageBox,
 )
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QPixmap, QAction, QIcon
@@ -21,7 +22,13 @@ from PySide6.QtGui import QFont
 from services.folder_service import FolderService
 from .components.mode_card import ContentCard
 from .components.note_window import popup_notewindow
-
+from models.flashcard import Flashcard
+from controllers.flashcard_controller import FlashcardController
+from models.quiz import Quiz
+from .components.quiz_window import popup_quizwindow
+from .components.flashcard_window import popup_flashcardwindow
+from .components.flashcard_components.flashcard_edit import FlashcardEditPage
+from .components.flashcard_components.models import get_sample_flashcards
 
 class Tag(QFrame):
     def __init__(self, name, color, removable=False):
@@ -249,7 +256,7 @@ class FolderDetailPage(QWidget):
             if item.widget():
                 item.widget().deleteLater()
 
-        # Create a FolderService instan ce with None as initial folder data
+        # Create a FolderService instance with None as initial folder data
         folder_service = FolderService(None)
         response = folder_service.fetch_items(self.folder_id)
         print(f"API Response: {response}")  # Debug print
@@ -262,30 +269,129 @@ class FolderDetailPage(QWidget):
         notes = response.get("notes", [])
         print(f"Found {len(notes)} notes")  # Debug print
         for note in notes:
-            card = ContentCard(name=note["name"], mode="📄 Note", parent=self)
+            card = ContentCard(
+                name=note["name"],
+                mode="📄 Note",
+                item_data=note,
+                parent=self
+            )
+            card.clicked.connect(self.handle_card_click)
             self.content_layout.addWidget(card)
 
         # Load flashcards
         flashcards = response.get("flashcards", [])
         print(f"Found {len(flashcards)} flashcards")  # Debug print
         for flashcard in flashcards:
-            card = ContentCard(name=flashcard["name"], mode="🗂️ Flashcard", parent=self)
+            card = ContentCard(
+                name=flashcard["name"],
+                mode="🗂️ Flashcard",
+                item_data=flashcard,
+                parent=self
+            )
+            card.clicked.connect(self.handle_card_click)
             self.content_layout.addWidget(card)
 
         # Load quizzes
         quizzes = response.get("quizzes", [])
-        print(f"Found {len(quizzes)} quizzes")  # Debug print
+        print(f"Found {len(quizzes)} quizzes")
         for quiz in quizzes:
             card = ContentCard(
                 name=quiz["title"],  # Note: quizzes use 'title' instead of 'name'
                 mode="❓ Quiz",
-                parent=self,
+                item_data=quiz,
+                parent=self
             )
+            card.clicked.connect(self.handle_card_click)
             self.content_layout.addWidget(card)
 
         # Update the total items count
         self.folder_total_items = len(notes) + len(flashcards) + len(quizzes)
         print(f"Total items: {self.folder_total_items}")  # Debug print
+
+    def handle_card_click(self, name, mode, item_data):
+        """Handle clicks on content cards"""
+        print("item_data", item_data.get('id'))
+        if "Note" in mode:
+            note_dialog = popup_notewindow(self)
+            note_dialog.title_input.setPlainText(name)
+            if item_data.get('content'):
+                note_dialog.content_input.setPlainText(item_data['content'])
+            if note_dialog.exec():
+                note_data = note_dialog.getNoteData()
+                # Update note in backend
+                try:
+                    folder_service = FolderService(None)
+                    folder_service.update_note(self.folder_id, item_data['id'], note_data)
+                    # Refresh items to show updated data
+                    self.load_items()
+                except Exception as e:
+                    print(f"Error updating note: {e}")
+
+        elif "Flashcard" in mode:
+            # Create flashcard object from API data
+            flashcard = Flashcard(
+                id=item_data.get('id', ''),
+                name=name,
+                description=item_data.get('description', ''),
+                terms=[]  # Terms will be loaded by the controller
+            )
+            # print("flashcard.id", flashcard.id)
+            # print("item_data.get('id', '')", item_data.get('id', ''))
+            # Create and show flashcard edit page
+            flashcard_edit = FlashcardEditPage()
+            flashcard_edit.loadFlashcardData(flashcard)
+            # Get the main window
+            main_window = self.window()
+            if main_window:
+                # Get the content area widget
+                content_area = main_window.findChild(QWidget, "contentArea")
+                if content_area and hasattr(content_area, "addWidget"):
+                    # Add flashcard edit page to content area
+                    content_area.addWidget(flashcard_edit)
+                    # Switch to flashcard edit page
+                    content_area.setCurrentWidget(flashcard_edit)
+                    # Connect back button to return to folder page
+                    flashcard_edit.back_button.clicked.connect(lambda: self.returnToFolder(flashcard_edit))
+                else:
+                    print("Error: Content area not found or is not a stacked widget")
+            else:
+                print("Error: No main window found")
+
+        elif "Quiz" in mode:
+            quiz = Quiz(
+                id=item_data.get('id', ''),
+                title=name,
+                quiz_type=item_data.get('quiz_type', 'quiz'),
+                mode=item_data.get('mode', 'normal'),
+                # questions=item_data.get('questions', [])
+            )
+            quiz_dialog = popup_quizwindow(self, quiz=quiz)
+            if quiz_dialog.exec():
+                quiz_data = quiz_dialog.getQuizData()
+                # Update quiz in backend
+                try:
+                    folder_service = FolderService(None)
+                    folder_service.update_quiz(self.folder_id, item_data['id'], quiz_data)
+                    # Refresh items to show updated data
+                    self.load_items()
+                except Exception as e:
+                    print(f"Error updating quiz: {e}")
+
+    def returnToFolder(self, flashcard_edit_page):
+        # Get the main window
+        main_window = self.window()
+        if main_window:
+            # Get the content area widget
+            content_area = main_window.findChild(QWidget, "contentArea")
+            if content_area and hasattr(content_area, "removeWidget"):
+                # Remove flashcard edit page from content area
+                content_area.removeWidget(flashcard_edit_page)
+                # Switch back to folder page
+                content_area.setCurrentWidget(self)
+            else:
+                print("Error: Content area not found or is not a stacked widget")
+        else:
+            print("Error: No main window found")
 
     def update_created_label(self):
         if self.folder_created_at:

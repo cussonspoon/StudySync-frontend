@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QSizePolicy,
     QFrame,
     QHBoxLayout,
+    QDialog,
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont, QColor
@@ -17,7 +18,7 @@ from models.quiz import Question
 from typing import List
 
 
-class QuizStart(QWidget):
+class QuizStart(QDialog):
     def __init__(self, parent=None, questions: List[Question] = None):
         super().__init__()
 

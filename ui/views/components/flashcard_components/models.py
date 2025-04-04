@@ -5,12 +5,12 @@ from datetime import datetime
 @dataclass
 class TermWord:
     id: int
-    word: str
+    term: str
     definition: str
     created_at: datetime
     updated_at: datetime
 
-@dataclass
+@dataclass  
 class Flashcard:
     id: int
     name: str
@@ -28,56 +28,56 @@ SAMPLE_FLASHCARDS = [
         terms=[
             TermWord(
                 id=1,
-                word="Variable",
+                term="Variable",
                 definition="A container for storing data values in programming",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             ),
             TermWord(
                 id=2,
-                word="Function",
+                term="Function",
                 definition="A reusable block of code that performs a specific task",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             ),
             TermWord(
                 id=3,
-                word="Loop",
+                term="Loop",
                 definition="A programming structure that repeats a block of code",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             ),
             TermWord(
                 id=4,
-                word="Array",
+                term="Array",
                 definition="A data structure that stores a collection of elements in a contiguous block of memory",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             ),
             TermWord(
                 id=5,
-                word="Object",
+                term="Object",
                 definition="An instance of a class that bundles data and methods that operate on that data",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             ),
             TermWord(
                 id=6,
-                word="Class",
+                term="Class",
                 definition="A blueprint for creating objects that defines their properties and behaviors",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             ),
             TermWord(
                 id=7,
-                word="Inheritance",
+                term="Inheritance",
                 definition="A mechanism that allows a class to inherit properties and methods from another class",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             ),
             TermWord(
                 id=8,
-                word="Polymorphism",
+                term="Polymorphism",
                 definition="The ability of different classes to be treated as instances of the same class through inheritance",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
@@ -93,35 +93,35 @@ SAMPLE_FLASHCARDS = [
         terms=[
             TermWord(
                 id=9,
-                word="List Comprehension",
+                term="List Comprehension",
                 definition="A concise way to create lists based on existing lists",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             ),
             TermWord(
                 id=10,
-                word="Dictionary",
+                term="Dictionary",
                 definition="A data structure that stores key-value pairs",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             ),
             TermWord(
                 id=11,
-                word="Generator",
+                term="Generator",
                 definition="A function that returns an iterator using the yield keyword",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             ),
             TermWord(
                 id=12,
-                word="Decorator",
+                term="Decorator",
                 definition="A design pattern that allows adding new functionality to existing objects without modifying their structure",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             ),
             TermWord(
                 id=13,
-                word="Lambda",
+                term="Lambda",
                 definition="An anonymous function that can have any number of arguments but can only have one expression",
                 created_at=datetime.now(),
                 updated_at=datetime.now()

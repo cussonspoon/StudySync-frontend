@@ -15,7 +15,7 @@ from PySide6.QtCore import Qt, Signal, QDir
 from PySide6.QtGui import QFont, QPixmap
 from controllers.user_controller import UserController
 from utils.global_vars import set_current_user
-
+from utils.session_manager import SessionManager
 
 class LoginPage(QWidget):
     login_successful = Signal()

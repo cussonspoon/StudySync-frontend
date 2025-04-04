@@ -402,8 +402,8 @@ class popup_quizwindow(QDialog):
                 )
                 question_objects.append(question_obj)
 
-        self.quiz_window = QuizStart(questions=question_objects)
-        self.quiz_window.show()
+        self.quiz_window = QuizStart(self.parent(), questions=question_objects)
+        self.quiz_window.exec()
 
     def getQuizData(self):
         """Returns the quiz data when dialog is closed."""
