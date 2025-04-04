@@ -6,10 +6,11 @@ from ui.views.statistic import StatPage
 from ui.views.notification import NotificationPage
 from ui.views.community import CommunityPage
 from ui.views.components.folder import Folder
-from services.folder_service import get_folders
+from services.folder_service import FolderService
 from controllers.home_controller import HomeController
 from enum import Enum
 from controllers.collection_controller import Collection_Controller
+from utils.global_vars import get_current_user
 
 
 class Page(Enum):
@@ -24,11 +25,14 @@ class WindowController:
     def __init__(self, ui):
         self.ui = ui
         # Initialize HomeController first
-        self.home_controller = HomeController(self.ui.page_home_scroll.widget())
+        self.home_controller = HomeController(
+            self.ui.page_home_scroll.widget(), self.ui
+        )
 
         # Initialize Collection Controller
         self.collection_controller = Collection_Controller(
-            self.ui.page_collection_scroll.widget()
+            self.ui.page_collection_scroll.widget(),
+            self.ui,  # Pass the UI which contains the main window
         )
 
         # Set controllers on their respective pages
@@ -60,7 +64,15 @@ class WindowController:
     def switchPage(self, index):
         self.ui.contentArea.setCurrentIndex(index)
         if index == Page.HOME.value:
-            self.home_controller.loadFolders()
+            # Get current user and load their folders
+            current_user = get_current_user()
+            if current_user:
+                folders = FolderService.get_user_folders(current_user.id)
+                self.home_controller.loadFolders(folders)
             self.home_controller.loadTasks()
         elif index == Page.COLLECTION.value:
-            self.collection_controller.loadFolders()
+            # Get current user and load their folders
+            current_user = get_current_user()
+            if current_user:
+                folders = FolderService.get_user_folders(current_user.id)
+                self.collection_controller.loadFolders(folders)

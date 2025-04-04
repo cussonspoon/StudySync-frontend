@@ -4,15 +4,26 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QFrame,
     QLabel,
+    QApplication,
 )
 from PySide6.QtGui import QPixmap
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt, QSize, Signal
+import sys
 
 
 class Folder(QWidget):
-    def __init__(self, name, count, date, avatar_url, img_url):
+    clicked = Signal()  # Add click signal
+
+    def __init__(self, id, name, count, date, avatar_url, img_url):
         super().__init__()
+        self.id = id
+        self.name = name
+        self.count = count
+        self.date = date
+        self.avatar_url = avatar_url
+        self.img_url = img_url
         self.setupUi(name, count, date, avatar_url, img_url)
+        self.setCursor(Qt.PointingHandCursor)  # Show hand cursor on hover
 
     def setupUi(self, name, count, date, avatar_url, img_url):
         # Main layout for the folder widget
@@ -29,6 +40,9 @@ class Folder(QWidget):
                 background-color: #F0F0F0;
                 border: 1px solid #ccc;
                 border-radius: 10px;
+            }
+            QFrame:hover {
+                background-color: #E0E0E0;
             }
         """
         )
@@ -110,7 +124,7 @@ class Folder(QWidget):
         )
         count_layout.addWidget(count_icon)
 
-        label_count = QLabel("Items(" + count + ")")
+        label_count = QLabel("Items(" + str(count) + ")")
         label_count.setStyleSheet(
             """
             QLabel {
@@ -124,3 +138,31 @@ class Folder(QWidget):
         count_layout.addWidget(label_count)
         count_layout.addStretch()
         layout.addLayout(count_layout)
+
+    def mousePressEvent(self, event):
+        """Handle mouse press events to emit click signal"""
+        if event.button() == Qt.LeftButton:
+            self.clicked.emit()
+        super().mousePressEvent(event)
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+
+    window = QWidget()
+    layout = QVBoxLayout(window)
+
+    # Example folder widget
+    folder_widget = Folder(
+        name="My Folder",
+        count="12",
+        date="2025-04-03",
+        avatar_url="static/images/avatar.png",  # Replace with valid path
+        img_url="static/images/folderbg.png",  # Replace with valid path
+    )
+    layout.addWidget(folder_widget)
+
+    window.setWindowTitle("Test Folder Widget")
+    window.resize(300, 300)
+    window.show()
+    sys.exit(app.exec())

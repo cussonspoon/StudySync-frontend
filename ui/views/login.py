@@ -14,7 +14,8 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, Signal, QDir
 from PySide6.QtGui import QFont, QPixmap
 from controllers.user_controller import UserController
-from utils.session_manager import SessionManager
+from utils.global_vars import set_current_user
+
 
 class LoginPage(QWidget):
     login_successful = Signal()
@@ -192,7 +193,21 @@ class LoginPage(QWidget):
             user = self.user_controller.login(username, password)
 
             if user:
-                # Login successful
+                # Debug print to check user attributes
+                print(
+                    f"User ID: {user.id}, Username: {user.username}, Email: {getattr(user, 'email', 'N/A')}"
+                )
+
+                # Store user data in global, handle missing email
+                set_current_user(
+                    {
+                        "id": user.id,
+                        "username": user.username,
+                        "email": getattr(
+                            user, "email", "N/A"
+                        ),  # Use 'N/A' if email is missing
+                    }
+                )
                 self.login_successful.emit()
             else:
                 # Show error message
@@ -386,6 +401,11 @@ class RegisterDialog(QDialog):
             user = self.user_controller.register(username, password)
 
             if user:
+                # Store user data in global
+                set_current_user(
+                    {"id": user.id, "username": user.username, "email": user.email}
+                )
+                self.login_successful.emit()
                 # Registration successful
                 self.accept()
             else:

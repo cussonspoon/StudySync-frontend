@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
     QHBoxLayout,
+    QMainWindow,
 )
 
 from ui.views.home import HomePage
@@ -19,7 +20,7 @@ from ui.views.statistic import StatPage
 from ui.views.notification import NotificationPage
 from ui.views.community import CommunityPage
 from ui.views.user_profile import UserProfilePage
-
+from ui.views.folder import FolderDetailPage
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -127,6 +128,7 @@ class Ui_MainWindow(object):
         self.page_noti_scroll = self.createScrollPage(NotificationPage())
         self.page_community_scroll = self.createScrollPage(CommunityPage())
         self.page_profile_scroll = self.createScrollPage(UserProfilePage())
+        self.page_folder_scroll = self.createScrollPage(FolderDetailPage())
 
         self.contentArea.addWidget(self.page_home_scroll)
         self.contentArea.addWidget(self.page_collection_scroll)
@@ -134,6 +136,15 @@ class Ui_MainWindow(object):
         self.contentArea.addWidget(self.page_noti_scroll)
         self.contentArea.addWidget(self.page_community_scroll)
         self.contentArea.addWidget(self.page_profile_scroll)
+        self.contentArea.addWidget(self.page_folder_scroll)
+
+        # Connect back button in FolderDetailPage to return to collection
+        folder_page = self.page_folder_scroll.widget()
+        back_btn = folder_page.findChild(QPushButton)
+        if back_btn:
+            back_btn.clicked.connect(
+                lambda: self.contentArea.setCurrentWidget(self.page_collection_scroll)
+            )
 
         # Connect logo to user profile
         self.logo.mousePressEvent = lambda event: self.contentArea.setCurrentWidget(self.page_profile_scroll)
@@ -193,4 +204,35 @@ class Ui_MainWindow(object):
         self.stats.setText("")
         self.noti.setText("")
         self.community.setText("")
-        self.logout.setText("")
+
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+
+        # Connect menu buttons
+        self.ui.home.clicked.connect(
+            lambda: self.ui.contentArea.setCurrentWidget(self.ui.page_home_scroll)
+        )
+        self.ui.collection.clicked.connect(
+            lambda: self.ui.contentArea.setCurrentWidget(self.ui.page_collection_scroll)
+        )
+        self.ui.stats.clicked.connect(
+            lambda: self.ui.contentArea.setCurrentWidget(self.ui.page_stats_scroll)
+        )
+        self.ui.noti.clicked.connect(
+            lambda: self.ui.contentArea.setCurrentWidget(self.ui.page_noti_scroll)
+        )
+        self.ui.community.clicked.connect(
+            lambda: self.ui.contentArea.setCurrentWidget(self.ui.page_community_scroll)
+        )
+
+    def show_folder_page(self, name, count, date):
+        print(f"Showing folder page for: {name}")
+        self.ui.contentArea.setCurrentWidget(self.ui.page_folder_scroll)
+        folder_page = self.ui.page_folder_scroll.widget()
+        folder_page.folder_name.setText(f"📁 {name}")
+        self.ui.page_folder_scroll.show()
+        self.ui.page_folder_scroll.widget().show()

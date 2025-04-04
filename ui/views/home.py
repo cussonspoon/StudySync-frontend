@@ -1,6 +1,6 @@
 import sys
 import os
-from PySide6.QtCore import Qt, QDir, QPoint
+from PySide6.QtCore import Qt, QDir, QPoint, Signal
 from PySide6.QtGui import QFont, QPixmap, QColor
 from PySide6.QtWidgets import QGraphicsDropShadowEffect
 from PySide6.QtWidgets import (
@@ -26,9 +26,11 @@ from ui.views.components.carousel import HorizontalImageScroller
 from utils.ui import Text, Image, SearchBar
 from ui.views.components.calendar import CalendarWidget
 from ui.views.components.folder import Folder
+from utils.global_vars import get_current_user
 
 
 class HomePage(QWidget):
+
     def __init__(self):
         super().__init__()
         self.folders = []
@@ -36,6 +38,12 @@ class HomePage(QWidget):
         self.search_results = []
         self.setupUi()
         self.setupSearchMechanism()
+        self.loadUserData()
+        user = get_current_user()
+        if user:
+            print(f"User ID: {user.id}")
+            print(f"Username: {user.username}")
+            print(f"Email: {user.email}")
 
     def setupUi(self):
         self.setObjectName("Form")
@@ -485,6 +493,26 @@ class HomePage(QWidget):
             except RuntimeError:
                 pass  # Widget already deleted
             self.search_results_grid = None
+
+    def on_folder_click(self, folder):
+        if hasattr(self, "home_controller"):
+            self.home_controller.navigate_to_folder(folder)
+        else:
+            print("No collection controller found")
+
+    def loadUserData(self):
+        # Get current user from global
+        current_user = get_current_user()
+        if current_user:
+            print(f"Loading data for user: {current_user.id}")
+            print(f"Username: {current_user.username}")
+            print(f"Email: {current_user.email}")
+            # Now you can use the user information to load user-specific data
+            # For example:
+            # self.loadUserFolders(current_user.id)
+            # self.loadUserPreferences(current_user.id)
+        else:
+            print("No user logged in")
 
 
 class TaskManagement(QWidget):
