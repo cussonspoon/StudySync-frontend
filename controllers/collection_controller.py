@@ -34,6 +34,8 @@ class Collection_Controller:
 
             # Reload folders to show the new folder
             self.loadFolders()
+            self.navigate_to_folder("Untitled", 0, "Just now")
+
         except Exception as e:
             print(f"Error creating folder: {e}")  # Debug print
 

@@ -1,6 +1,6 @@
 import sys
 import os
-from PySide6.QtCore import Qt, QDir, QPoint
+from PySide6.QtCore import Qt, QDir, QPoint, Signal
 from PySide6.QtGui import QFont, QPixmap, QColor
 from PySide6.QtWidgets import QGraphicsDropShadowEffect
 from PySide6.QtWidgets import (
@@ -29,6 +29,7 @@ from ui.views.components.folder import Folder
 
 
 class HomePage(QWidget):
+    
     def __init__(self):
         super().__init__()
         self.folders = []
@@ -486,6 +487,13 @@ class HomePage(QWidget):
                 pass  # Widget already deleted
             self.search_results_grid = None
 
+    def on_folder_click(self, name, count, date):
+        print(f"Folder clicked: {name}, count: {count}, date: {date}")  # Debug print
+        if hasattr(self, "home_controller"):
+            self.home_controller.navigate_to_folder(name, str(count), date)
+        else:
+            print("No collection controller found")
+
 
 class TaskManagement(QWidget):
     def __init__(self, pos_x, pos_y, width, length, tasks, parent=None):
@@ -563,6 +571,13 @@ class TaskManagement(QWidget):
             self.task_container.addWidget(task_ui)
             # Then notify the controller
             self.home_controller.createTask()
+
+    # def on_folder_click(self, name, count, date):
+    #     print(f"Folder clicked: {name}, count: {count}, date: {date}")  # Debug print
+    #     if hasattr(self, "collection_controller"):
+    #         self.collection_controller.navigate_to_folder(name, str(count), date)
+    #     else:
+    #         print("No collection controller found")
 
 
 class TaskUI(QWidget):

@@ -1,6 +1,6 @@
 import os
 import sys
-from PySide6.QtCore import Qt, QDir
+from PySide6.QtCore import Qt, QDir, Signal
 from PySide6.QtWidgets import (
     QApplication,
     QWidget,
@@ -16,9 +16,12 @@ from ui.views.components.folder import Folder
 
 
 class HorizontalImageScroller(QWidget):
+    folder_clicked = Signal(str, int, str)  # Modified to pass name, count, date
+
     def __init__(self, folders, parent=None):
         super().__init__(parent)
         self.folders = folders
+        self.home_controller = None
         self.setupUI()
 
     def setupUI(self):
@@ -68,12 +71,8 @@ class HorizontalImageScroller(QWidget):
             "background-color: white; border-radius: 10px;"
         )
         self.scroll_layout = QHBoxLayout(self.scroll_widget)
-        self.scroll_layout.setSpacing(
-            40
-        )  # Increased spacing between folders from 20 to 40
-        self.scroll_layout.setContentsMargins(
-            40, 20, 40, 20  # Increased left and right margins from 20 to 40
-        )  # Add margins around the layout
+        self.scroll_layout.setSpacing(40)
+        self.scroll_layout.setContentsMargins(40, 20, 40, 20)
 
         # Add stretch to push folders to the left
         self.scroll_layout.addStretch()
@@ -107,6 +106,12 @@ class HorizontalImageScroller(QWidget):
                 folder_data["avatar"],
                 folder_data["image"],
             )
+            # Connect folder click to the folder_clicked signal
+            folder.clicked.connect(
+                lambda n=folder_data["name"], c=folder_data["count"], d=folder_data[
+                    "date"
+                ]: self.folder_clicked.emit(n, c, d)
+            )
             self.scroll_layout.addWidget(folder)
 
         # Add stretch back
@@ -125,6 +130,13 @@ class HorizontalImageScroller(QWidget):
             self.scroll_area.horizontalScrollBar().value()
             + 240  # Increased from 220 to account for new spacing
         )
+
+    def set_controller(self, controller):
+        """Set the home controller and connect signals."""
+        self.home_controller = controller
+        # Connect the folder_clicked signal to the controller's navigate_to_folder method
+        self.folder_clicked.connect(self.home_controller.navigate_to_folder)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

@@ -294,6 +294,7 @@ class CollectionPage(QWidget):
         if hasattr(self, "collection_controller"):
             print("Calling controller's createFolder")  # Debug print
             self.collection_controller.createFolder()
+            # self.collection_controller.navigate_to_folder("Untitled", 0, "Just now")
         else:
             print("No collection controller found")  # Debug print
 
