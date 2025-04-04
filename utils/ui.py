@@ -127,7 +127,7 @@
 import os
 import sys
 from PySide6.QtWidgets import (
-    QLabel, QWidget, QHBoxLayout, QVBoxLayout, QLineEdit, QApplication
+    QLabel, QWidget, QHBoxLayout, QVBoxLayout, QLineEdit, QApplication, QFrame, QSizePolicy
 )
 from PySide6.QtGui import QFont, QPixmap
 from PySide6.QtCore import Qt, QDir
@@ -224,6 +224,50 @@ class SearchBar(QWidget):
 
         self.setFixedSize(500, 60)  # Set fixed size for search bar
 
+class QuizQuestionCard(QWidget):
+    def __init__(self, question_text="Sample Question?"):
+        super().__init__()
+
+        self.question_text = question_text
+
+        # Set size policy to expand horizontally
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+
+        # 📌 Card Container (QFrame)
+        self.card = QFrame(self)
+        self.card.setStyleSheet(
+            """
+            QFrame {
+                background-color: white;
+                border-radius: 10px;
+                border: 1px solid #E0E0E0;
+            }
+            """
+        )
+        self.card.setFixedHeight(120)  # Adjust based on layout
+        self.card.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)  # Make card expand horizontally
+
+        # 📌 Layout for Card
+        layout = QVBoxLayout(self.card)
+        layout.setContentsMargins(20, 20, 20, 20)  # Increased padding
+
+        # 📌 Question Label
+        self.question_label = QLabel(self.question_text)
+        self.question_label.setWordWrap(True)
+        self.question_label.setStyleSheet(
+            "font-weight: bold; font-size: 16px; border: none; color: #333333;"
+        )
+        self.question_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)  # Make label expand horizontally
+
+        # Add question label to layout
+        layout.addWidget(self.question_label)
+
+        # 📌 Main Layout
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)  # Remove margins to allow full width
+        main_layout.addWidget(self.card)
+
+        self.setLayout(main_layout)
 
 # ✅ Run Application Test
 if __name__ == "__main__":
@@ -247,5 +291,4 @@ if __name__ == "__main__":
     window.setLayout(layout)
     window.show()
     sys.exit(app.exec())
-
 
