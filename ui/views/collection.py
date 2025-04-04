@@ -11,12 +11,16 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QDialogButtonBox,
 )
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt, QSize, Signal
 from PySide6.QtGui import QFont, QPixmap
 from ui.views.components.note_window import popup_notewindow
 from ui.views.components.folder import Folder
 from ui.views.components.flashcard_window import popup_flashcardwindow
-from ui.views.components.flashcard_components.models import Flashcard, TermWord, get_sample_flashcards
+from ui.views.components.flashcard_components.models import (
+    Flashcard,
+    TermWord,
+    get_sample_flashcards,
+)
 from datetime import datetime
 
 
@@ -94,6 +98,8 @@ class JoinContestDialog(QDialog):
 
 
 class CollectionPage(QWidget):
+    folder_clicked = Signal(str, int, str)  # Modified to pass name, count, date
+
     def __init__(self):
         super().__init__()
         self.folders = []
@@ -190,10 +196,9 @@ class CollectionPage(QWidget):
         # Private/Public buttons centered
         toggle_layout = QHBoxLayout()
         main_layout.addLayout(toggle_layout)
-        private_button = QPushButton("Private")
-        public_button = QPushButton("Public")
-        private_button.setStyleSheet(
-            """
+
+        # Define button style
+        button_style = """
             QPushButton {
                 background-color: #F0F0F0;
                 border-radius: 15px;
@@ -204,28 +209,17 @@ class CollectionPage(QWidget):
                 background-color: #ffc99a;
             }
         """
-        )
-        public_button.setStyleSheet(private_button.styleSheet())
+
+        private_button = QPushButton("Private")
+        public_button = QPushButton("Public")
+        private_button.setStyleSheet(button_style)
+        public_button.setStyleSheet(button_style)
         private_button.setCheckable(True)
         private_button.setChecked(True)
         public_button.setCheckable(True)
         toggle_layout.addWidget(private_button)
         toggle_layout.addWidget(public_button)
         toggle_layout.addStretch(1)
-
-        placeholder_note_button = QPushButton("Placeholder Note")
-        placeholder_note_button.clicked.connect(self.showNoteWindow)
-        main_layout.addWidget(placeholder_note_button)
-
-        placeholder_flashcard_button = QPushButton("Placeholder Flashcard")
-        placeholder_flashcard_button.clicked.connect(self.showFlashcardWindow)
-        main_layout.addWidget(placeholder_flashcard_button)
-        
-        # Store grid_layout as instance variable so we can update it
-        self.grid_layout = QGridLayout()
-        self.grid_layout.setSpacing(10)
-        self.grid_layout.setVerticalSpacing(30)
-        main_layout.addLayout(self.grid_layout)
 
         # Create add folder button
         add_folder_button = QPushButton("+")
@@ -245,20 +239,35 @@ class CollectionPage(QWidget):
         )
         print("Connecting add folder button")  # Debug print
         add_folder_button.clicked.connect(self.on_add_folder_clicked)
-        toggle_layout.addStretch(1)
         toggle_layout.addWidget(add_folder_button)
-        toggle_layout.addWidget(placeholder_note_button)
+
+        # Create note and flashcard buttons
+        note_button = QPushButton("Note")
+        note_button.clicked.connect(self.showNoteWindow)
+        toggle_layout.addWidget(note_button)
+
+        flashcard_button = QPushButton("Flashcard")
+        flashcard_button.clicked.connect(self.showFlashcardWindow)
+        toggle_layout.addWidget(flashcard_button)
+
+        # Grid layout for folders
+        self.grid_layout = QGridLayout()
+        self.grid_layout.setSpacing(10)
+        self.grid_layout.setVerticalSpacing(30)
+        main_layout.addLayout(self.grid_layout)
+
+        main_layout.addStretch(1)
 
     def showNoteWindow(self):
         note_dialog = popup_notewindow(self)
         if note_dialog.exec():
             note_data = note_dialog.getNoteData()
             print("Note Data:", note_data)  # You can handle the note data here
-            
+
     def showFlashcardWindow(self):
         # Get sample flashcards from the API
         flashcards = get_sample_flashcards()
-        
+
         if flashcards:
             # Create and show the flashcard window with the first flashcard set
             flashcard_dialog = popup_flashcardwindow(flashcards[0], self)
@@ -270,7 +279,9 @@ class CollectionPage(QWidget):
             print("No flashcard sets available")
 
     def create_folder_widget(self, name, count, date, avatar_url, img_url):
-        return Folder(name, count, date, avatar_url, img_url)
+        folder = Folder(name, count, date, avatar_url, img_url)
+        folder.mousePressEvent = lambda e: self.on_folder_click(name, count, date)
+        return folder
 
     def showJoinContestDialog(self):
         dialog = JoinContestDialog()
@@ -283,5 +294,13 @@ class CollectionPage(QWidget):
         if hasattr(self, "collection_controller"):
             print("Calling controller's createFolder")  # Debug print
             self.collection_controller.createFolder()
+            # self.collection_controller.navigate_to_folder("Untitled", 0, "Just now")
+        else:
+            print("No collection controller found")  # Debug print
+
+    def on_folder_click(self, name, count, date):
+        print(f"Folder clicked: {name}, count: {count}, date: {date}")  # Debug print
+        if hasattr(self, "collection_controller"):
+            self.collection_controller.navigate_to_folder(name, str(count), date)
         else:
             print("No collection controller found")  # Debug print

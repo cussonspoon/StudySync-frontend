@@ -24,11 +24,14 @@ class WindowController:
     def __init__(self, ui):
         self.ui = ui
         # Initialize HomeController first
-        self.home_controller = HomeController(self.ui.page_home_scroll.widget())
+        self.home_controller = HomeController(
+            self.ui.page_home_scroll.widget(), self.ui
+        )
 
         # Initialize Collection Controller
         self.collection_controller = Collection_Controller(
-            self.ui.page_collection_scroll.widget()
+            self.ui.page_collection_scroll.widget(),
+            self.ui,  # Pass the UI which contains the main window
         )
 
         # Set controllers on their respective pages

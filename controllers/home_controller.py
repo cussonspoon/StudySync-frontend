@@ -5,8 +5,9 @@ from services.folder_service import search_folder
 
 
 class HomeController:
-    def __init__(self, homepage):
+    def __init__(self, homepage, ui):
         self.homepage = homepage
+        self.ui = ui  # Store the UI reference
         self.loadFolders()
         self.loadTasks()
 
@@ -17,8 +18,14 @@ class HomeController:
         # Update the collections and recommendFolders components
         if hasattr(self.homepage, "collections"):
             self.homepage.collections.update_folders(folders)
+            self.homepage.collections.set_controller(
+                self
+            )  # Set controller for collections
         if hasattr(self.homepage, "recommendFolders"):
             self.homepage.recommendFolders.update_folders(folders)
+            self.homepage.recommendFolders.set_controller(
+                self
+            )  # Set controller for recommendFolders
 
     # task management with UI
     def loadTasks(self):
@@ -48,6 +55,15 @@ class HomeController:
         # Call the search service
         results = search_folder(search_text)
         return results
+
+    def navigate_to_folder(self, name, count, date):
+        print(f"Navigating to folder: {name}")
+        # Use the UI's contentArea to switch pages
+        self.ui.contentArea.setCurrentWidget(self.ui.page_folder_scroll)
+        folder_page = self.ui.page_folder_scroll.widget()
+        folder_page.folder_name.setText(f"📁 {name}")
+        self.ui.page_folder_scroll.show()
+        self.ui.page_folder_scroll.widget().show()
 
     # def setupSearch(self):
     #     self.home_page.searchBar.textChanged.connect(self.searchFolders)
