@@ -19,8 +19,11 @@ from PySide6.QtWidgets import QDialog, QButtonGroup
 from PySide6.QtGui import QFont
 
 from services.folder_service import FolderService
+from services.quiz_service import QuizService
 from .components.mode_card import ContentCard
 from .components.note_window import popup_notewindow
+from .components.quiz_window import popup_quizwindow
+from models.quiz import Quiz
 
 
 class Tag(QFrame):
@@ -249,7 +252,7 @@ class FolderDetailPage(QWidget):
             if item.widget():
                 item.widget().deleteLater()
 
-        # Create a FolderService instan ce with None as initial folder data
+        # Create a FolderService instance with None as initial folder data
         folder_service = FolderService(None)
         response = folder_service.fetch_items(self.folder_id)
         print(f"API Response: {response}")  # Debug print
@@ -258,34 +261,96 @@ class FolderDetailPage(QWidget):
             print("No response from API")  # Debug print
             return
 
+        # Store all items for reference
+        self.items = []
+
         # Load notes
         notes = response.get("notes", [])
         print(f"Found {len(notes)} notes")  # Debug print
         for note in notes:
-            card = ContentCard(name=note["name"], mode="📄 Note", parent=self)
+            self.items.append(note)  # Store note data
+            card = ContentCard(
+                name=note["name"], mode="📄 Note", item_data=note, parent=self
+            )
+            card.clicked.connect(self.handle_item_click)
             self.content_layout.addWidget(card)
 
         # Load flashcards
         flashcards = response.get("flashcards", [])
         print(f"Found {len(flashcards)} flashcards")  # Debug print
         for flashcard in flashcards:
-            card = ContentCard(name=flashcard["name"], mode="🗂️ Flashcard", parent=self)
+            self.items.append(flashcard)  # Store flashcard data
+            card = ContentCard(
+                name=flashcard["name"],
+                mode="🗂️ Flashcard",
+                item_data=flashcard,
+                parent=self,
+            )
+            card.clicked.connect(self.handle_item_click)
             self.content_layout.addWidget(card)
 
         # Load quizzes
         quizzes = response.get("quizzes", [])
         print(f"Found {len(quizzes)} quizzes")  # Debug print
         for quiz in quizzes:
+            self.items.append(quiz)  # Store quiz data
             card = ContentCard(
                 name=quiz["title"],  # Note: quizzes use 'title' instead of 'name'
                 mode="❓ Quiz",
+                item_data=quiz,
                 parent=self,
             )
+            card.clicked.connect(self.handle_item_click)
             self.content_layout.addWidget(card)
 
         # Update the total items count
         self.folder_total_items = len(notes) + len(flashcards) + len(quizzes)
         print(f"Total items: {self.folder_total_items}")  # Debug print
+
+    def handle_item_click(self, name, mode):
+        """Handle clicks on content cards"""
+        print(f"Opening {mode} item: {name}")
+
+        # Find the item data
+        item_data = next(
+            (
+                item
+                for item in self.items
+                if item.get("name", item.get("title")) == name
+            ),
+            None,
+        )
+
+        if not item_data:
+            print(f"Could not find data for item: {name}")
+            return
+
+        if "Note" in mode:
+            note_dialog = popup_notewindow(self)
+            note_dialog.title_input.setPlainText(name)
+            if note_dialog.exec():
+                note_data = note_dialog.getNoteData()
+                print(f"Note Data: {note_data}")
+                self.load_items()  # Refresh after edit
+
+        elif "Quiz" in mode:
+            # Create Quiz object from existing data
+            quiz = Quiz(
+                id=item_data.get("id", ""),
+                title=item_data.get("title", ""),
+                quiz_type=item_data.get("quiz_type", "multiple"),
+                mode=item_data.get("mode", "normal"),
+            )
+            # Open quiz editor with existing quiz
+            quiz_dialog = popup_quizwindow(self, quiz=quiz)
+            if quiz_dialog.exec():
+                quiz_data = quiz_dialog.getQuizData()
+                print(f"Quiz Data: {quiz_data}")
+                self.load_items()  # Refresh after edit
+
+        elif "Flashcard" in mode:
+            # TODO: Implement flashcard handling
+            pass
 
     def update_created_label(self):
         if self.folder_created_at:
@@ -379,46 +444,57 @@ class CreateModeDialog(QDialog):
 
         # Show appropriate window based on mode
         if "Note" in mode:
-            self.accept()  # Close the create dialog first
-            note_dialog = popup_notewindow(parent)
-            note_dialog.title_input.setPlainText(name)  # Set the title
-            if note_dialog.exec():
-                note_data = note_dialog.getNoteData()
-                # Create note in backend
-                try:
-                    folder_service = FolderService(None)
-                    created_note = folder_service.create_note(
-                        folder_id, name, note_data
-                    )
-                    if created_note:
-                        # Only add to UI if backend creation was successful
-                        card = ContentCard(name=name, mode="📄 Note", parent=parent)
-                        parent.content_layout.insertWidget(0, card)
-                except Exception as e:
-                    print(f"Error creating note: {e}")
+            pass
+            # self.accept()  # Close the create dialog first
+            # note_dialog = popup_notewindow(parent)
+            # note_dialog.title_input.setPlainText(name)  # Set the title
+            # if note_dialog.exec():
+            #     note_data = note_dialog.getNoteData()
+            #     # Create note in backend
+            #     try:
+            #         folder_service = FolderService(None)
+            #         created_note = folder_service.create_note(
+            #             folder_id, name, note_data
+            #         )
+            #         if created_note:
+            #             # Only add to UI if backend creation was successful
+            #             card = ContentCard(name=name, mode="📄 Note", parent=parent)
+            #             parent.content_layout.insertWidget(0, card)
+            #     except Exception as e:
+            #         print(f"Error creating note: {e}")
 
         elif "Flashcard" in mode:
-            try:
-                folder_service = FolderService(None)
-                created_flashcard = folder_service.create_flashcard(folder_id, name)
-                if created_flashcard:
-                    # Only add to UI if backend creation was successful
-                    card = ContentCard(name=name, mode="🗂️ Flashcard", parent=parent)
-                    parent.content_layout.insertWidget(0, card)
-            except Exception as e:
-                print(f"Error creating flashcard: {e}")
+            pass
+            # try:
+            #     folder_service = FolderService(None)
+            #     created_flashcard = folder_service.create_flashcard(folder_id, name)
+            #     if created_flashcard:
+            #         # Only add to UI if backend creation was successful
+            #         card = ContentCard(name=name, mode="🗂️ Flashcard", parent=parent)
+            #         parent.content_layout.insertWidget(0, card)
+            # except Exception as e:
+            #     print(f"Error creating flashcard: {e}")
 
         elif "Quiz" in mode:
             try:
-                folder_service = FolderService(None)
-                created_quiz = folder_service.create_quiz(folder_id, name)
+                # Create quiz using QuizService with folder_id
+                quiz_service = QuizService(None)
+                created_quiz = quiz_service.create_quiz(
+                    title=name, folder_id=folder_id, quiz_type="multiple", mode="normal"
+                )
+
                 if created_quiz:
-                    # Only add to UI if backend creation was successful
-                    card = ContentCard(name=name, mode="❓ Quiz", parent=parent)
-                    parent.content_layout.insertWidget(0, card)
+                    # Show quiz editor window
+                    self.accept()  # Close create dialog first
+                    quiz_dialog = popup_quizwindow(parent, quiz=created_quiz)
+                    if quiz_dialog.exec():
+                        quiz_data = quiz_dialog.getQuizData()
+                        print(f"Quiz Data: {quiz_data}")
+                        # Refresh the folder contents
+                        parent.load_items()
+
+              
             except Exception as e:
                 print(f"Error creating quiz: {e}")
 
-        # Refresh the folder's items to ensure we're showing the correct state
-        parent.load_items()
         self.accept()

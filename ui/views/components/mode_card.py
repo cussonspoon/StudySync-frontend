@@ -5,17 +5,21 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QFrame,
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 from .note_window import popup_notewindow
 from .quiz_window import popup_quizwindow
 from models.quiz import Quiz
 
 
 class ContentCard(QFrame):
-    def __init__(self, name, mode, parent=None):
+    # Add a signal that will be emitted when card is clicked
+    clicked = Signal(str, str)  # Will emit (name, mode)
+
+    def __init__(self, name, mode, item_data=None, parent=None):
         super().__init__(parent)
         self.name = name
         self.mode = mode
+        self.item_data = item_data  # Store the full item data
         self.setFixedHeight(100)
         self.setStyleSheet(
             """
@@ -72,24 +76,7 @@ class ContentCard(QFrame):
         card_layout.addStretch()
 
     def mousePressEvent(self, event):
-        """Handle mouse press events to open appropriate window"""
+        """Handle mouse press events to emit clicked signal"""
         if event.button() == Qt.LeftButton:
-            if "Note" in self.mode:
-                note_dialog = popup_notewindow(self.parent())
-                note_dialog.title_input.setPlainText(self.name)  # Set the title
-                if note_dialog.exec():
-                    note_data = note_dialog.getNoteData()
-                    print("Note Data:", note_data)  # You can handle the note data here
-            elif "Quiz" in self.mode:
-                # Create a new quiz with empty ID
-                quiz = Quiz(
-                    id="",  # Empty ID for new quiz
-                    title=self.name,
-                    quiz_type="quiz",
-                    mode="normal",
-                )
-                quiz_dialog = popup_quizwindow(self.parent(), quiz=quiz)
-                if quiz_dialog.exec():
-                    quiz_data = quiz_dialog.getQuizData()
-                    print("Quiz Data:", quiz_data)  # You can handle the quiz data here
+            self.clicked.emit(self.name, self.mode)
         super().mousePressEvent(event)

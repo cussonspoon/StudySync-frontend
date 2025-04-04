@@ -27,7 +27,7 @@ class FolderService:
             response = requests.get(f"{API_BASE_URL}/folder/{id}")
             print(f"Response status: {response.status_code}")
             print(f"Response content: {response.text}")
-
+            
             if response.status_code == 200:
                 items = response.json()
                 print(f"Parsed items: {items}")
@@ -295,7 +295,11 @@ class FolderService:
             print(f"Error getting public folders: {str(e)}")
             raise
 
+    def create_quiz(self, title: str) -> Quiz:
+        """Create a new quiz"""
+        
     
+            
 
 # def get_folders():
 #     # response = requests.get("http://127.0.0.1:5000/folders")

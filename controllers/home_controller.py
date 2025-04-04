@@ -69,7 +69,20 @@ class HomeController:
         # Use the UI's contentArea to switch pages
         self.ui.contentArea.setCurrentWidget(self.ui.page_folder_scroll)
         folder_page = self.ui.page_folder_scroll.widget()
+
+        # Set all necessary folder properties
         folder_page.folder_name.setText(f"📁 {folder.name}")
+        folder_page.folder_id = folder.id
+        folder_page.folder_total_items = folder.total_items
+        folder_page.folder_created_at = folder.created_at
+        folder_page.folder_img_url = folder.img_url
+
+        # Update the created date label
+        folder_page.update_created_label()
+
+        # Load the folder's items
+        folder_page.load_items()
+
         self.ui.page_folder_scroll.show()
         self.ui.page_folder_scroll.widget().show()
 

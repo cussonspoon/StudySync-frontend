@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
     QSizePolicy,
     QMessageBox,
 )
-from PySide6.QtCore import QRect, Qt, QSize
+from PySide6.QtCore import QRect, Qt, QSize, Signal
 from PySide6.QtGui import QIcon
 from utils.ui import QuizQuestionCard
 from .quiz_dialog import QuizDialog
@@ -25,6 +25,8 @@ from services.quiz_service import QuizService
 
 
 class popup_quizwindow(QDialog):
+    quiz_created = Signal()  # Signal to emit when quiz is created
+
     def __init__(self, parent=None, quiz: Quiz = None):
         super().__init__(
             parent,
@@ -402,9 +404,18 @@ class popup_quizwindow(QDialog):
                 )
                 question_objects.append(question_obj)
 
-        self.quiz_window = QuizStart(questions=question_objects)
-        self.quiz_window.show()
+        self.quiz_window = QuizStart(parent=self, questions=question_objects)
+        # Connect the quiz_completed signal to refresh the folder contents
+        if isinstance(self.parent(), QWidget):
+            self.quiz_window.quiz_completed.connect(self.parent().load_items)
+        self.quiz_window.exec()  # Use exec() instead of show() for modal dialogs
 
     def getQuizData(self):
         """Returns the quiz data when dialog is closed."""
         return {"title": self.quiz_name.text(), "questions": self.questions}
+
+    def closeEvent(self, event):
+        """Override close event to emit signal if quiz was created"""
+        if self.quiz_created:
+            self.quiz_created.emit()
+        super().closeEvent(event)
