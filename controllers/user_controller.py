@@ -112,6 +112,15 @@ class UserController(BaseController):
             print(f"Get current user error: {str(e)}")
             return None
 
+    def get_user_stats(self, user_id: str):
+        """Get the stats of a user."""
+        url = f"{self.SERVER_URL}/user/{user_id}/stats"
+        reply = self.perform_get_request_sync(url)
+        json_doc = QJsonDocument.fromJson(reply.readAll())
+        if json_doc.isNull():
+            raise ValueError("Invalid JSON response from server")
+        return json_doc.object()
+
     def logout(self) -> bool:
         """Logout the current user."""
         try:

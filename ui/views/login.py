@@ -22,6 +22,7 @@ class LoginPage(QWidget):
     def __init__(self):
         super().__init__()
         self.user_controller = UserController()
+        self.session_manager = SessionManager.get_instance()
         self.setupUi()
 
     def setupUi(self):
@@ -187,11 +188,13 @@ class LoginPage(QWidget):
         username = self.username_input.text()
         password = self.password_input.text()
 
+
         try:
             # Attempt login using UserController
             user = self.user_controller.login(username, password)
 
             if user:
+                self.session_manager.set_current_user(user)
                 # Login successful
                 self.login_successful.emit()
             else:
