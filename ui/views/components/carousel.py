@@ -16,7 +16,7 @@ from ui.views.components.folder import Folder
 
 
 class HorizontalImageScroller(QWidget):
-    folder_clicked = Signal(str, int, str)  # Modified to pass name, count, date
+    folder_clicked = Signal(object)  # Changed to pass a Folder object
 
     def __init__(self, folders, parent=None):
         super().__init__(parent)
@@ -100,17 +100,16 @@ class HorizontalImageScroller(QWidget):
         # Add new folders
         for folder_data in folders:
             folder = Folder(
-                folder_data["name"],
-                folder_data["count"],
-                folder_data["date"],
-                folder_data["avatar"],
-                folder_data["image"],
+                folder_data.id,
+                folder_data.name,
+                folder_data.total_items,
+                folder_data.created_at,
+                folder_data.img_url,  # should be avatar
+                folder_data.img_url,
             )
             # Connect folder click to the folder_clicked signal
             folder.clicked.connect(
-                lambda n=folder_data["name"], c=folder_data["count"], d=folder_data[
-                    "date"
-                ]: self.folder_clicked.emit(n, c, d)
+                lambda checked=False, f=folder_data: self.folder_clicked.emit(f)
             )
             self.scroll_layout.addWidget(folder)
 

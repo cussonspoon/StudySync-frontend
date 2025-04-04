@@ -494,10 +494,9 @@ class HomePage(QWidget):
                 pass  # Widget already deleted
             self.search_results_grid = None
 
-    def on_folder_click(self, name, count, date):
-        print(f"Folder clicked: {name}, count: {count}, date: {date}")  # Debug print
+    def on_folder_click(self, folder):
         if hasattr(self, "home_controller"):
-            self.home_controller.navigate_to_folder(name, str(count), date)
+            self.home_controller.navigate_to_folder(folder)
         else:
             print("No collection controller found")
 
@@ -592,13 +591,6 @@ class TaskManagement(QWidget):
             self.task_container.addWidget(task_ui)
             # Then notify the controller
             self.home_controller.createTask()
-
-    # def on_folder_click(self, name, count, date):
-    #     print(f"Folder clicked: {name}, count: {count}, date: {date}")  # Debug print
-    #     if hasattr(self, "collection_controller"):
-    #         self.collection_controller.navigate_to_folder(name, str(count), date)
-    #     else:
-    #         print("No collection controller found")
 
 
 class TaskUI(QWidget):

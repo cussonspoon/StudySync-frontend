@@ -12,6 +12,7 @@ import os
 load_dotenv()
 API_BASE_URL = os.getenv("BASE_URL")
 
+
 class FolderService:
     def __init__(self, folder_data: Folder):
         self._folder = folder_data
@@ -381,23 +382,23 @@ class FolderService:
 # def delete_folder(folder):
 #     return folder
 
-# def search_folder(folder_name):
-#     #implement search folder api
+def search_folder(folder_name):
+    #implement search folder api
 
-#     folder = [{
-#         "name": "History",
-#         "count": "10",
-#         "date": "2024-01-01",
-#         "avatar": "static/images/profile.jpg",
-#         "image": "static/images/pic1.jpg",
-#     }, {
-#         "name": "History123",
-#         "count": "10",
-#         "date": "2024-01-01",
-#         "avatar": "static/images/profile.jpg",
-#         "image": "static/images/pic1.jpg"}]
+    folder = [{
+        "name": "History",
+        "count": "10",
+        "date": "2024-01-01",
+        "avatar": "static/images/profile.jpg",
+        "image": "static/images/pic1.jpg",
+    }, {
+        "name": "History123",
+        "count": "10",
+        "date": "2024-01-01",
+        "avatar": "static/images/profile.jpg",
+        "image": "static/images/pic1.jpg"}]
 
-#     if folder_name == "History":
-#         return folder
-#     else:
-#         return []
+    if folder_name == "History":
+        return folder
+    else:
+        return []

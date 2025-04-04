@@ -1,7 +1,8 @@
-from services.folder_service import get_folders
+from services.folder_service import FolderService
 from services.task_service import get_tasks
 from services.task_service import create_task
 from services.folder_service import search_folder
+from utils.global_vars import get_current_user
 
 
 class HomeController:
@@ -11,8 +12,15 @@ class HomeController:
         self.loadFolders()
         self.loadTasks()
 
-    def loadFolders(self):
-        folders = get_folders()  # API call
+    def loadFolders(self, folders=None):
+        if folders is None:
+            # Get current user and their folders
+            current_user = get_current_user()
+            if current_user:
+                folders = FolderService.get_user_folders(current_user.id)
+            else:
+                folders = []
+
         self.homepage.folders = folders
 
         # Update the collections and recommendFolders components
@@ -56,12 +64,12 @@ class HomeController:
         results = search_folder(search_text)
         return results
 
-    def navigate_to_folder(self, name, count, date):
-        print(f"Navigating to folder: {name}")
+    def navigate_to_folder(self, folder):
+        print(f"Navigating to folder: {folder.name}")
         # Use the UI's contentArea to switch pages
         self.ui.contentArea.setCurrentWidget(self.ui.page_folder_scroll)
         folder_page = self.ui.page_folder_scroll.widget()
-        folder_page.folder_name.setText(f"📁 {name}")
+        folder_page.folder_name.setText(f"📁 {folder.name}")
         self.ui.page_folder_scroll.show()
         self.ui.page_folder_scroll.widget().show()
 

@@ -14,8 +14,14 @@ import sys
 class Folder(QWidget):
     clicked = Signal()  # Add click signal
 
-    def __init__(self, name, count, date, avatar_url, img_url):
+    def __init__(self, id, name, count, date, avatar_url, img_url):
         super().__init__()
+        self.id = id
+        self.name = name
+        self.count = count
+        self.date = date
+        self.avatar_url = avatar_url
+        self.img_url = img_url
         self.setupUi(name, count, date, avatar_url, img_url)
         self.setCursor(Qt.PointingHandCursor)  # Show hand cursor on hover
 
@@ -118,7 +124,7 @@ class Folder(QWidget):
         )
         count_layout.addWidget(count_icon)
 
-        label_count = QLabel("Items(" + count + ")")
+        label_count = QLabel("Items(" + str(count) + ")")
         label_count.setStyleSheet(
             """
             QLabel {

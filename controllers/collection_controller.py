@@ -1,7 +1,9 @@
-from services.folder_service import get_folders, create_folder
+from services.folder_service import FolderService
 from services.task_service import get_tasks
 from services.task_service import create_task
 from services.folder_service import search_folder
+from utils.global_vars import get_current_user
+from models.folder import CreateFolder
 
 
 class Collection_Controller:
@@ -11,39 +13,55 @@ class Collection_Controller:
         self.collection_page.set_controller(self)
         self.loadFolders()
 
-    def loadFolders(self):
-        folders = get_folders()  # API call
+    def loadFolders(self, folders=None):
+        if folders is None:
+            # Get current user and their folders
+            current_user = get_current_user()
+            if current_user:
+                folders = FolderService.get_user_folders(current_user.id)
+            else:
+                folders = []
+
         self.collection_page.folders = folders
         self.collection_page.update_folders(folders)  # Update the UI with new folders
 
     def createFolder(self):
         print("Inside createFolder method")  # Debug print
+        # Get current user
+        current_user = get_current_user()
+        if not current_user:
+            print("No user logged in")
+            return
+
         # Create a new folder with default values
-        new_folder = {
-            "name": "New Folder",
-            "count": "0 items",
-            "date": "Just now",
-            "avatar": "static/images/logo.png",
-            "image": "static/images/folderimgplaceholder.jpg",
-        }
+        folder_data = CreateFolder(
+            name="New Folder",
+            accesss="private",  # Default access level
+            total_items=0,
+            total_likes=0,
+            img_url="static/images/folderimgplaceholder.jpg",
+        )
 
         try:
+            # Create a FolderService instance with None as initial folder data
+            folder_service = FolderService(None)
             # Call the service to create the folder
-            created_folder = create_folder(new_folder)
+            created_folder = folder_service.create_folder(folder_data, current_user.id)
             print("Created new folder:", created_folder)  # Debug print
 
             # Reload folders to show the new folder
             self.loadFolders()
-            self.navigate_to_folder("Untitled", 0, "Just now")
+            self.navigate_to_folder(created_folder)
 
         except Exception as e:
             print(f"Error creating folder: {e}")  # Debug print
 
-    def navigate_to_folder(self, name, count, date):
-        print(f"Navigating to folder: {name}")
+    def navigate_to_folder(self, folder):
+        print(f"Type of folder: {type(folder)}")
+        print(f"Navigating to folder: {folder.name}")
         # Use the UI's contentArea to switch pages
         self.ui.contentArea.setCurrentWidget(self.ui.page_folder_scroll)
         folder_page = self.ui.page_folder_scroll.widget()
-        folder_page.folder_name.setText(f"📁 {name}")
+        folder_page.folder_name.setText(f"📁 {folder.name}")
         self.ui.page_folder_scroll.show()
         self.ui.page_folder_scroll.widget().show()

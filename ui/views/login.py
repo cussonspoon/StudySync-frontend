@@ -167,9 +167,20 @@ class LoginPage(QWidget):
         try:
             user = self.user_controller.login(username, password)
             if user:
-                # Store user data in global
+                # Debug print to check user attributes
+                print(
+                    f"User ID: {user.id}, Username: {user.username}, Email: {getattr(user, 'email', 'N/A')}"
+                )
+
+                # Store user data in global, handle missing email
                 set_current_user(
-                    {"id": user.id, "username": user.username, "email": user.email}
+                    {
+                        "id": user.id,
+                        "username": user.username,
+                        "email": getattr(
+                            user, "email", "N/A"
+                        ),  # Use 'N/A' if email is missing
+                    }
                 )
                 self.login_successful.emit()
             else:

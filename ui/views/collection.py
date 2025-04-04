@@ -22,6 +22,7 @@ from ui.views.components.flashcard_components.models import (
     get_sample_flashcards,
 )
 from datetime import datetime
+from utils.global_vars import get_current_user
 
 
 class JoinContestDialog(QDialog):
@@ -124,11 +125,12 @@ class CollectionPage(QWidget):
         # Add new folders
         for i, folder in enumerate(folders):
             folder_widget = self.create_folder_widget(
-                folder["name"],
-                folder["count"],
-                folder["date"],
-                folder["avatar"],
-                folder["image"],
+                folder.id,
+                folder.name,  # Access the name attribute
+                folder.total_items,  # Access the total_items attribute
+                folder.created_at,  # Access the created_at attribute
+                folder.img_url,  # Access the img_url attribute
+                folder.img_url,  # Assuming avatar and image are the same
             )
             self.grid_layout.addWidget(folder_widget, i // 4, i % 4)
 
@@ -278,9 +280,9 @@ class CollectionPage(QWidget):
         else:
             print("No flashcard sets available")
 
-    def create_folder_widget(self, name, count, date, avatar_url, img_url):
-        folder = Folder(name, count, date, avatar_url, img_url)
-        folder.mousePressEvent = lambda e: self.on_folder_click(name, count, date)
+    def create_folder_widget(self, id, name, count, date, avatar_url, img_url):
+        folder = Folder(id, name, count, date, avatar_url, img_url)
+        folder.mousePressEvent = lambda e: self.on_folder_click(folder)
         return folder
 
     def showJoinContestDialog(self):
@@ -294,13 +296,11 @@ class CollectionPage(QWidget):
         if hasattr(self, "collection_controller"):
             print("Calling controller's createFolder")  # Debug print
             self.collection_controller.createFolder()
-            # self.collection_controller.navigate_to_folder("Untitled", 0, "Just now")
         else:
             print("No collection controller found")  # Debug print
 
-    def on_folder_click(self, name, count, date):
-        print(f"Folder clicked: {name}, count: {count}, date: {date}")  # Debug print
+    def on_folder_click(self, folder):
         if hasattr(self, "collection_controller"):
-            self.collection_controller.navigate_to_folder(name, str(count), date)
+            self.collection_controller.navigate_to_folder(folder)
         else:
             print("No collection controller found")  # Debug print
