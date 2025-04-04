@@ -22,7 +22,6 @@ from ui.views.community import CommunityPage
 from ui.views.user_profile import UserProfilePage
 from ui.views.folder import FolderDetailPage
 
-
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")

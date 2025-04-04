@@ -382,5 +382,9 @@ class CreateModeDialog(QDialog):
             if note_dialog.exec():
                 note_data = note_dialog.getNoteData()
                 print("Note Data:", note_data)  # You can handle the note data here
+        elif "Flashcard" in mode:
+            pass
+        elif "Quiz" in mode:
+            pass
         else:
             self.accept()
