@@ -117,7 +117,7 @@ class QuestionCard(QFrame):
 class QuizPage(QWidget):
     def __init__(self, parent=None, quiz: Quiz = None):
         super().__init__(parent)
-        self.quiz = Quiz(id="b6e3886a-7c02-40f5-bdf6-fb8b50c9118c", title="Quiz 1", quiz_type="quiz", mode="normal")
+        self.quiz = Quiz(id="d592e4a8-6aea-4fa8-92dd-c562db757a0b", title="Quiz 1", quiz_type="quiz", mode="normal")
         self.quiz_controller = QuizController(self.quiz)
         self.questions = []
         

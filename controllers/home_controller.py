@@ -1,24 +1,39 @@
-from services.folder_service import get_folders
+from services.folder_service import FolderService
 from services.task_service import get_tasks
 from services.task_service import create_task
 from services.folder_service import search_folder
+from utils.global_vars import get_current_user
 
 
 class HomeController:
-    def __init__(self, homepage):
+    def __init__(self, homepage, ui):
         self.homepage = homepage
+        self.ui = ui  # Store the UI reference
         self.loadFolders()
         self.loadTasks()
 
-    def loadFolders(self):
-        folders = get_folders()  # API call
+    def loadFolders(self, folders=None):
+        if folders is None:
+            # Get current user and their folders
+            current_user = get_current_user()
+            if current_user:
+                folders = FolderService.get_user_folders(current_user.id)
+            else:
+                folders = []
+
         self.homepage.folders = folders
 
         # Update the collections and recommendFolders components
         if hasattr(self.homepage, "collections"):
             self.homepage.collections.update_folders(folders)
+            self.homepage.collections.set_controller(
+                self
+            )  # Set controller for collections
         if hasattr(self.homepage, "recommendFolders"):
             self.homepage.recommendFolders.update_folders(folders)
+            self.homepage.recommendFolders.set_controller(
+                self
+            )  # Set controller for recommendFolders
 
     # task management with UI
     def loadTasks(self):
@@ -48,6 +63,15 @@ class HomeController:
         # Call the search service
         results = search_folder(search_text)
         return results
+
+    def navigate_to_folder(self, folder):
+        print(f"Navigating to folder: {folder.name}")
+        # Use the UI's contentArea to switch pages
+        self.ui.contentArea.setCurrentWidget(self.ui.page_folder_scroll)
+        folder_page = self.ui.page_folder_scroll.widget()
+        folder_page.folder_name.setText(f"📁 {folder.name}")
+        self.ui.page_folder_scroll.show()
+        self.ui.page_folder_scroll.widget().show()
 
     # def setupSearch(self):
     #     self.home_page.searchBar.textChanged.connect(self.searchFolders)
