@@ -73,41 +73,6 @@ class Ui_MainWindow(object):
             "community", "community.png", QRect(10, 380, 51, 61)
         )
 
-        # Add test button to sidebar
-        self.test_folder = QPushButton(self.menus)
-        self.test_folder.setText("Test Folder")
-        self.test_folder.setGeometry(QRect(10, 470, 51, 61))
-        self.test_folder.setObjectName("test_folder")
-        self.test_folder.setStyleSheet(
-            """
-            QPushButton {
-                background-color: #87db8a;
-                border: none;
-                border-radius: 10px;
-                padding: 5px;
-                color: black;
-                font-size: 10px;
-            }
-            QPushButton:hover {
-                background-color: #79AD47;
-            }
-        """
-        )
-
-        self.bottom = QFrame(self.sidebar)
-        self.bottom.setGeometry(QRect(10, 620, 71, 141))
-        self.bottom.setFrameShape(QFrame.Shape.NoFrame)
-        self.bottom.setObjectName("bottom")
-
-        self.logout = QPushButton(self.bottom)
-        self.logout.setGeometry(QRect(0, 70, 71, 61))
-        icon = QIcon()
-        img_path = QDir.currentPath() + "/static/images/logout.png"
-        icon.addFile(img_path, QSize(), QIcon.Mode.Normal, QIcon.State.Off)
-        self.logout.setIcon(icon)
-        self.logout.setIconSize(QSize(50, 50))
-        self.logout.setObjectName("logout")
-
         # Content Area
         self.contentArea = QStackedWidget(self.centralwidget)
         self.contentArea.setGeometry(QRect(90, 0, 1300, 831))
@@ -189,9 +154,6 @@ class Ui_MainWindow(object):
         self.stats.setText("")
         self.noti.setText("")
         self.community.setText("")
-        self.logout.setText("")
-
-        self.logout.setText("")
 
 
 class MainWindow(QMainWindow):
@@ -217,19 +179,10 @@ class MainWindow(QMainWindow):
             lambda: self.ui.contentArea.setCurrentWidget(self.ui.page_community_scroll)
         )
 
-        # Connect test folder button directly to page switch
-        self.ui.test_folder.clicked.connect(
-            lambda: self.ui.contentArea.setCurrentWidget(self.ui.page_folder_scroll)
-        )
-
-        # Initialize folder page only once
-        self.folder_page = FolderDetailPage()
-        self.ui.page_folder_scroll.setWidget(self.folder_page)
-
-        # Get the CollectionPage widget and connect folder click
-        collection_page = self.ui.page_collection_scroll.widget()
-        collection_page.folder_clicked.connect(self.show_folder_page)
-
-    def show_folder_page(self):
-        print("Showing folder page")
+    def show_folder_page(self, name, count, date):
+        print(f"Showing folder page for: {name}")
         self.ui.contentArea.setCurrentWidget(self.ui.page_folder_scroll)
+        folder_page = self.ui.page_folder_scroll.widget()
+        folder_page.folder_name.setText(f"📁 {name}")
+        self.ui.page_folder_scroll.show()
+        self.ui.page_folder_scroll.widget().show()

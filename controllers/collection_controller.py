@@ -5,8 +5,10 @@ from services.folder_service import search_folder
 
 
 class Collection_Controller:
-    def __init__(self, collection_page):
+    def __init__(self, collection_page, ui):
         self.collection_page = collection_page
+        self.ui = ui  # Store the UI reference
+        self.collection_page.set_controller(self)
         self.loadFolders()
 
     def loadFolders(self):
@@ -34,3 +36,12 @@ class Collection_Controller:
             self.loadFolders()
         except Exception as e:
             print(f"Error creating folder: {e}")  # Debug print
+
+    def navigate_to_folder(self, name, count, date):
+        print(f"Navigating to folder: {name}")
+        # Use the UI's contentArea to switch pages
+        self.ui.contentArea.setCurrentWidget(self.ui.page_folder_scroll)
+        folder_page = self.ui.page_folder_scroll.widget()
+        folder_page.folder_name.setText(f"📁 {name}")
+        self.ui.page_folder_scroll.show()
+        self.ui.page_folder_scroll.widget().show()

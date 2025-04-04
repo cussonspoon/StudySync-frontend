@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QFrame,
     QLineEdit,
     QMenu,
+    QSizePolicy
 )
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QPixmap, QAction, QIcon
@@ -25,8 +26,10 @@ class Tag(QFrame):
         self.setStyleSheet(
             f"background-color: {color}; border-radius: 5px; padding: 3px;"
         )
+        self.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(5, 0, 5, 0)
+        layout.setContentsMargins(0, 0, 0, 0)
 
         label = QLabel(name)
         label.setStyleSheet("font-size: 12px;")
@@ -49,32 +52,37 @@ class FolderDetailPage(QWidget):
             """
             QWidget {
                 background-color: #FAFAFA;
-                color: black;  /* Set default text color to black */
+                color: black;
             }
             QLabel {
-                color: black;  /* Ensure all labels are black */
+                color: black;
             }
-        """
+            QScrollArea {
+                border: none;
+            }
+            """
         )
 
-        # Create main horizontal layout to hold sidebar and content
+        # Create main horizontal layout to hold content
         main_horizontal_layout = QHBoxLayout(self)
-        main_horizontal_layout.setContentsMargins(0, 0, 0, 0)
+        # main_horizontal_layout.setContentsMargins(10, 10, 10, 10)
         main_horizontal_layout.setSpacing(0)
 
         content_widget = QWidget()
+        content_widget.setFixedWidth(1190)
 
         # Move existing main_layout to content_widget
         self.main_layout = QVBoxLayout(content_widget)
-        self.main_layout.setAlignment(Qt.AlignTop)
+        # self.main_layout.setContentsMargins(10, 10, 10, 10)
+        self.main_layout.setSpacing(2)
 
         # === Scroll Area ===
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setWidget(content_widget)
-        scroll.setStyleSheet("QScrollArea { border: none; }")
+        scroll.setWidget(content_widget)  # Changed to use content_widget directly
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
-        # Add sidebar and scroll area to main horizontal layout
+        # Add scroll area to main horizontal layout
         main_horizontal_layout.addWidget(scroll)
 
         # === Banner ===
@@ -82,10 +90,8 @@ class FolderDetailPage(QWidget):
         banner.setStyleSheet("background-color: lightgray; border-radius: 10px;")
         banner.setFixedHeight(250)
         banner_layout = QVBoxLayout(banner)
-        banner_layout.setSpacing(0)  # Reduce spacing between elements
-        banner_layout.setContentsMargins(
-            20, 60, 20, 20
-        )  # Add top margin to center content
+        banner_layout.setSpacing(0)
+        banner_layout.setContentsMargins(10, 10, 10, 10)
 
         self.folder_name = QLabel("📁 Folder Name")
         self.folder_name.setStyleSheet(
@@ -107,6 +113,9 @@ class FolderDetailPage(QWidget):
         banner_layout.addWidget(created_label)
         banner_layout.addWidget(upload_btn, alignment=Qt.AlignRight)
 
+        # Add banner to main layout
+        self.main_layout.addWidget(banner)
+
         # Create a widget to hold all content cards
         self.content_area = QWidget()
         self.content_layout = QVBoxLayout(self.content_area)
@@ -118,12 +127,11 @@ class FolderDetailPage(QWidget):
         owner_label.setStyleSheet("color: black;")
         owner_tag = Tag("Arhway", "#FBC490")
 
-        self.main_layout.addSpacing(20)
-
         collaborator_label = QLabel("Collaborators")
         collaborator_label.setStyleSheet("color: black;")
         collaborator_layout = QHBoxLayout()
         collaborator_layout.setContentsMargins(0, 0, 0, 0)
+        collaborator_layout.setSpacing(0)
         self.collaborators = []
 
         # Example collaborators
@@ -136,10 +144,11 @@ class FolderDetailPage(QWidget):
 
         # Visibility and Action Buttons Row
         visibility_row = QHBoxLayout()
+        visibility_row.setContentsMargins(0, 5, 0, 5)
         visibility = QLabel("Visibility: Private")
         visibility.setStyleSheet("color: black;")
         visibility_row.addWidget(visibility)
-        visibility_row.addStretch()  # Push buttons to the right
+        visibility_row.addStretch()
 
         # Action buttons
         self.action_btn = QPushButton("⋮")
@@ -180,15 +189,16 @@ class FolderDetailPage(QWidget):
         visibility_row.addWidget(plus_btn)
         plus_btn.clicked.connect(self.show_create_dialog)
 
-        # Add to main layout
-        self.main_layout.addWidget(banner)
-        self.main_layout.addSpacing(20)
+        # Add to main layout with adjusted spacing
         self.main_layout.addWidget(owner_label)
         self.main_layout.addWidget(owner_tag)
+        self.main_layout.addSpacing(5)
         self.main_layout.addWidget(collaborator_label)
         self.main_layout.addLayout(collaborator_layout)
+
+        self.main_layout.addSpacing(5)
         self.main_layout.addLayout(visibility_row)
-        self.main_layout.addWidget(self.content_area)  # Add content area last
+        self.main_layout.addWidget(self.content_area)
 
     def add_collaborator(self):
         # Simple example to add collaborator
@@ -305,18 +315,3 @@ class CreateModeDialog(QDialog):
         parent.content_layout.insertWidget(0, content_card)
 
         self.accept()
-
-
-# class MainWindow(QMainWindow):
-#     def __init__(self):
-#         super().__init__()
-#         self.setWindowTitle("Folder Detail")
-#         self.setMinimumSize(1000, 700)
-#         self.setCentralWidget(FolderDetailPage())
-
-
-# if __name__ == "__main__":
-#     app = QApplication(sys.argv)
-#     window = MainWindow()
-#     window.show()
-#     sys.exit(app.exec())

@@ -28,7 +28,8 @@ class WindowController:
 
         # Initialize Collection Controller
         self.collection_controller = Collection_Controller(
-            self.ui.page_collection_scroll.widget()
+            self.ui.page_collection_scroll.widget(),
+            self.ui,  # Pass the UI which contains the main window
         )
 
         # Set controllers on their respective pages

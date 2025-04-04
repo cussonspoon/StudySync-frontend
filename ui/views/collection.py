@@ -299,4 +299,7 @@ class CollectionPage(QWidget):
 
     def on_folder_click(self, name, count, date):
         print(f"Folder clicked: {name}, count: {count}, date: {date}")  # Debug print
-        self.folder_clicked.emit(name, count, date)
+        if hasattr(self, "collection_controller"):
+            self.collection_controller.navigate_to_folder(name, str(count), date)
+        else:
+            print("No collection controller found")  # Debug print
