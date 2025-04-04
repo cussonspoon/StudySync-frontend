@@ -23,6 +23,97 @@ from models.quiz import Question, Quiz, Choice
 from controllers.quiz_controller import QuizController
 from typing import List
 
+class QuestionCard(QFrame):
+    def __init__(self, question_data, parent=None):
+        super().__init__(parent)
+        self.question_data = question_data
+        self.quiz_page = parent  # Store reference to QuizPage
+        self.setup_ui()
+
+    def setup_ui(self):
+        self.setStyleSheet("""
+            QFrame {
+                background-color: #f8f9fa;
+                border-radius: 10px;
+                padding: 20px;
+            }
+        """)
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(15)
+
+        # Question Label
+        question_label = QuizQuestionCard(self.question_data["question"])
+        question_label.setStyleSheet("""
+            QLabel {
+                font-size: 18px;
+                color: #2c3e50;
+                font-weight: 500;
+                padding: 10px;
+            }
+        """)
+        layout.addWidget(question_label)
+
+        # Action Buttons
+        buttons_layout = QHBoxLayout()
+        buttons_layout.setContentsMargins(0, 0, 0, 0)
+        buttons_layout.setSpacing(10)
+        buttons_layout.setAlignment(Qt.AlignRight)
+
+        # Edit Button
+        edit_button = QPushButton("Edit")
+        edit_button.setStyleSheet("""
+            QPushButton {
+                background-color: #3498db;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 8px 15px;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #2980b9;
+            }
+            QPushButton:pressed {
+                background-color: #1c669b;
+            }
+        """)
+        edit_button.clicked.connect(self.handle_edit)
+        buttons_layout.addWidget(edit_button)
+
+        # Remove Button
+        remove_button = QPushButton("Remove")
+        remove_button.setStyleSheet("""
+            QPushButton {
+                background-color: #e74c3c;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 8px 15px;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #c0392b;
+            }
+            QPushButton:pressed {
+                background-color: #a93226;
+            }
+        """)
+        remove_button.clicked.connect(self.handle_remove)
+        buttons_layout.addWidget(remove_button)
+
+        layout.addLayout(buttons_layout)
+
+    def handle_edit(self):
+        if self.quiz_page:
+            self.quiz_page.show_question_dialog(question=self.question_data, dialog_type="edit")
+
+    def handle_remove(self):
+        if self.quiz_page:
+            self.quiz_page.remove_question(self)
+
 class QuizPage(QWidget):
     def __init__(self, parent=None, quiz: Quiz = None):
         super().__init__(parent)
@@ -294,6 +385,11 @@ class QuizPage(QWidget):
         except Exception as e:
             print("Error adding question:", str(e))
             QMessageBox.warning(self, "Error", "Failed to add question. Please try again.")
+    
+    def clear_layout(self):
+        for i in reversed(range(self.questions_layout.count())):
+            item = self.questions_layout.itemAt(i)
+            item.widget().deleteLater()
 
     def save_question(self, question_data):
         """Saves an edited question."""
@@ -310,113 +406,32 @@ class QuizPage(QWidget):
 
     def add_question_to_ui(self, question_data):
         """Creates a UI row for a question with answer choices, edit and remove buttons."""
-        question_container = QFrame()
-        question_container.setStyleSheet("""
-            QFrame {
-                background-color: #f8f9fa;
-                border-radius: 10px;
-                padding: 20px;
-            }
-        """)
-        question_layout = QVBoxLayout(question_container)
-        question_layout.setContentsMargins(0, 0, 0, 0)
-        question_layout.setSpacing(15)
+        question_card = QuestionCard(question_data, self)
+        self.questions_layout.addWidget(question_card)
 
-        # Question Label
-        question_label = QuizQuestionCard(question_data["question"])
-        question_label.setStyleSheet("""
-            QLabel {
-                font-size: 18px;
-                color: #2c3e50;
-                font-weight: 500;
-                padding: 10px;
-            }
-        """)
-        question_layout.addWidget(question_label)
+    def remove_question(self, question_card):
+        try:
+            # Remove from data
+            question_text = question_card.question_data["question"]
+            self.questions = [q for q in self.questions if q.question != question_text]
 
-        # Action Buttons
-        buttons_layout = QHBoxLayout()
-        buttons_layout.setContentsMargins(0, 0, 0, 0)
-        buttons_layout.setSpacing(10)
-        buttons_layout.setAlignment(Qt.AlignRight)
+            # Remove from UI
+            self.questions_layout.removeWidget(question_card)
+            question_card.deleteLater()
 
-        # Edit Button
-        edit_button = QPushButton("Edit")
-        edit_button.setStyleSheet("""
-            QPushButton {
-                background-color: #3498db;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                padding: 8px 15px;
-                font-size: 14px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #2980b9;
-            }
-            QPushButton:pressed {
-                background-color: #1c669b;
-            }
-        """)
-        edit_button.clicked.connect(lambda: self.show_question_dialog(question=question_data, dialog_type="edit"))
-        buttons_layout.addWidget(edit_button)
-
-        # Remove Button
-        remove_button = QPushButton("Remove")
-        remove_button.setStyleSheet("""
-            QPushButton {
-                background-color: #e74c3c;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                padding: 8px 15px;
-                font-size: 14px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #c0392b;
-            }
-            QPushButton:pressed {
-                background-color: #a93226;
-            }
-        """)
-        remove_button.clicked.connect(lambda: self.remove_question(question_label, question_layout))
-        buttons_layout.addWidget(remove_button)
-
-        question_layout.addLayout(buttons_layout)
-        self.questions_layout.addWidget(question_container)
-
-    def _cleanup_layout(self, layout):
-        """Helper method to clean up all widgets and nested layouts."""
-        while layout.count():
-            item = layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
-            elif item.layout():
-                nested_layout = item.layout()
-                self._cleanup_layout(nested_layout)
-                nested_layout.deleteLater()
-
-    def remove_question(self, question_label, question_layout):
-        """Removes a question from the UI and the data list."""
-        # Remove from data
-        question_text = question_label.question_text
-        self.questions = [q for q in self.questions if q.question != question_text]
-
-        # Clean up UI
-        self._cleanup_layout(question_layout)
-        self.questions_layout.removeItem(question_layout)
-        question_layout.deleteLater()
+            # Update the UI
+            self.scrollAreaContent.update()
+            self.scrollArea.update()
+            
+        except Exception as e:
+            print(f"Error removing question: {e}")
+            QMessageBox.warning(self, "Error", "Failed to remove question.")
 
     def refresh_questions(self):
         """Clears and reloads all questions from the API."""
         try:
             # Clear existing questions from UI
-            while self.questions_layout.count():
-                item = self.questions_layout.takeAt(0)
-                if item.widget():
-                    item.widget().deleteLater()
+            self.clear_layout()
             
             # Clear existing questions list
             self.questions.clear()

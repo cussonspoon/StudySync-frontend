@@ -3,12 +3,15 @@ from PySide6.QtNetwork import QNetworkReply
 from .base_controller import BaseController
 from models.user import User
 from typing import Optional
-
+from utils.session_manager import SessionManager
 # Example of how to use the UserController
 class UserController(BaseController):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.current_user = None
+        self.session_manager = SessionManager.get_instance()
+        self.current_user = self.session_manager.get_current_user()
+        print(self.current_user)
 
     def fetch_user_data(self, user_id):
         """Fetch user data synchronously from the server."""
