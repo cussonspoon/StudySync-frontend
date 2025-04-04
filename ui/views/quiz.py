@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
 )
 from PySide6.QtCore import QRect, Qt, QSize
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QFont
 from utils.ui import QuizQuestionCard
 from ..views.components.quiz_dialog import QuizDialog
 from .components.quiz_start import QuizStart
@@ -34,132 +34,205 @@ class QuizPage(QWidget):
 
     def init_ui(self):
         self.setObjectName("Form")
-        self.setStyleSheet("background-color: #FAFAFA;")
-        self.setFixedWidth(1200)  # Set fixed width for the entire page
+        self.setStyleSheet("""
+            QWidget {
+                background-color: #f8f9fa;
+            }
+        """)
+        self.setFixedWidth(1200)
         self.setFixedHeight(800)
-        
-        # Set size policy to expand in both directions
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
 
-        # 📌 Main Layout for the entire QuizPage
+        # Main Layout
         self.main_layout = QVBoxLayout(self)
-        self.main_layout.setContentsMargins(20, 20, 20, 20)  # Add some padding around the edges
-        self.main_layout.setSpacing(20)  # Add spacing between elements
+        self.main_layout.setContentsMargins(30, 30, 30, 30)
+        self.main_layout.setSpacing(25)
         self.main_layout.setAlignment(Qt.AlignTop)
 
-        # 📌 Back Button Container (Full Width)
-        back_button_container = QHBoxLayout()
-        back_button_container.setContentsMargins(0, 0, 0, 0)
-        back_button_container.setAlignment(Qt.AlignLeft)
+        # Header Container
+        header_container = QFrame()
+        header_container.setStyleSheet("""
+            QFrame {
+                background-color: white;
+                border-radius: 15px;
+                padding: 20px;
+            }
+        """)
+        header_layout = QVBoxLayout(header_container)
+        header_layout.setContentsMargins(0, 0, 0, 0)
+        header_layout.setSpacing(15)
 
-        # 📌 Back Button
+        # Back Button and Title Container
+        top_container = QHBoxLayout()
+        top_container.setContentsMargins(0, 0, 0, 0)
+        top_container.setSpacing(20)
+
+        # Back Button
         self.back_button = QPushButton("← Back")
-        self.back_button.setFixedSize(100, 50)
-        self.back_button.setStyleSheet(
-            "padding: 10px; font-size: 18px; background-color: #E0E0E0; color: black; border-radius: 10px;"
-        )
+        self.back_button.setFixedSize(100, 40)
+        self.back_button.setStyleSheet("""
+            QPushButton {
+                background-color: #e9ecef;
+                color: #2c3e50;
+                border: none;
+                border-radius: 10px;
+                font-size: 16px;
+                font-weight: bold;
+                padding: 8px;
+            }
+            QPushButton:hover {
+                background-color: #dee2e6;
+            }
+            QPushButton:pressed {
+                background-color: #ced4da;
+            }
+        """)
         self.back_button.clicked.connect(self.go_back)
-        back_button_container.addWidget(self.back_button)
-        
-        # Add back button container to main layout
-        self.main_layout.addLayout(back_button_container)
+        top_container.addWidget(self.back_button)
 
-        # 📌 Quiz Name
+        # Quiz Title
         self.quiz_name = QLabel(self.quiz.title)
-        self.quiz_name.setObjectName("quiz_name")
-        self.quiz_name.setStyleSheet(
-            "background-color: rgb(217, 217, 217);\n"
-            "color: rgb(0, 0, 0);\n"
-            "padding: 20px;\n"
-            "font-size: 40px;\n"
-            "font-weight: bold;\n"
-            "border-radius: 10px;"
-            "border: 1px solid #DCDCDC;"
-        )
+        self.quiz_name.setStyleSheet("""
+            QLabel {
+                color: #2c3e50;
+                font-size: 32px;
+                font-weight: bold;
+                padding: 10px;
+            }
+        """)
         self.quiz_name.setWordWrap(True)
         self.quiz_name.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        self.main_layout.addWidget(self.quiz_name)
+        top_container.addWidget(self.quiz_name)
 
-        # 📌 Scroll Area Setup
+        header_layout.addLayout(top_container)
+
+        # Action Buttons Container
+        action_container = QHBoxLayout()
+        action_container.setContentsMargins(0, 0, 0, 0)
+        action_container.setSpacing(15)
+        action_container.setAlignment(Qt.AlignRight)
+
+        # Add Button
+        self.add_button = QPushButton()
+        self.add_button.setIcon(QIcon("static/images/plus.svg"))
+        self.add_button.setIconSize(QSize(24, 24))
+        self.add_button.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                border: none;
+                border-radius: 10px;
+                padding: 10px;
+            }
+            QPushButton:hover {
+                background-color: #45a049;
+            }
+            QPushButton:pressed {
+                background-color: #3d8b40;
+            }
+        """)
+        self.add_button.setFixedSize(50, 50)
+        self.add_button.clicked.connect(lambda: self.show_question_dialog(dialog_type="add"))
+        action_container.addWidget(self.add_button)
+
+        # Refresh Button
+        self.refresh_button = QPushButton()
+        self.refresh_button.setIcon(QIcon("static/images/refresh.svg"))
+        self.refresh_button.setIconSize(QSize(24, 24))
+        self.refresh_button.setStyleSheet("""
+            QPushButton {
+                background-color: #3498db;
+                border: none;
+                border-radius: 10px;
+                padding: 10px;
+            }
+            QPushButton:hover {
+                background-color: #2980b9;
+            }
+            QPushButton:pressed {
+                background-color: #1c669b;
+            }
+        """)
+        self.refresh_button.setFixedSize(50, 50)
+        self.refresh_button.clicked.connect(lambda: self.refresh_questions())
+        action_container.addWidget(self.refresh_button)
+
+        # Start Quiz Button
+        self.start_quiz_button = QPushButton("Start Quiz")
+        self.start_quiz_button.setStyleSheet("""
+            QPushButton {
+                background-color: #2ecc71;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-size: 16px;
+                font-weight: bold;
+                padding: 10px 20px;
+            }
+            QPushButton:hover {
+                background-color: #27ae60;
+            }
+            QPushButton:pressed {
+                background-color: #219653;
+            }
+        """)
+        self.start_quiz_button.setFixedSize(150, 50)
+        self.start_quiz_button.clicked.connect(lambda: self.start_quiz())
+        action_container.addWidget(self.start_quiz_button)
+
+        header_layout.addLayout(action_container)
+        self.main_layout.addWidget(header_container)
+
+        # Questions Container
+        questions_container = QFrame()
+        questions_container.setStyleSheet("""
+            QFrame {
+                background-color: white;
+                border-radius: 15px;
+                padding: 20px;
+            }
+        """)
+        questions_layout = QVBoxLayout(questions_container)
+        questions_layout.setContentsMargins(0, 0, 0, 0)
+        questions_layout.setSpacing(20)
+
+        # Scroll Area
         self.scrollArea = QScrollArea()
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setStyleSheet("""
             QScrollArea {
-                background-color: #FAFAFA;
+                background-color: transparent;
                 border: none;
             }
             QScrollBar:vertical {
                 border: none;
-                background: #F0F0F0;
+                background: #f8f9fa;
                 width: 10px;
                 margin: 0px;
             }
             QScrollBar::handle:vertical {
-                background: #C0C0C0;
+                background: #dee2e6;
                 min-height: 20px;
                 border-radius: 5px;
             }
             QScrollBar::handle:vertical:hover {
-                background: #A0A0A0;
+                background: #ced4da;
             }
         """)
 
-        # 📌 Content Widget for Scroll Area
+        # Scroll Area Content
         self.scrollAreaContent = QWidget()
         self.scrollArea.setWidget(self.scrollAreaContent)
         
-        # 📌 Main Layout for the Scroll Area Content
-        self.layout = QVBoxLayout(self.scrollAreaContent)
-        self.layout.setContentsMargins(0, 0, 0, 0)
-        self.layout.setSpacing(20)
-        self.layout.setAlignment(Qt.AlignTop)
-
-        # 📌 Questions Layout
-        self.questions_layout = QVBoxLayout()
+        # Questions Layout
+        self.questions_layout = QVBoxLayout(self.scrollAreaContent)
+        self.questions_layout.setContentsMargins(0, 0, 0, 0)
         self.questions_layout.setSpacing(20)
-        self.layout.addLayout(self.questions_layout)
+        self.questions_layout.setAlignment(Qt.AlignTop)
 
-        # 📌 Add Button Layout
-        self.add_button_layout = QHBoxLayout()
-        self.add_button_layout.setAlignment(Qt.AlignRight)
-        self.add_button_layout.setSpacing(10)
+        questions_layout.addWidget(self.scrollArea)
+        self.main_layout.addWidget(questions_container)
 
-        # 📌 Add Button
-        self.add_button = QPushButton()
-        self.add_button.setIcon(QIcon("static/images/plus.svg")) 
-        self.add_button.setIconSize(QSize(24, 24))
-        self.add_button.setStyleSheet(
-            "padding: 10px; background-color: #4CAF50; color: white; border-radius: 10px;"
-        )
-        self.add_button.setFixedSize(50, 50)
-        self.add_button.clicked.connect(lambda: self.show_question_dialog(dialog_type="add"))
-        
-        self.start_quiz_button = QPushButton("Start Quiz")
-        self.start_quiz_button.setStyleSheet(
-            "padding: 10px; font-size: 18px; background-color: #4CAF50; color: white; border-radius: 10px;"
-        )
-        self.start_quiz_button.setFixedSize(200, 50)
-        self.start_quiz_button.clicked.connect(lambda: self.start_quiz())
-
-        self.refresh_button = QPushButton()    
-        self.refresh_button.setIcon(QIcon("static/images/refresh.svg"))
-        self.refresh_button.setIconSize(QSize(24, 24))
-        self.refresh_button.setStyleSheet(
-            "padding: 10px; background-color: #4CAF50; border-radius: 10px; color: white;"
-        )
-        self.refresh_button.setFixedSize(50, 50)
-        self.refresh_button.clicked.connect(lambda: self.refresh_questions())
-        
-        self.add_button_layout.addWidget(self.add_button)
-        self.add_button_layout.addWidget(self.refresh_button)
-        self.add_button_layout.addWidget(self.start_quiz_button)
-        
-        self.main_layout.addLayout(self.add_button_layout)
-        
-        # 📌 Add Scroll Area to Main Layout
-        self.main_layout.addWidget(self.scrollArea)
-
-        # 📌 Load Initial Questions
+        # Load Initial Questions
         self.load_questions()
 
     def go_back(self):
@@ -184,99 +257,135 @@ class QuizPage(QWidget):
 
     def show_question_dialog(self, question: Question = None, dialog_type: str = "add"):
         """Shows a dialog to create or edit a question."""
-        # Convert dictionary to Question object if needed
-        if isinstance(question, dict):
-            temp_question = Question(
-                id="",  # Empty string for new questions
-                question=question["question"],
-                created_at="",
-                quiz_id=self.quiz.id,
-                choices=[Choice(id="", choice=choice["choice"], is_answer=choice["is_answer"], question_id="") for choice in question["choices"]]
-            )
-            question = temp_question
+        try:
+            # Convert dictionary to Question object if needed
+            if isinstance(question, dict):
+                temp_question = Question(
+                    id="",  # Empty string for new questions
+                    question=question["question"],
+                    created_at="",
+                    quiz_id=self.quiz.id,
+                    choices=[Choice(id="", choice=choice["choice"], is_answer=choice["is_answer"], question_id="") for choice in question["choices"]]
+                )
+                question = temp_question
+                
+            # Create and show dialog
+            dialog = QuizDialog(question=question, parent=self, on_submit=self.add_question if dialog_type == "add" else self.save_question, dialog_type=dialog_type)
+            dialog.exec_()
             
-        if dialog_type == "add":
-            self.dialog = QuizDialog(question=question, parent=self, on_submit=self.add_question, dialog_type=dialog_type)
-        elif dialog_type == "edit":
-            self.dialog = QuizDialog(question=question, parent=self, on_submit=self.save_question, dialog_type=dialog_type)
+        except Exception as e:
+            print(f"Error showing dialog: {str(e)}")
+            QMessageBox.warning(self, "Error", "Failed to open dialog. Please try again.")
 
-        self.dialog.exec_()
-
-    def save_question(
-        self, question_text, choices, question_data=None
-    ):
-        """Saves a new question or edits an existing one."""
-        if (
-            not question_text.strip()
-            or any(not choice.strip() for choice in choices)
-        ):
-            return  # Prevent adding empty questions
-
-        if question_data:
-            # Editing an existing question
-            question_data.question = question_text
-            question_data.choices = choices
-            self.refresh_questions()
-        else:
-            # Adding a new question
-            new_question = Question(
-                id="",  # Empty string for new questions
-                question=question_text,
-                created_at="",
-                quiz_id=self.quiz.id,
-                choices=[Choice(id="", choice=choice["choice"], is_answer=choice["is_answer"], question_id="") for choice in choices]
-            )
-            self.questions.append(new_question)
-            self.add_question_to_ui({
-                "question": question_text,
-                "choices": choices
-            })
-
-        self.dialog.accept()
-        
     def add_question(self, question_data):
         """Adds a new question to the quiz data and UI."""
         try:
+            # Post question first
             reply = self.quiz_controller.post_question(self.quiz.id, question_data["question"])            
             question_id = reply["id"]
+            
+            # Post choices
             for choice in question_data["choices"]:
                 self.quiz_controller.post_choice(question_id, choice["choice"], choice["is_answer"])
-            self.dialog.accept()  # Close the dialog after successful save
+                
+            # Refresh questions
             self.refresh_questions()
+            
         except Exception as e:
             print("Error adding question:", str(e))
+            QMessageBox.warning(self, "Error", "Failed to add question. Please try again.")
+
+    def save_question(self, question_data):
+        """Saves an edited question."""
+        try:
+            # Update question
+            self.quiz_controller.update_question(question_data)
+            
+            # Refresh questions
+            self.refresh_questions()
+            
+        except Exception as e:
+            print("Error saving question:", str(e))
+            QMessageBox.warning(self, "Error", "Failed to save question. Please try again.")
 
     def add_question_to_ui(self, question_data):
         """Creates a UI row for a question with answer choices, edit and remove buttons."""
-        question_row = QVBoxLayout()
+        question_container = QFrame()
+        question_container.setStyleSheet("""
+            QFrame {
+                background-color: #f8f9fa;
+                border-radius: 10px;
+                padding: 20px;
+            }
+        """)
+        question_layout = QVBoxLayout(question_container)
+        question_layout.setContentsMargins(0, 0, 0, 0)
+        question_layout.setSpacing(15)
 
         # Question Label
         question_label = QuizQuestionCard(question_data["question"])
-        question_label.setStyleSheet("font-size: 18px;")
-        question_row.addWidget(question_label)
+        question_label.setStyleSheet("""
+            QLabel {
+                font-size: 18px;
+                color: #2c3e50;
+                font-weight: 500;
+                padding: 10px;
+            }
+        """)
+        question_layout.addWidget(question_label)
 
-        # Edit & Remove Buttons
+        # Action Buttons
         buttons_layout = QHBoxLayout()
+        buttons_layout.setContentsMargins(0, 0, 0, 0)
+        buttons_layout.setSpacing(10)
         buttons_layout.setAlignment(Qt.AlignRight)
 
+        # Edit Button
         edit_button = QPushButton("Edit")
-        edit_button.setStyleSheet(
-            "padding: 8px; font-size: 14px; background-color: blue; color: white; border-radius: 5px;"
-        )
+        edit_button.setStyleSheet("""
+            QPushButton {
+                background-color: #3498db;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 8px 15px;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #2980b9;
+            }
+            QPushButton:pressed {
+                background-color: #1c669b;
+            }
+        """)
         edit_button.clicked.connect(lambda: self.show_question_dialog(question=question_data, dialog_type="edit"))
         buttons_layout.addWidget(edit_button)
 
+        # Remove Button
         remove_button = QPushButton("Remove")
-        remove_button.setStyleSheet(
-            "padding: 8px; font-size: 14px; background-color: red; color: white; border-radius: 5px;"
-        )
-        remove_button.clicked.connect(
-            lambda: self.remove_question(question_label, question_row)
-        )
+        remove_button.setStyleSheet("""
+            QPushButton {
+                background-color: #e74c3c;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 8px 15px;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #c0392b;
+            }
+            QPushButton:pressed {
+                background-color: #a93226;
+            }
+        """)
+        remove_button.clicked.connect(lambda: self.remove_question(question_label, question_layout))
         buttons_layout.addWidget(remove_button)
 
-        question_row.addLayout(buttons_layout)
-        self.questions_layout.addLayout(question_row)
+        question_layout.addLayout(buttons_layout)
+        self.questions_layout.addWidget(question_container)
 
     def _cleanup_layout(self, layout):
         """Helper method to clean up all widgets and nested layouts."""
@@ -289,30 +398,46 @@ class QuizPage(QWidget):
                 self._cleanup_layout(nested_layout)
                 nested_layout.deleteLater()
 
-    def remove_question(self, question_label, question_row):
+    def remove_question(self, question_label, question_layout):
         """Removes a question from the UI and the data list."""
         # Remove from data
         question_text = question_label.question_text
         self.questions = [q for q in self.questions if q.question != question_text]
 
         # Clean up UI
-        self._cleanup_layout(question_row)
-        self.questions_layout.removeItem(question_row)
-        question_row.deleteLater()
+        self._cleanup_layout(question_layout)
+        self.questions_layout.removeItem(question_layout)
+        question_layout.deleteLater()
 
     def refresh_questions(self):
-        """Clears and reloads all questions."""
-        # Clean up existing questions
-        self._cleanup_layout(self.questions_layout)
-        self.questions_layout.deleteLater()
-        
-        # Create a new questions layout
-        self.questions_layout = QVBoxLayout()
-        self.questions_layout.setSpacing(20)
-        self.layout.addLayout(self.questions_layout)
-        
-        # Reload questions
-        self.load_questions()
+        """Clears and reloads all questions from the API."""
+        try:
+            # Clear existing questions from UI
+            while self.questions_layout.count():
+                item = self.questions_layout.takeAt(0)
+                if item.widget():
+                    item.widget().deleteLater()
+            
+            # Clear existing questions list
+            self.questions.clear()
+            
+            # Fetch fresh questions from API
+            self.questions = self.quiz_controller.get_questions(self.quiz.id)
+            
+            # Update UI with new questions
+            for question in self.questions:
+                question_data = {
+                    "question": question.question,
+                    "choices": [
+                        {"choice": choice.choice, "is_answer": choice.is_answer}
+                        for choice in question.choices
+                    ]
+                }
+                self.add_question_to_ui(question_data)
+                
+        except Exception as e:
+            print(f"Error refreshing questions: {str(e)}")
+            QMessageBox.warning(self, "Error", "Failed to refresh questions. Please try again.")
 
     def start_quiz(self):
         """Starts the quiz."""
