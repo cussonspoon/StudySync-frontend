@@ -15,206 +15,233 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt
 from models.quiz import Question
 
-input_style = """
-            QLineEdit {
-                background-color: #ffffff;
-                border: 1px solid #ccc;
-                font-size: 16px;
-                font-weight: normal;
-                padding: 15px;
-                border-radius: 10px;
-                color: black;
-            }
-            """
-
-header_style = """
-            QLabel {
-                font-size: 20px;
-                font-weight: bold;
-                margin-bottom: 10px;
-                color: black;
-            }
-            """
-
-cancel_btn_style = """
-            QPushButton {
-                background-color: #ffffff;
-                color: black;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 10px;
-                font-size: 16px;
-            }
-            QPushButton:hover {
-                background-color: #f7f7f7;
-            }
-            QPushButton:pressed {
-                background-color: #f7f7f7;
-            }
-            """
-
-save_btn_style = """
-            QPushButton {
-                background-color: #ffffff;
-                color: black;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 10px;
-                font-size: 16px;
-            }
-            QPushButton:hover {
-                background-color: #f7f7f7;
-            }
-            QPushButton:pressed {
-                background-color: #f7f7f7;
-            }
-            """
-            
-radio_btn_style =  """
-                QRadioButton {
-                    background-color: none;
-                    color: black;
-                    font-size: 16px;
-                    font-weight: normal;
-                    padding: 10px;
-                }
-                QRadioButton::indicator {
-                    width: 20px;
-                    height: 20px;
-                }
-                QRadioButton::indicator::unchecked {
-                    image: url(./static/images/circle.svg);
-                }
-                QRadioButton::indicator::checked {
-                    image: url(./static/images/circle-check.svg);
-                }
-                QRadioButton::checked {
-                    color: green;
-                }
-                """
-
+# Define all styles in a dictionary for better organization
+STYLES = {
+    "dialog": """
+        QDialog {
+            background-color: #f8f9fa;
+        }
+    """,
+    
+    "input": """
+        QLineEdit {
+            background-color: #ffffff;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            padding: 15px;
+            color: #2c3e50;
+        }
+        QLineEdit:focus {
+            border-color: #3498db;
+        }
+        QLineEdit::placeholder {
+            color: #adb5bd;
+        }
+    """,
+    
+    "header": """
+        QLabel {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+    """,
+    
+    "radio_button": """
+        QRadioButton {
+            font-size: 16px;
+            color: #2c3e50;
+            padding: 10px;
+        }
+        QRadioButton::indicator {
+            width: 24px;
+            height: 24px;
+        }
+        QRadioButton::indicator::unchecked {
+            image: url(./static/images/circle.svg);
+        }
+        QRadioButton::indicator::checked {
+            image: url(./static/images/circle-check.svg);
+        }
+        QRadioButton:checked {
+            color: #27ae60;
+        }
+    """,
+    
+    "button": """
+        QPushButton {
+            background-color: #ffffff;
+            color: #2c3e50;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 12px 25px;
+            min-width: 120px;
+        }
+        QPushButton:hover {
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+        }
+        QPushButton:pressed {
+            background-color: #e9ecef;
+        }
+    """,
+    
+    "save_button": """
+        QPushButton {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 12px 25px;
+            min-width: 120px;
+        }
+        QPushButton:hover {
+            background-color: #27ae60;
+        }
+        QPushButton:pressed {
+            background-color: #219653;
+        }
+    """,
+    
+    "cancel_button": """
+        QPushButton {
+            background-color: #e9ecef;
+            color: #2c3e50;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 12px 25px;
+            min-width: 120px;
+        }
+        QPushButton:hover {
+            background-color: #dee2e6;
+        }
+        QPushButton:pressed {
+            background-color: #ced4da;
+        }
+    """
+}
 
 class QuizDialog(QDialog):
     def __init__(self, question: Question = None, parent=None, on_submit=None, dialog_type: str = "edit"):
         super().__init__(parent)
-        self.setWindowTitle(dialog_type.capitalize() + " Quiz")
-        self.setFixedSize(400, 500)
-        self.setStyleSheet("background-color: #f7f7f7;")
+        self.setWindowTitle(dialog_type.capitalize() + " Question")
+        self.setFixedSize(500, 600)
+        self.setStyleSheet(STYLES["dialog"])
         self.setModal(True)
         self.question = question
         self.on_submit = on_submit
+
+        # Main Layout
         layout = QVBoxLayout(self)
-        layout.setSpacing(5)
-        # layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(20)
+        layout.setContentsMargins(30, 30, 30, 30)
 
         # Title Input
         question_header = QLabel("Question:")
-        question_header.setStyleSheet(header_style)
+        question_header.setStyleSheet(STYLES["header"])
         layout.addWidget(question_header)
+
         self.title_input = QLineEdit()
         self.title_input.setText(self.question.question if self.question else "")
-        self.title_input.setStyleSheet(input_style)
+        self.title_input.setStyleSheet(STYLES["input"])
+        self.title_input.setPlaceholderText("Enter your question here...")
         layout.addWidget(self.title_input)
 
-        # Questions List
+        # Choices Header
         choice_header = QLabel("Choices:")
-        choice_header.setStyleSheet(header_style)
+        choice_header.setStyleSheet(STYLES["header"])
         layout.addWidget(choice_header)
 
         # Create button group for radio buttons
         self.answer_group = QButtonGroup(self)
 
-        # Choice 1 with radio button
-        choice1_layout = QHBoxLayout()
-        self.choice_1 = QLineEdit()
-        self.choice_1.setText(self.question.choices[0].choice if self.question and self.question.choices and len(self.question.choices) > 0 else "")
-        self.choice_1.setStyleSheet(input_style)
-        self.radio_1 = QRadioButton()
-        self.radio_1.setStyleSheet(radio_btn_style)
-        self.radio_1.setChecked(self.question.choices[0].is_answer if self.question and self.question.choices and len(self.question.choices) > 0 else False)
-        self.answer_group.addButton(self.radio_1)
-        choice1_layout.addWidget(self.choice_1)
-        choice1_layout.addWidget(self.radio_1)
-        layout.addLayout(choice1_layout)
+        # Initialize choice inputs and radio buttons
+        self.choice_inputs = []
+        self.radio_buttons = []
 
-        # Choice 2 with radio button
-        choice2_layout = QHBoxLayout()
-        self.choice_2 = QLineEdit()
-        self.choice_2.setText(self.question.choices[1].choice if self.question and self.question.choices and len(self.question.choices) > 1 else "")
-        self.choice_2.setStyleSheet(input_style)
-        self.radio_2 = QRadioButton()
-        self.radio_2.setStyleSheet(radio_btn_style)
-        self.radio_2.setChecked(self.question.choices[1].is_answer if self.question and self.question.choices and len(self.question.choices) > 1 else False)
-        self.answer_group.addButton(self.radio_2)
-        choice2_layout.addWidget(self.choice_2)
-        choice2_layout.addWidget(self.radio_2)
-        layout.addLayout(choice2_layout)
+        # Choice Inputs
+        for i in range(4):
+            choice_layout = QHBoxLayout()
+            
+            # Choice Input
+            choice_input = QLineEdit()
+            choice_input.setStyleSheet(STYLES["input"])
+            choice_input.setPlaceholderText(f"Choice {i+1}...")
+            
+            # Set text if editing existing question
+            if self.question and self.question.choices and len(self.question.choices) > i:
+                choice_input.setText(self.question.choices[i].choice)
+            
+            self.choice_inputs.append(choice_input)
+            choice_layout.addWidget(choice_input)
 
-        # Choice 3 with radio button
-        choice3_layout = QHBoxLayout()
-        self.choice_3 = QLineEdit()
-        self.choice_3.setText(self.question.choices[2].choice if self.question and self.question.choices and len(self.question.choices) > 2 else "")
-        self.choice_3.setStyleSheet(input_style)
-        self.radio_3 = QRadioButton()
-        self.radio_3.setStyleSheet(radio_btn_style)
-        self.radio_3.setChecked(self.question.choices[2].is_answer if self.question and self.question.choices and len(self.question.choices) > 2 else False)
-        self.answer_group.addButton(self.radio_3)
-        choice3_layout.addWidget(self.choice_3)
-        choice3_layout.addWidget(self.radio_3)
-        layout.addLayout(choice3_layout)
+            # Radio Button
+            radio = QRadioButton()
+            radio.setStyleSheet(STYLES["radio_button"])
+            
+            # Set checked state if editing existing question
+            if self.question and self.question.choices and len(self.question.choices) > i:
+                radio.setChecked(self.question.choices[i].is_answer)
+            
+            self.radio_buttons.append(radio)
+            self.answer_group.addButton(radio)
+            choice_layout.addWidget(radio)
 
-        # Choice 4 with radio button
-        choice4_layout = QHBoxLayout()
-        self.choice_4 = QLineEdit()
-        self.choice_4.setText(self.question.choices[3].choice if self.question and self.question.choices and len(self.question.choices) > 3 else "")
-        self.choice_4.setStyleSheet(input_style)
-        self.radio_4 = QRadioButton()
-        self.radio_4.setStyleSheet(radio_btn_style)
-        self.radio_4.setChecked(self.question.choices[3].is_answer if self.question and self.question.choices and len(self.question.choices) > 3 else False)
-        self.answer_group.addButton(self.radio_4)
-        choice4_layout.addWidget(self.choice_4)
-        choice4_layout.addWidget(self.radio_4)
-        layout.addLayout(choice4_layout)
+            layout.addLayout(choice_layout)
 
-        # Save & Cancel Buttons
+        # Buttons Layout
         btn_layout = QHBoxLayout()
-        self.save_btn = QPushButton("Save")
-        self.save_btn.setStyleSheet(save_btn_style)
-        self.save_btn.clicked.connect(lambda: self.on_submit(self.get_quiz_data()))
+        btn_layout.setSpacing(15)
+        btn_layout.setAlignment(Qt.AlignRight)
+
+        # Cancel Button
         self.cancel_btn = QPushButton("Cancel")
-        self.cancel_btn.setStyleSheet(cancel_btn_style)
+        self.cancel_btn.setStyleSheet(STYLES["cancel_button"])
         self.cancel_btn.clicked.connect(self.reject)
         btn_layout.addWidget(self.cancel_btn)
+
+        # Save Button
+        self.save_btn = QPushButton("Save")
+        self.save_btn.setStyleSheet(STYLES["save_button"])
+        self.save_btn.clicked.connect(self.save_question)
         btn_layout.addWidget(self.save_btn)
+
         layout.addLayout(btn_layout)
 
-    def add_question(self):
-        text = self.title_input.text().strip()
-        if text:
-            self.question_list.addItem(text)
-            self.title_input.clear()
-        else:
-            QMessageBox.warning(self, "Warning", "Question cannot be empty.")
-
     def get_quiz_data(self):
-        return {
+        data = {
             "question": self.title_input.text(),
             "choices": [
                 {
-                    "choice": self.choice_1.text(),
-                    "is_answer": self.radio_1.isChecked()
-                },
-                {
-                    "choice": self.choice_2.text(),
-                    "is_answer": self.radio_2.isChecked()
-                },
-                {
-                    "choice": self.choice_3.text(),
-                    "is_answer": self.radio_3.isChecked()
-                },
-                {
-                    "choice": self.choice_4.text(),
-                    "is_answer": self.radio_4.isChecked()
+                    "choice": self.choice_inputs[i].text(),
+                    "is_answer": self.radio_buttons[i].isChecked()
                 }
+                for i in range(4)
             ]
         }
+        return data
+
+    def save_question(self):
+        """Handles saving the question and closing the dialog."""
+        try:
+            # Get the question data
+            question_data = self.get_quiz_data()
+            
+            # Call the on_submit callback with the data
+            if self.on_submit:
+                self.on_submit(question_data)
+            
+            # Close the dialog
+            self.accept()
+            
+        except Exception as e:
+            print(f"Error saving question: {str(e)}")
+            QMessageBox.warning(self, "Error", "Failed to save question. Please try again.")

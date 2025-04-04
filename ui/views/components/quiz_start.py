@@ -9,7 +9,10 @@ from PySide6.QtWidgets import (
     QSpacerItem,
     QSizePolicy,
     QFrame,
+    QHBoxLayout,
 )
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont, QColor
 from models.quiz import Question
 from typing import List
 
@@ -27,79 +30,116 @@ class QuizStart(QWidget):
 
     def init_ui(self):
         """Initialize the quiz UI."""
-        layout = QVBoxLayout()
-        layout.setSpacing(20)
+        # Main layout
+        main_layout = QVBoxLayout()
+        main_layout.setSpacing(20)
+        main_layout.setContentsMargins(30, 30, 30, 30)
+        self.setLayout(main_layout)
+
+        # Quiz title container
+        title_container = QFrame()
+        title_container.setStyleSheet("""
+            QFrame {
+                background-color: #2c3e50;
+                border-radius: 15px;
+                padding: 20px;
+            }
+        """)
+        title_layout = QVBoxLayout(title_container)
+        title_layout.setContentsMargins(0, 0, 0, 0)
 
         self.quiz_title = QLabel("Quiz Title")
-        self.quiz_title.setStyleSheet(
-            """
+        self.quiz_title.setStyleSheet("""
             QLabel {
-                font-size: 24px;
+                font-size: 28px;
                 font-weight: bold;
-                color: black;
-                background-color: #ecf0f1;
+                color: white;
                 padding: 10px;
-                border-radius: 5px;
             }
-            """      
-        )
-        layout.addWidget(self.quiz_title)
+        """)
+        self.quiz_title.setAlignment(Qt.AlignCenter)
+        title_layout.addWidget(self.quiz_title)
+        main_layout.addWidget(title_container)
 
-        # spacer = QSpacerItem(30, 30, QSizePolicy.Minimum, QSizePolicy.Fixed)
-        # layout.addItem(spacer)
-        # Question Label
-        self.question_label = QLabel()
-        self.question_label.setStyleSheet(
-            """
-            QLabel {
-                font-size: 24px;
-                font-weight: regular;
-                padding: 10px;
-                padding-left: 0;
-                border: none;
-                margin-bottom: 20px;
-                color: black;
-            }
-            """
-        )
-        self.question_label.setWordWrap(True)
-
-        self.frame = QFrame()
-        self.frame.setLayout(QVBoxLayout())
-        self.frame.setStyleSheet(
-            """
+        # Progress indicator
+        progress_container = QFrame()
+        progress_container.setStyleSheet("""
             QFrame {
-                background-color: #ecf0f1;
-                border: 1px solid #bdc3c7;
-                border-radius: 5px;
-                padding: 15px;
+                background-color: #f8f9fa;
+                border-radius: 10px;
+                padding: 10px;
             }
-            """
-        )
-        self.frame.setMinimumHeight(200)
-        self.frame.layout().setSpacing(10)
+        """)
+        progress_layout = QHBoxLayout(progress_container)
+        progress_layout.setContentsMargins(10, 10, 10, 10)
 
-        self.frame.layout().addWidget(self.question_label)
+        self.progress_label = QLabel()
+        self.progress_label.setStyleSheet("""
+            QLabel {
+                font-size: 16px;
+                color: #2c3e50;
+                font-weight: bold;
+            }
+        """)
+        progress_layout.addWidget(self.progress_label)
+        main_layout.addWidget(progress_container)
 
-        # Option Buttons
+        # Question container
+        self.frame = QFrame()
+        self.frame.setStyleSheet("""
+            QFrame {
+                background-color: white;
+                border: 2px solid #e9ecef;
+                border-radius: 15px;
+                padding: 25px;
+            }
+        """)
+        frame_layout = QVBoxLayout(self.frame)
+        frame_layout.setSpacing(20)
+
+        # Question label
+        self.question_label = QLabel()
+        self.question_label.setStyleSheet("""
+            QLabel {
+                font-size: 20px;
+                color: #2c3e50;
+                font-weight: 500;
+                padding: 10px;
+            }
+        """)
+        self.question_label.setWordWrap(True)
+        self.question_label.setAlignment(Qt.AlignCenter)
+        frame_layout.addWidget(self.question_label)
+
+        # Options container
         self.options_group = QButtonGroup(self)
         self.option_buttons = []
 
-        for i in range(4):  # Assuming 4 options per question
-            button = QRadioButton()
-            button.setStyleSheet(
-                """
-                QRadioButton {
-                    background-color: rgb(252,254,252);
-                    color: black;
-                    font-size: 16px;
-                    font-weight: normal;
-                    padding: 10px;
+        for i in range(4):
+            option_container = QFrame()
+            option_container.setStyleSheet("""
+                QFrame {
+                    background-color: #f8f9fa;
                     border-radius: 10px;
+                    padding: 5px;
+                }
+                QFrame:hover {
+                    background-color: #e9ecef;
+                }
+            """)
+            option_layout = QHBoxLayout(option_container)
+            option_layout.setContentsMargins(10, 10, 10, 10)
+
+            button = QRadioButton()
+            button.setStyleSheet("""
+                QRadioButton {
+                    font-size: 16px;
+                    color: #2c3e50;
+                    padding: 10px;
                 }
                 QRadioButton::indicator {
-                    width: 20px;
-                    height: 20px;
+                    width: 24px;
+                    height: 24px;
                 }
                 QRadioButton::indicator::unchecked {
                     image: url(./static/images/circle.svg);
@@ -107,32 +147,39 @@ class QuizStart(QWidget):
                 QRadioButton::indicator::checked {
                     image: url(./static/images/circle-check.svg);
                 }
-                QRadioButton::checked {
-                    color: green;
+                QRadioButton:checked {
+                    color: #27ae60;
                 }
-                """
-            )
-            button
+            """)
             self.option_buttons.append(button)
             self.options_group.addButton(button)
-            self.frame.layout().addWidget(button)
+            option_layout.addWidget(button)
+            frame_layout.addWidget(option_container)
 
-        layout.addWidget(self.frame)
+        main_layout.addWidget(self.frame)
 
-        # Submit Button
-        self.submit_button = QPushButton("Submit")
-        self.submit_button.setStyleSheet(
-            """
+        # Buttons container
+        buttons_container = QFrame()
+        buttons_container.setStyleSheet("""
+            QFrame {
+                background-color: transparent;
+            }
+        """)
+        buttons_layout = QHBoxLayout(buttons_container)
+        buttons_layout.setSpacing(20)
+
+        # Submit button
+        self.submit_button = QPushButton("Submit Answer")
+        self.submit_button.setStyleSheet("""
             QPushButton {
                 background-color: #3498db;
                 color: white;
                 border: none;
-                padding: 10px 20px;
-                border-radius: 5px;
+                padding: 15px 30px;
+                border-radius: 10px;
                 font-size: 16px;
                 font-weight: bold;
-                font-family: Arial;
-                
+                min-width: 200px;
             }
             QPushButton:hover {
                 background-color: #2980b9;
@@ -140,23 +187,21 @@ class QuizStart(QWidget):
             QPushButton:pressed {
                 background-color: #1c669b;
             }
-            """
-        )
+        """)
         self.submit_button.clicked.connect(self.check_answer)
 
-        # Reset Button (Initially Hidden)
+        # Reset button
         self.reset_button = QPushButton("Restart Quiz")
-        self.reset_button.setStyleSheet(
-            """
+        self.reset_button.setStyleSheet("""
             QPushButton {
                 background-color: #e74c3c;
                 color: white;
                 border: none;
-                padding: 10px 20px;
-                border-radius: 5px;
+                padding: 15px 30px;
+                border-radius: 10px;
                 font-size: 16px;
                 font-weight: bold;
-                
+                min-width: 200px;
             }
             QPushButton:hover {
                 background-color: #c0392b;
@@ -164,34 +209,40 @@ class QuizStart(QWidget):
             QPushButton:pressed {
                 background-color: #a93226;
             }
-            """
-        )
+        """)
         self.reset_button.clicked.connect(self.reset_quiz)
-        self.reset_button.hide()  # Hide initially
+        self.reset_button.hide()
 
-        layout.addWidget(self.submit_button)
-        layout.addWidget(self.reset_button)
-        self.setLayout(layout)
+        buttons_layout.addWidget(self.submit_button)
+        buttons_layout.addWidget(self.reset_button)
+        main_layout.addWidget(buttons_container)
+
+        # Set window properties
         self.setWindowTitle("Quiz App")
-        self.setFixedWidth(550)
+        self.setFixedWidth(600)
+        self.setStyleSheet("""
+            QWidget {
+                background-color: #f8f9fa;
+            }
+        """)
 
         self.load_question()
 
     def load_question(self):
         """Load the current question and update the UI."""
         if self.current_question_index < len(self.questions):
-            self.reset_button.hide()  # Hide reset button while quiz is running
+            self.reset_button.hide()
             question_data = self.questions[self.current_question_index]
             self.question_label.setText(question_data.question)
             self.quiz_title.setText(f"Quiz {self.current_question_index + 1}")
+            self.progress_label.setText(f"Question {self.current_question_index + 1} of {len(self.questions)}")
 
             for i, option in enumerate(question_data.choices):
                 self.option_buttons[i].setText(option.choice)
                 self.option_buttons[i].setChecked(False)
                 self.option_buttons[i].show()
 
-            self.submit_button.show()  # Ensure submit button is visible
-
+            self.submit_button.show()
         else:
             self.display_result()
 
@@ -206,10 +257,10 @@ class QuizStart(QWidget):
                 if answer.is_answer:
                     correct_answer = answer.choice
                     if selected_answer == correct_answer:
-                        self.score += 1  # Only increase score if answer is correct
-                        break  # Exit loop once we find the correct answer
+                        self.score += 1
+                        break
 
-            self.current_question_index += 1  # Move to next question
+            self.current_question_index += 1
             self.load_question()
 
     def reset_quiz(self):
@@ -221,15 +272,14 @@ class QuizStart(QWidget):
     def display_result(self):
         """Show final score and hide unnecessary UI elements."""
         self.question_label.setText(
-            f"Your score: {self.score}/{len(self.questions)}"
+            f"Quiz Completed!\nYour score: {self.score}/{len(self.questions)}"
         )
-        self.quiz_title.setText(f"Completed Quiz")
-        # Hide all option buttons and submit button
+        self.quiz_title.setText("Quiz Results")
+        self.progress_label.setText("Final Score")
+        
         for button in self.option_buttons:
             button.hide()
         self.submit_button.hide()
-
-        # Show reset button
         self.reset_button.show()
 
     def next_question(self):
