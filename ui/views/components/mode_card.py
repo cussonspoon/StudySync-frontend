@@ -6,7 +6,9 @@ from PySide6.QtWidgets import (
     QFrame,
 )
 from PySide6.QtCore import Qt
-from ..components.note_window import popup_notewindow
+from .note_window import popup_notewindow
+from .quiz_window import popup_quizwindow
+from models.quiz import Quiz
 
 
 class ContentCard(QFrame):
@@ -78,4 +80,16 @@ class ContentCard(QFrame):
                 if note_dialog.exec():
                     note_data = note_dialog.getNoteData()
                     print("Note Data:", note_data)  # You can handle the note data here
+            elif "Quiz" in self.mode:
+                # Create a new quiz with empty ID
+                quiz = Quiz(
+                    id="",  # Empty ID for new quiz
+                    title=self.name,
+                    quiz_type="quiz",
+                    mode="normal",
+                )
+                quiz_dialog = popup_quizwindow(self.parent(), quiz=quiz)
+                if quiz_dialog.exec():
+                    quiz_data = quiz_dialog.getQuizData()
+                    print("Quiz Data:", quiz_data)  # You can handle the quiz data here
         super().mousePressEvent(event)

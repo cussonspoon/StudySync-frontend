@@ -11,7 +11,8 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont
 from controllers.user_controller import UserController
-from utils.session_manager import SessionManager
+from utils.global_vars import set_current_user
+
 
 class LoginPage(QWidget):
     login_successful = Signal()  # Define the signal at the class level
@@ -19,7 +20,6 @@ class LoginPage(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.user_controller = UserController()
-        self.session_manager = SessionManager.get_instance()
         self.setup_ui()
 
     def setup_ui(self):
@@ -50,7 +50,7 @@ class LoginPage(QWidget):
         login_form = QFormLayout()
         login_form.setSpacing(10)
         login_form.setAlignment(Qt.AlignCenter)
-        
+
         self.username_input = QLineEdit()
         self.username_input.setPlaceholderText("Username")
         self.username_input.setFixedWidth(300)
@@ -68,7 +68,7 @@ class LoginPage(QWidget):
         login_button_container = QWidget()
         login_button_layout = QVBoxLayout(login_button_container)
         login_button_layout.setAlignment(Qt.AlignCenter)
-        
+
         self.login_button = QPushButton("Login")
         self.login_button.setFixedWidth(300)
         self.login_button.setStyleSheet(
@@ -76,19 +76,19 @@ class LoginPage(QWidget):
         )
         self.login_button.clicked.connect(self.handle_login)
         login_button_layout.addWidget(self.login_button)
-        
+
         self.login_layout.addWidget(login_button_container)
 
         # Register link container
         register_link_container = QWidget()
         register_link_layout = QVBoxLayout(register_link_container)
         register_link_layout.setAlignment(Qt.AlignCenter)
-        
+
         self.register_link = QPushButton("Don't have an account? Register")
         self.register_link.setStyleSheet("color: #4CAF50; border: none;")
         self.register_link.clicked.connect(self.show_register_form)
         register_link_layout.addWidget(self.register_link)
-        
+
         self.login_layout.addWidget(register_link_container)
 
         # Create register page
@@ -126,7 +126,7 @@ class LoginPage(QWidget):
         register_button_container = QWidget()
         register_button_layout = QVBoxLayout(register_button_container)
         register_button_layout.setAlignment(Qt.AlignCenter)
-        
+
         self.register_button = QPushButton("Register")
         self.register_button.setFixedWidth(300)
         self.register_button.setStyleSheet(
@@ -134,19 +134,19 @@ class LoginPage(QWidget):
         )
         self.register_button.clicked.connect(self.handle_register)
         register_button_layout.addWidget(self.register_button)
-        
+
         self.register_layout.addWidget(register_button_container)
 
         # Login link container
         login_link_container = QWidget()
         login_link_layout = QVBoxLayout(login_link_container)
         login_link_layout.setAlignment(Qt.AlignCenter)
-        
+
         self.login_link = QPushButton("Already have an account? Login")
         self.login_link.setStyleSheet("color: #4CAF50; border: none;")
         self.login_link.clicked.connect(self.show_login_form)
         login_link_layout.addWidget(self.login_link)
-        
+
         self.register_layout.addWidget(login_link_container)
 
         # Add pages to stacked widget
@@ -159,13 +159,18 @@ class LoginPage(QWidget):
         password = self.password_input.text()
 
         if not username or not password:
-            QMessageBox.warning(self, "Error", "Please enter both username and password")
+            QMessageBox.warning(
+                self, "Error", "Please enter both username and password"
+            )
             return
 
         try:
             user = self.user_controller.login(username, password)
             if user:
-                self.session_manager.set_current_user(user)
+                # Store user data in global
+                set_current_user(
+                    {"id": user.id, "username": user.username, "email": user.email}
+                )
                 self.login_successful.emit()
             else:
                 QMessageBox.warning(self, "Error", "Invalid username or password")
@@ -178,13 +183,18 @@ class LoginPage(QWidget):
         password = self.register_password_input.text()
 
         if not username or not password:
-            QMessageBox.warning(self, "Error", "Please enter both username and password")
+            QMessageBox.warning(
+                self, "Error", "Please enter both username and password"
+            )
             return
 
         try:
             user = self.user_controller.register(username, password)
             if user:
-                self.session_manager.set_current_user(user)
+                # Store user data in global
+                set_current_user(
+                    {"id": user.id, "username": user.username, "email": user.email}
+                )
                 self.login_successful.emit()
             else:
                 QMessageBox.warning(self, "Error", "Registration failed")
@@ -203,4 +213,4 @@ class LoginPage(QWidget):
         self.username_input.show()
         self.password_input.show()
         self.login_button.show()
-        self.register_link.show() 
+        self.register_link.show()
