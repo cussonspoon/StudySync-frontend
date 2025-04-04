@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from PySide6.QtCore import QCoreApplication, QDir, QMetaObject, QRect, QSize
+from PySide6.QtCore import QCoreApplication, QDir, QMetaObject, QSize, Qt
 from PySide6.QtGui import QFont, QIcon, QPixmap
 from PySide6.QtWidgets import (
     QFrame,
@@ -9,6 +9,8 @@ from PySide6.QtWidgets import (
     QScrollArea,
     QStackedWidget,
     QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
 )
 
 from ui.views.home import HomePage
@@ -16,6 +18,8 @@ from ui.views.collection import CollectionPage
 from ui.views.statistic import StatPage
 from ui.views.notification import NotificationPage
 from ui.views.community import CommunityPage
+# from ui.views.quiz import QuizPage
+
 
 
 class Ui_MainWindow(object):
@@ -25,11 +29,14 @@ class Ui_MainWindow(object):
         MainWindow.setMinimumSize(QSize(1300, 831))
         MainWindow.setMaximumSize(QSize(1300, 831))
 
-        self.centralwidget = QWidget(MainWindow)
-        self.centralwidget.setObjectName("centralwidget")
+        # Create main layout
+        self.main_layout = QHBoxLayout(MainWindow)
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.main_layout.setSpacing(0)
 
-        self.sidebar = QFrame(self.centralwidget)
-        self.sidebar.setGeometry(QRect(0, 0, 91, 831))
+        # Create sidebar
+        self.sidebar = QFrame(MainWindow)
+        self.sidebar.setFixedWidth(91)  # Set fixed width for sidebar
         self.sidebar.setFrameShape(QFrame.Shape.StyledPanel)
         self.sidebar.setObjectName("sidebar")
         self.sidebar.setStyleSheet(
@@ -40,54 +47,78 @@ class Ui_MainWindow(object):
             """
         )
 
+        # Create sidebar layout
+        self.sidebar_layout = QVBoxLayout(self.sidebar)
+        self.sidebar_layout.setContentsMargins(10, 10, 10, 10)
+        self.sidebar_layout.setSpacing(10)
+
+        # Top section
         self.top = QFrame(self.sidebar)
-        self.top.setGeometry(QRect(10, 10, 71, 121))
         self.top.setFrameShape(QFrame.Shape.NoFrame)
         self.top.setObjectName("top")
+        self.top_layout = QVBoxLayout(self.top)
+        self.top_layout.setContentsMargins(0, 0, 0, 0)
 
         self.logo = QLabel(self.top)
-        self.logo.setGeometry(QRect(10, 10, 61, 71))
+        self.logo.setFixedSize(61, 71)
         img_path = QDir.currentPath() + "/static/images/logo.png"
         self.logo.setPixmap(QPixmap(img_path))
         self.logo.setScaledContents(True)
         self.logo.setObjectName("logo")
+        self.top_layout.addWidget(self.logo, alignment=Qt.AlignCenter)
+        self.sidebar_layout.addWidget(self.top)
 
+        # Menu section
         self.menus = QFrame(self.sidebar)
-        self.menus.setGeometry(QRect(10, 140, 71, 471))
         self.menus.setFrameShape(QFrame.Shape.NoFrame)
         self.menus.setObjectName("menus")
-        font = QFont()
-        font.setKerning(True)
-        self.menus.setFont(font)
+        self.menus_layout = QVBoxLayout(self.menus)
+        self.menus_layout.setContentsMargins(0, 0, 0, 0)
+        self.menus_layout.setSpacing(20)
+        self.menus_layout.setAlignment(Qt.AlignCenter)  # Center the menu items
 
         # Menu buttons
-        self.home = self.createMenuButton("home", "home.png", QRect(10, 20, 51, 61))
-        self.collection = self.createMenuButton(
-            "collection", "collection.png", QRect(10, 110, 51, 61)
-        )
-        self.stats = self.createMenuButton("stats", "stat.png", QRect(10, 200, 51, 61))
-        self.noti = self.createMenuButton("noti", "noti.png", QRect(10, 290, 51, 61))
-        self.community = self.createMenuButton(
-            "community", "community.png", QRect(10, 380, 51, 61)
-        )
+        self.home = self.createMenuButton("home", "home.png")
+        self.collection = self.createMenuButton("collection", "collection.png")
+        self.stats = self.createMenuButton("stats", "stat.png")
+        self.noti = self.createMenuButton("noti", "noti.png")
+        self.community = self.createMenuButton("community", "community.png")
 
+        # Add stretch before buttons to center them vertically
+        self.menus_layout.addStretch()
+
+        # Add buttons with center alignment
+        self.menus_layout.addWidget(self.home, alignment=Qt.AlignCenter)
+        self.menus_layout.addWidget(self.collection, alignment=Qt.AlignCenter)
+        self.menus_layout.addWidget(self.stats, alignment=Qt.AlignCenter)
+        self.menus_layout.addWidget(self.noti, alignment=Qt.AlignCenter)
+        self.menus_layout.addWidget(self.community, alignment=Qt.AlignCenter)
+
+        # Add stretch after buttons to center them vertically
+        self.menus_layout.addStretch()
+
+        self.sidebar_layout.addWidget(self.menus)
+
+        # Bottom section
         self.bottom = QFrame(self.sidebar)
-        self.bottom.setGeometry(QRect(10, 620, 71, 141))
         self.bottom.setFrameShape(QFrame.Shape.NoFrame)
         self.bottom.setObjectName("bottom")
+        self.bottom_layout = QVBoxLayout(self.bottom)
+        self.bottom_layout.setContentsMargins(0, 0, 0, 0)
 
         self.logout = QPushButton(self.bottom)
-        self.logout.setGeometry(QRect(0, 70, 71, 61))
+        self.logout.setFixedSize(71, 61)
         icon = QIcon()
         img_path = QDir.currentPath() + "/static/images/logout.png"
         icon.addFile(img_path, QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.logout.setIcon(icon)
         self.logout.setIconSize(QSize(50, 50))
         self.logout.setObjectName("logout")
+        self.bottom_layout.addWidget(self.logout, alignment=Qt.AlignCenter)
+        self.sidebar_layout.addWidget(self.bottom)
 
         # Content Area
-        self.contentArea = QStackedWidget(self.centralwidget)
-        self.contentArea.setGeometry(QRect(90, 0, 1300, 831))
+        self.contentArea = QStackedWidget(MainWindow)
         self.contentArea.setObjectName("contentArea")
 
         # Pages
@@ -103,15 +134,17 @@ class Ui_MainWindow(object):
         self.contentArea.addWidget(self.page_noti_scroll)
         self.contentArea.addWidget(self.page_community_scroll)
 
-        MainWindow.setCentralWidget(self.centralwidget)
+        # Add sidebar and content area to main layout
+        self.main_layout.addWidget(self.sidebar)
+        self.main_layout.addWidget(self.contentArea)
 
         self.retranslateUi(MainWindow)
         QMetaObject.connectSlotsByName(MainWindow)
 
-    def createMenuButton(self, name, icon_file, geometry):
+    def createMenuButton(self, name, icon_file):
         button = QPushButton(self.menus)
         button.setObjectName(name)
-        button.setGeometry(geometry)
+        button.setFixedSize(71, 61)
         icon = QIcon()
         img_path = QDir.currentPath() + f"/static/images/{icon_file}"
         icon.addFile(img_path, QSize(), QIcon.Mode.Normal, QIcon.State.Off)
