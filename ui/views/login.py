@@ -15,7 +15,7 @@ from PySide6.QtCore import Qt, Signal, QDir
 from PySide6.QtGui import QFont, QPixmap
 from controllers.user_controller import UserController
 from utils.global_vars import set_current_user
-
+from utils.session_manager import SessionManager
 
 class LoginPage(QWidget):
     login_successful = Signal()
@@ -23,6 +23,7 @@ class LoginPage(QWidget):
     def __init__(self):
         super().__init__()
         self.user_controller = UserController()
+        self.session_manager = SessionManager.get_instance()
         self.setupUi()
 
     def setupUi(self):
@@ -188,16 +189,18 @@ class LoginPage(QWidget):
         username = self.username_input.text()
         password = self.password_input.text()
 
+
         try:
             # Attempt login using UserController
             user = self.user_controller.login(username, password)
 
             if user:
+                self.session_manager.set_current_user(user)
+                # Login successful
                 # Debug print to check user attributes
                 print(
                     f"User ID: {user.id}, Username: {user.username}, Email: {getattr(user, 'email', 'N/A')}"
                 )
-
                 # Store user data in global, handle missing email
                 set_current_user(
                     {

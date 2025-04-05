@@ -6,6 +6,8 @@ from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QFont, QPixmap, QIcon
 from ui.views.components.user_components.models import get_user_by_id, get_user_statistics, get_user_activities
 from datetime import datetime
+from utils.session_manager import SessionManager
+from controllers.user_controller import UserController
 
 class UserProfilePage(QWidget):
     def __init__(self):
@@ -14,6 +16,8 @@ class UserProfilePage(QWidget):
         self.user = get_user_by_id(self.user_id)
         self.stats = get_user_statistics(self.user_id)
         self.activities = get_user_activities(self.user_id)
+        self.user_controller = UserController()
+        self.session_manager = SessionManager.get_instance()
         self.setupUi()
         self.setStyleSheet("""
             QWidget {
@@ -23,6 +27,22 @@ class UserProfilePage(QWidget):
 
     def set_controller(self, controller):
         self.user_profile_controller = controller
+
+    def refresh_data(self):
+        self.user = self.session_manager.get_current_user()
+        self.value_username.setText(self.user.username)
+        self.stats = self.user_controller.get_user_stats(self.user.id)
+
+        data = {
+            "folders_created": self.stats["total_folders"],
+            "notes_created": self.stats["total_notes"],
+            "quizzes_taken": self.stats["total_quizzes"],
+            "total_flashcards": self.stats["total_flashcards"]
+        }
+
+        self.update_statistics(data)
+
+        # self.value_created_at.setText(self.user.created_at.strftime("%B %d, %Y"))
 
     def setupUi(self):
         # Main layout
@@ -109,25 +129,32 @@ class UserProfilePage(QWidget):
             ("Created At", self.user.created_at.strftime("%B %d, %Y") if self.user else ""),
         ]
 
-        for label_text, value_text in fields:
-            field_layout = QHBoxLayout()
-            
-            # Label
-            label = QLabel(label_text)
-            label.setFont(QFont("Inter", 12))
-            label.setStyleSheet("color: #666666;")
-            label.setFixedWidth(100)
-            field_layout.addWidget(label)
-            
-            # Value
-            value = QLabel(value_text)
-            value.setFont(QFont("Inter", 12))
-            value.setStyleSheet("color: #1A1A1A;")
-            field_layout.addWidget(value)
-            field_layout.addStretch()
-            
-            profile_layout.addLayout(field_layout)
+        username_layout = QHBoxLayout()
+        self.label_username = QLabel("Username")
+        self.label_username.setFont(QFont("Inter", 12))
+        self.label_username.setStyleSheet("color: #666666;")
+        self.label_username.setFixedWidth(100)
+        username_layout.addWidget(self.label_username)
+        
+        self.value_username = QLabel(self.user.username if self.user else "")
+        self.value_username.setFont(QFont("Inter", 12))
+        self.value_username.setStyleSheet("color: #1A1A1A;")
+        username_layout.addWidget(self.value_username)
+        profile_layout.addLayout(username_layout)
 
+        created_at_layout = QHBoxLayout()
+        self.label_created_at = QLabel("Created At")
+        self.label_created_at.setFont(QFont("Inter", 12))
+        self.label_created_at.setStyleSheet("color: #666666;")
+        self.label_created_at.setFixedWidth(100)
+        created_at_layout.addWidget(self.label_created_at)
+        
+        self.value_created_at = QLabel(self.user.created_at.strftime("%B %d, %Y") if self.user else "")
+        self.value_created_at.setFont(QFont("Inter", 12))
+        self.value_created_at.setStyleSheet("color: #1A1A1A;")
+        created_at_layout.addWidget(self.value_created_at)
+        profile_layout.addLayout(created_at_layout)
+        
         content_layout.addWidget(profile_section)
 
         # Statistics Section
@@ -153,23 +180,17 @@ class UserProfilePage(QWidget):
         stats_grid = QHBoxLayout()
         stats_grid.setSpacing(20)
 
-        if self.stats:
-            stats = [
-                ("Folders", str(self.stats.folders_created)),
-                ("Notes", str(self.stats.notes_created)),
-                ("Quizzes", str(self.stats.quizzes_taken)),
-                ("Posts", str(self.stats.total_posts))
-            ]
-        else:
-            stats = [
-                ("Folders", "0"),
-                ("Notes", "0"),
-                ("Quizzes", "0"),
-                ("Posts", "0")
-            ]
+        # Default stats when no user is logged in
+        stats = [
+            ("Folders", "0"),
+            ("Notes", "0"),
+            ("Quizzes", "0"),
+            ("Flashcards", "0")
+        ]
 
-        for title, value in stats:
+        for i, (title, value) in enumerate(stats):
             stat_card = QFrame()
+            stat_card.setObjectName(f"stat_card_{i}")
             stat_card.setStyleSheet("""
                 QFrame {
                     background-color: #F8F9FA;
@@ -181,12 +202,14 @@ class UserProfilePage(QWidget):
             card_layout.setSpacing(10)
 
             value_label = QLabel(value)
+            value_label.setObjectName(f"stat_value_{i}")
             value_label.setFont(QFont("Inter", 24, QFont.Weight.Bold))
             value_label.setStyleSheet("color: #1A1A1A;")
             value_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             card_layout.addWidget(value_label)
 
             title_label = QLabel(title)
+            title_label.setObjectName(f"stat_title_{i}")
             title_label.setFont(QFont("Inter", 12))
             title_label.setStyleSheet("color: #666666;")
             title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -256,4 +279,27 @@ class UserProfilePage(QWidget):
         content_layout.addStretch()
 
         scroll.setWidget(content_widget)
-        layout.addWidget(scroll) 
+        layout.addWidget(scroll)
+
+    def update_statistics(self, stats_data=None):
+        """Update the statistics values
+        Args:
+            stats_data (dict): Dictionary containing statistics data with keys:
+                - folders_created
+                - notes_created
+                - quizzes_taken
+                - total_flashcards
+        """
+        if not stats_data:
+            stats_data = {
+                "folders_created": "0",
+                "notes_created": "0",
+                "quizzes_taken": "0",
+                "total_flashcards": "0"
+            }
+
+        # Update each stat card
+        for i, stat_key in enumerate(["folders_created", "notes_created", "quizzes_taken", "total_flashcards"]):
+            value_label = self.findChild(QLabel, f"stat_value_{i}")
+            if value_label:
+                value_label.setText(str(stats_data.get(stat_key, "0"))) 

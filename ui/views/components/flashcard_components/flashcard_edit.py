@@ -1,17 +1,20 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
     QPushButton, QFrame, QScrollArea, QLineEdit,
-    QSizePolicy
+    QSizePolicy, QDialog
 )
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QFont, QIcon
-from typing import List, Dict
-from .models import get_sample_flashcards, Flashcard
+from typing import List, Dict, Union
+from .models import get_sample_flashcards, Flashcard, TermWord
+from ..flashcard_window import popup_flashcardwindow
+from controllers.flashcard_controller import FlashcardController
 
 class WordCard(QFrame):
     def __init__(self, word: str = "Word", parent=None):
         super().__init__(parent)
         self.word = word
+
         self.setupUi()
 
     def setupUi(self):
@@ -94,6 +97,118 @@ class TermInput(QFrame):
         delete_button.clicked.connect(self.deleteLater)
         layout.addWidget(delete_button)
 
+class AddTermDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Add New Term")
+        self.setModal(True)
+        self.setFixedSize(500, 300)
+        self.setStyleSheet("""
+            QDialog {
+                background-color: #f8f9fa;
+                border-radius: 10px;
+            }
+            QLabel {
+                font-size: 14px;
+                color: #333;
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+            QLineEdit {
+                padding: 10px;
+                border: 2px solid #e0e0e0;
+                border-radius: 6px;
+                background-color: white;
+                font-size: 14px;
+                margin-bottom: 10px;
+            }
+            QLineEdit:focus {
+                border: 2px solid #4CAF50;
+            }
+            QLineEdit:hover {
+                border: 2px solid #ccc;
+            }
+            QPushButton {
+                padding: 10px 20px;
+                border-radius: 6px;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            QPushButton#cancelBtn {
+                background-color: #f8f9fa;
+                border: 2px solid #dc3545;
+                color: #dc3545;
+            }
+            QPushButton#cancelBtn:hover {
+                background-color: #dc3545;
+                color: white;
+            }
+            QPushButton#addBtn {
+                background-color: #4CAF50;
+                border: none;
+                color: white;
+            }
+            QPushButton#addBtn:hover {
+                background-color: #45a049;
+            }
+        """)
+        
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(10, 20, 20, 10)
+        layout.setSpacing(10)
+        
+        # Title
+        title_label = QLabel("Add New Term")
+        title_label.setStyleSheet("""
+            font-size: 18px;
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 15px;
+        """)
+        layout.addWidget(title_label)
+        
+        # Word input
+        word_label = QLabel("Word:")
+        self.word_input = QLineEdit()
+        self.word_input.setPlaceholderText("Enter the term or word")
+        
+        layout.addWidget(word_label)
+        layout.addWidget(self.word_input)
+        
+        # Definition input
+        definition_label = QLabel("Definition:")
+        self.definition_input = QLineEdit()
+        self.definition_input.setPlaceholderText("Enter the definition or explanation")
+        
+        layout.addWidget(definition_label)
+        layout.addWidget(self.definition_input)
+        
+        # Buttons
+        button_layout = QHBoxLayout()
+        button_layout.setSpacing(15)
+        
+        cancel_button = QPushButton("Cancel")
+        cancel_button.setObjectName("cancelBtn")
+        cancel_button.clicked.connect(self.reject)
+        
+        add_button = QPushButton("Add Term")
+        add_button.setObjectName("addBtn")
+        add_button.clicked.connect(self.accept)
+        
+        button_layout.addStretch()
+        button_layout.addWidget(cancel_button)
+        button_layout.addWidget(add_button)
+        
+        layout.addStretch()
+        layout.addLayout(button_layout)
+
+    def get_term_data(self):
+        """Get the term data as a dictionary"""
+        return {
+            "word": self.word_input.text().strip(),
+            "definition": self.definition_input.text().strip()
+        }
+
 class FlashcardEditPage(QWidget):
     def __init__(self):
         super().__init__()
@@ -102,8 +217,8 @@ class FlashcardEditPage(QWidget):
         sample_flashcards = get_sample_flashcards()
         self.current_flashcard = sample_flashcards[0] if sample_flashcards else None
         self.setupUi()
-        if self.current_flashcard:
-            self.loadFlashcardData(self.current_flashcard)
+        # if self.current_flashcard:
+        #     self.loadFlashcardData(self.current_flashcard)
 
     def setupUi(self):
         main_layout = QVBoxLayout(self)
@@ -157,6 +272,23 @@ class FlashcardEditPage(QWidget):
             }
         """)
         header_layout.addWidget(upload_button)
+
+        # Start Flashcard button
+        self.start_button = QPushButton("Start Flashcard")
+        self.start_button.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                border: none;
+                border-radius: 4px;
+                padding: 8px 16px;
+                color: white;
+            }
+            QPushButton:hover {
+                background-color: #45a049;
+            }
+        """)
+        self.start_button.clicked.connect(self.start_flashcard)
+        header_layout.addWidget(self.start_button)
 
         main_layout.addLayout(header_layout)
 
@@ -261,7 +393,11 @@ class FlashcardEditPage(QWidget):
     def loadFlashcardData(self, flashcard: Flashcard):
         """Load data from a Flashcard object into the UI"""
         # Set title
+        print("flashcard", flashcard)
+        print("loadFlashcardData", flashcard.id)
         self.title_input.setText(flashcard.name)
+        self.current_flashcard = flashcard
+        flashcard_controller = FlashcardController(flashcard)
 
         # Clear existing terms
         while self.terms_list_layout.count() > 1:  # Keep the stretch
@@ -274,25 +410,43 @@ class FlashcardEditPage(QWidget):
             item = self.words_layout.takeAt(0)
             if item.widget():
                 item.widget().deleteLater()
-
+        
+        terms = flashcard_controller.get_terms(flashcard.id)
+        self.current_flashcard.terms = terms
+        # self.set_terms(terms)
         # Add terms from flashcard
-        for term in flashcard.terms:
+        for term in terms:
             # Add term input
-            term_input = TermInput(term.word, term.definition)
+            term_input = TermInput(term.term, term.definition)
             self.terms_list_layout.insertWidget(self.terms_list_layout.count() - 1, term_input)
             
             # Add word card
-            word_card = WordCard(term.word)
+            word_card = WordCard(term.term)
             self.words_layout.insertWidget(self.words_layout.count() - 1, word_card)
 
         # Update terms count
         self.updateTermsCount()
 
     def add_term(self):
-        """Add a new empty term input"""
-        term_input = TermInput()
-        self.terms_list_layout.insertWidget(self.terms_list_layout.count() - 1, term_input)
-        self.updateTermsCount()
+        """Add a new term through dialog and API"""
+        dialog = AddTermDialog(self)
+        if dialog.exec():
+            term_data = dialog.get_term_data()
+            
+            if term_data["word"] and term_data["definition"]:
+                try:
+                    # Add term through API
+                    flashcard_controller = FlashcardController(self.current_flashcard)
+                    flashcard_controller.post_term(
+                        self.current_flashcard.id,
+                        term_data["word"],
+                        term_data["definition"]
+                    )
+                    
+                    # Reload flashcard data to show new term
+                    self.loadFlashcardData(self.current_flashcard)
+                except Exception as e:
+                    print(f"Error adding term: {e}")
 
     def updateTermsCount(self):
         """Update the terms count label"""
@@ -314,7 +468,7 @@ class FlashcardEditPage(QWidget):
                     })
         return terms
 
-    def set_terms(self, terms: List[Dict[str, str]]):
+    def set_terms(self, terms: List[Union[Dict[str, str], TermWord]]):
         """Set terms in the UI"""
         # Clear existing terms
         while self.terms_list_layout.count() > 1:  # Keep the stretch
@@ -322,20 +476,33 @@ class FlashcardEditPage(QWidget):
             if item.widget():
                 item.widget().deleteLater()
 
-        # Add new terms
-        for term in terms:
-            term_input = TermInput(term["word"], term["definition"])
-            self.terms_list_layout.insertWidget(self.terms_list_layout.count() - 1, term_input)
-
-        # Update terms count
-        self.updateTermsCount()
-
-        # Update word cards
+        # Clear existing word cards
         while self.words_layout.count() > 1:  # Keep the stretch
             item = self.words_layout.takeAt(0)
             if item.widget():
                 item.widget().deleteLater()
 
+        # Add new terms
         for term in terms:
-            word_card = WordCard(term["word"])
-            self.words_layout.insertWidget(self.words_layout.count() - 1, word_card) 
+            if isinstance(term, dict):
+                word = term.get("term", "")
+                definition = term.get("definition", "")
+            else:  # TermWord object
+                word = term.term
+                definition = term.definition
+                
+            term_input = TermInput(word, definition)
+            self.terms_list_layout.insertWidget(self.terms_list_layout.count() - 1, term_input)
+            
+            # Add word card
+            word_card = WordCard(word)
+            self.words_layout.insertWidget(self.words_layout.count() - 1, word_card)
+
+        # Update terms count
+        self.updateTermsCount()
+
+    def start_flashcard(self):
+        """Start the flashcard review session"""
+        if self.current_flashcard:
+            flashcard_window = popup_flashcardwindow(self.current_flashcard, self)
+            flashcard_window.exec() 
