@@ -23,6 +23,7 @@ from ui.views.user_profile import UserProfilePage
 from utils.session_manager import SessionManager
 from ui.views.folder import FolderDetailPage
 
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -81,9 +82,9 @@ class Ui_MainWindow(object):
         # Menu buttons
         self.home = self.createMenuButton("home", "home.png")
         self.collection = self.createMenuButton("collection", "collection.png")
-        self.stats = self.createMenuButton("stats", "stat.png")
-        self.noti = self.createMenuButton("noti", "noti.png")
-        self.community = self.createMenuButton("community", "community.png")
+        # self.stats = self.createMenuButton("stats", "stat.png")
+        # self.noti = self.createMenuButton("noti", "noti.png")
+        # self.community = self.createMenuButton("community", "community.png")
 
         # Add stretch before buttons to center them vertically
         self.menus_layout.addStretch()
@@ -91,9 +92,9 @@ class Ui_MainWindow(object):
         # Add buttons with center alignment
         self.menus_layout.addWidget(self.home, alignment=Qt.AlignCenter)
         self.menus_layout.addWidget(self.collection, alignment=Qt.AlignCenter)
-        self.menus_layout.addWidget(self.stats, alignment=Qt.AlignCenter)
-        self.menus_layout.addWidget(self.noti, alignment=Qt.AlignCenter)
-        self.menus_layout.addWidget(self.community, alignment=Qt.AlignCenter)
+        # self.menus_layout.addWidget(self.stats, alignment=Qt.AlignCenter)
+        # self.menus_layout.addWidget(self.noti, alignment=Qt.AlignCenter)
+        # self.menus_layout.addWidget(self.community, alignment=Qt.AlignCenter)
 
         # Add stretch after buttons to center them vertically
         self.menus_layout.addStretch()
@@ -125,17 +126,17 @@ class Ui_MainWindow(object):
         # Pages
         self.page_home_scroll = self.createScrollPage(HomePage())
         self.page_collection_scroll = self.createScrollPage(CollectionPage())
-        self.page_stats_scroll = self.createScrollPage(StatPage())
-        self.page_noti_scroll = self.createScrollPage(NotificationPage())
-        self.page_community_scroll = self.createScrollPage(CommunityPage())
+        # self.page_stats_scroll = self.createScrollPage(StatPage())
+        # self.page_noti_scroll = self.createScrollPage(NotificationPage())
+        # self.page_community_scroll = self.createScrollPage(CommunityPage())
         self.page_profile_scroll = self.createScrollPage(UserProfilePage())
         self.page_folder_scroll = self.createScrollPage(FolderDetailPage())
 
         self.contentArea.addWidget(self.page_home_scroll)
         self.contentArea.addWidget(self.page_collection_scroll)
-        self.contentArea.addWidget(self.page_stats_scroll)
-        self.contentArea.addWidget(self.page_noti_scroll)
-        self.contentArea.addWidget(self.page_community_scroll)
+        # self.contentArea.addWidget(self.page_stats_scroll)
+        # self.contentArea.addWidget(self.page_noti_scroll)
+        # self.contentArea.addWidget(self.page_community_scroll)
         self.contentArea.addWidget(self.page_profile_scroll)
         self.contentArea.addWidget(self.page_folder_scroll)
 
@@ -162,7 +163,7 @@ class Ui_MainWindow(object):
         # Get the current user from session manager
         session_manager = SessionManager.get_instance()
         current_user = session_manager.get_current_user()
-        
+
         if current_user:
             # Switch to profile page
             self.page_profile_scroll.widget().refresh_data()
@@ -171,10 +172,9 @@ class Ui_MainWindow(object):
         else:
             # If no user is logged in, show login page or message
             from PySide6.QtWidgets import QMessageBox
+
             QMessageBox.warning(
-                self.contentArea,
-                "Not Logged In",
-                "Please log in to view your profile."
+                self.contentArea, "Not Logged In", "Please log in to view your profile."
             )
 
     def createMenuButton(self, name, icon_file):
@@ -222,9 +222,9 @@ class Ui_MainWindow(object):
         self.logo.setText("")
         self.home.setText("")
         self.collection.setText("")
-        self.stats.setText("")
-        self.noti.setText("")
-        self.community.setText("")
+        # self.stats.setText("")
+        # self.noti.setText("")
+        # self.community.setText("")
 
 
 class MainWindow(QMainWindow):
@@ -240,15 +240,15 @@ class MainWindow(QMainWindow):
         self.ui.collection.clicked.connect(
             lambda: self.ui.contentArea.setCurrentWidget(self.ui.page_collection_scroll)
         )
-        self.ui.stats.clicked.connect(
-            lambda: self.ui.contentArea.setCurrentWidget(self.ui.page_stats_scroll)
-        )
-        self.ui.noti.clicked.connect(
-            lambda: self.ui.contentArea.setCurrentWidget(self.ui.page_noti_scroll)
-        )
-        self.ui.community.clicked.connect(
-            lambda: self.ui.contentArea.setCurrentWidget(self.ui.page_community_scroll)
-        )
+        # self.ui.stats.clicked.connect(
+        #     lambda: self.ui.contentArea.setCurrentWidget(self.ui.page_stats_scroll)
+        # )
+        # self.ui.noti.clicked.connect(
+        #     lambda: self.ui.contentArea.setCurrentWidget(self.ui.page_noti_scroll)
+        # )
+        # self.ui.community.clicked.connect(
+        #     lambda: self.ui.contentArea.setCurrentWidget(self.ui.page_community_scroll)
+        # )
 
     def show_folder_page(self, name, count, date):
         print(f"Showing folder page for: {name}")

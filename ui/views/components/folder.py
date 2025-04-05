@@ -1,3 +1,4 @@
+from datetime import datetime
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -93,7 +94,11 @@ class Folder(QWidget):
         layout.addLayout(name_layout)
 
         # Date
-        date_label = QLabel(date)
+        date_label = QLabel()
+        date2 = datetime.fromisoformat(date.replace("Z", "+00:00"))
+        formatted_date = date2.strftime("%B %d, %Y")
+        date_label.setText(f"Created on {formatted_date}")
+        
         date_label.setStyleSheet(
             """
             QLabel {
@@ -145,6 +150,7 @@ class Folder(QWidget):
             self.clicked.emit()
         super().mousePressEvent(event)
 
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
@@ -159,6 +165,7 @@ if __name__ == "__main__":
         avatar_url="static/images/avatar.png",  # Replace with valid path
         img_url="static/images/folderbg.png",  # Replace with valid path
     )
+
     layout.addWidget(folder_widget)
 
     window.setWindowTitle("Test Folder Widget")

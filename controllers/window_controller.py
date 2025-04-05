@@ -16,9 +16,9 @@ from utils.global_vars import get_current_user
 class Page(Enum):
     HOME = 0
     COLLECTION = 1
-    STAT = 2
-    NOTIFICATION = 3
-    COMMUNITY = 4
+    # STAT = 2
+    # NOTIFICATION = 3
+    # COMMUNITY = 4
 
 
 class WindowController:
@@ -47,17 +47,17 @@ class WindowController:
         self.ui.collection.clicked.connect(
             lambda: self.switchPage(Page.COLLECTION.value)
         )
-        self.ui.stats.clicked.connect(lambda: self.switchPage(Page.STAT.value))
-        self.ui.noti.clicked.connect(lambda: self.switchPage(Page.NOTIFICATION.value))
-        self.ui.community.clicked.connect(lambda: self.switchPage(Page.COMMUNITY.value))
+        # self.ui.stats.clicked.connect(lambda: self.switchPage(Page.STAT.value))
+        # self.ui.noti.clicked.connect(lambda: self.switchPage(Page.NOTIFICATION.value))
+        # self.ui.community.clicked.connect(lambda: self.switchPage(Page.COMMUNITY.value))
 
     def setupPages(self):
         self.pages = {
             Page.HOME: self.ui.page_home_scroll,
             Page.COLLECTION: self.ui.page_collection_scroll,
-            Page.STAT: self.ui.page_stats_scroll,
-            Page.NOTIFICATION: self.ui.page_noti_scroll,
-            Page.COMMUNITY: self.ui.page_community_scroll,
+            # Page.STAT: self.ui.page_stats_scroll,
+            # Page.NOTIFICATION: self.ui.page_noti_scroll,
+            # Page.COMMUNITY: self.ui.page_community_scroll,
         }
         self.switchPage(Page.HOME.value)  # Start with home page (index 0)
 

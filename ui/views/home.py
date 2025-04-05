@@ -58,7 +58,7 @@ class HomePage(QWidget):
         self.searchFrame = QFrame()
         self.searchFrame.setFixedHeight(80)
         self.searchFrame.setStyleSheet(
-            "background-color: #F8F6F1; margin: 0px; padding: 0px;"
+            "background-color: #F8F6F1; margin: 0px; padding: 0px; color: black;"
         )
 
         # Create shadow frame
@@ -87,7 +87,7 @@ class HomePage(QWidget):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.scrollArea.setStyleSheet("background-color: #F8F6F1;")
+        self.scrollArea.setStyleSheet("background-color: #F7F6F3; color: black;")
 
         self.scrollAreaWidgetContents = QWidget()
         self.scroll_layout = QVBoxLayout(self.scrollAreaWidgetContents)
@@ -121,6 +121,7 @@ class HomePage(QWidget):
         self.collectionText = Text(
             21, "My Collections", "333333", self.scrollAreaWidgetContents
         )
+        self.collectionText.setFont(QFont("Arial", 21, QFont.Bold))  # Set font to bold
 
         collection_layout.addWidget(self.collectionText)
         collection_layout.addWidget(self.collectionIcon)
@@ -144,6 +145,7 @@ class HomePage(QWidget):
         self.recommendsText = Text(
             21, "Recommended folders for you", "333333", self.scrollAreaWidgetContents
         )
+        self.recommendsText.setFont(QFont("Arial", 21, QFont.Bold))
         self.scroll_layout.addWidget(self.recommendsText)
 
         self.recommendFolders = HorizontalImageScroller(
@@ -158,6 +160,7 @@ class HomePage(QWidget):
 
         task_layout = QHBoxLayout()
         self.taskText = Text(21, "Task", "333333", self.scrollAreaWidgetContents)
+        self.taskText.setFont(QFont("Arial", 21, QFont.Bold))
         self.taskImg = Image(141, 130, "task.png", self.scrollAreaWidgetContents)
 
         task_layout.addWidget(self.taskText)
@@ -454,6 +457,7 @@ class HomePage(QWidget):
         # Add folders directly to grid, 4 per row
         for i, folder in enumerate(results):
             folder_widget = Folder(
+                folder["id"],
                 folder["name"],
                 folder["count"],
                 folder["date"],

@@ -58,6 +58,60 @@ class Tag(QFrame):
             layout.addWidget(remove_btn)
 
 
+class ChangeFolderNameDialog(QDialog):
+    def __init__(self, current_name, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Change Folder Name")
+        self.setFixedSize(300, 150)
+        self.setStyleSheet(
+            """
+            QDialog { 
+                background-color: #F7F6F3; 
+                border-radius: 10px; 
+            }
+            QLineEdit {
+                padding: 8px;
+                border-radius: 5px;
+                border: 1px solid #ccc;
+                background: white;
+                font-size: 14px;
+            }
+            QPushButton {
+                padding: 8px 16px;
+                border-radius: 5px;
+                font-size: 14px;
+                min-width: 100px;
+            }
+            QPushButton#saveBtn {
+                background-color: #A9DFBF;
+                border: none;
+            }
+            QPushButton#saveBtn:hover {
+                background-color: #82E0AA;
+            }
+            """
+        )
+
+        layout = QVBoxLayout(self)
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+
+        # Name input
+        self.name_input = QLineEdit()
+        self.name_input.setPlaceholderText("Enter new folder name")
+        self.name_input.setText(current_name.replace("📁 ", ""))
+        layout.addWidget(self.name_input)
+
+        # Save button
+        save_btn = QPushButton("Save")
+        save_btn.setObjectName("saveBtn")
+        save_btn.clicked.connect(self.accept)
+        layout.addWidget(save_btn, alignment=Qt.AlignCenter)
+
+    def get_new_name(self):
+        return self.name_input.text().strip()
+
+
 class FolderDetailPage(QWidget):
     def __init__(self):
         super().__init__()
@@ -111,11 +165,13 @@ class FolderDetailPage(QWidget):
 
         # === Banner ===
         banner = QFrame()
-        banner.setStyleSheet("background-color: lightgray; border-radius: 10px;")
+        banner.setStyleSheet(
+            "background-color: #E6D582; border-radius: 10px; color: black;"
+        )
         banner.setFixedHeight(250)
         banner_layout = QVBoxLayout(banner)
         banner_layout.setSpacing(0)
-        banner_layout.setContentsMargins(10, 10, 10, 10)
+        banner_layout.setContentsMargins(20, 10, 10, 10)
 
         self.folder_name = QLabel("📁 Folder Name")
         self.folder_name.setStyleSheet(
@@ -124,7 +180,7 @@ class FolderDetailPage(QWidget):
                 font-size: 24px;
                 font-weight: bold;
                 color: black;
-                margin-top: 40px;
+                margin-top: 80px;
                 margin-bottom: 0px;
                 margin-left: 0px;
                 margin-right: 0px;
@@ -137,11 +193,21 @@ class FolderDetailPage(QWidget):
         self.created_label.setStyleSheet("color: black;")
         self.created_label.setAlignment(Qt.AlignCenter)
 
-        upload_btn = QPushButton("📷 Upload image")
+        upload_btn = QPushButton("🔁 Change name")
         upload_btn.setFixedSize(130, 30)
         upload_btn.setStyleSheet(
-            "background-color: gray; color: white; border-radius: 5px;"
+            """
+            QPushButton {
+                background-color: gray; 
+                color: white; 
+                border-radius: 5px;
+            }
+            QPushButton:hover {
+                background-color: #666666;
+            }
+            """
         )
+        upload_btn.clicked.connect(self.show_change_name_dialog)
 
         banner_layout.addWidget(self.folder_name)
         banner_layout.addWidget(self.created_label)
@@ -165,76 +231,40 @@ class FolderDetailPage(QWidget):
         # === Owner & Collaborators ===
         owner_label = QLabel("Owner")
         owner_label.setStyleSheet("color: black;")
-        owner_tag = Tag("Arhway", "#FBC490")
+        owner_label.setStyleSheet("font-size: 16px; color: black;")
 
-        collaborator_label = QLabel("Collaborators")
-        collaborator_label.setStyleSheet("color: black;")
-        collaborator_layout = QHBoxLayout()
-        collaborator_layout.setContentsMargins(0, 0, 0, 0)
-        collaborator_layout.setSpacing(0)
-        self.collaborators = []
-
-        # Example collaborators
-        for name, color in [("John", "#A9DFBF"), ("Jake", "#AED6F1")]:
-            tag = Tag(name, color, removable=True)
-            collaborator_layout.addWidget(tag)
-            self.collaborators.append(tag)
-
-        collaborator_layout.addStretch()
+        owner_tag = Tag("You:)", "#FBC490")
 
         # Visibility and Action Buttons Row
         visibility_row = QHBoxLayout()
         visibility_row.setContentsMargins(0, 5, 0, 5)
         visibility = QLabel("Visibility: Private")
         visibility.setStyleSheet("color: black;")
+        visibility.setStyleSheet("font-size: 16px; color: black;")
         visibility_row.addWidget(visibility)
         visibility_row.addStretch()
-
-        # Action buttons
-        self.action_btn = QPushButton("⋮")
-        self.action_btn.setFixedSize(40, 40)
-        self.action_btn.setStyleSheet(
-            """
-            QPushButton {
-                background-color: #F0F0F0;
-                border-radius: 5px;
-                font-size: 20px;
-            }
-            QPushButton:hover {
-                background-color: #E0E0E0;
-            }
-        """
-        )
-        self.action_menu = QMenu()
-        self.action_menu.addAction("Add collaborator")
-        self.action_menu.addAction("Change to public")
-        self.action_btn.setMenu(self.action_menu)
 
         plus_btn = QPushButton("+")
         plus_btn.setFixedSize(40, 40)
         plus_btn.setStyleSheet(
             """
             QPushButton {
-                background-color: #F0F0F0;
+                background-color: #A9DFBF;
                 border-radius: 5px;
                 font-size: 24px;
             }
             QPushButton:hover {
-                background-color: #E0E0E0;
+                background-color: #A9DFBF;
             }
         """
         )
 
-        visibility_row.addWidget(self.action_btn)
         visibility_row.addWidget(plus_btn)
         plus_btn.clicked.connect(self.show_create_dialog)
 
         # Add all components to info layout
         info_layout.addWidget(owner_label)
         info_layout.addWidget(owner_tag)
-        info_layout.addSpacing(5)
-        info_layout.addWidget(collaborator_label)
-        info_layout.addLayout(collaborator_layout)
         info_layout.addSpacing(5)
         info_layout.addLayout(visibility_row)
 
@@ -274,7 +304,7 @@ class FolderDetailPage(QWidget):
         if not response:
             print("No response from API")  # Debug print
             return
-        
+
         if not self.folder_id:
             print("Warning: No folder ID set!")
             return
@@ -287,22 +317,22 @@ class FolderDetailPage(QWidget):
             note_service = NoteService()
             print(f"Attempting to load notes for folder: {self.folder_id}")
             notes = note_service.get_notes_by_folder(self.folder_id)
-            print(f"Found {len(notes)} notes: {[note['name'] for note in notes]}")  # Debug print
+            print(
+                f"Found {len(notes)} notes: {[note['name'] for note in notes]}"
+            )  # Debug print
 
             for note in notes:
                 print(f"Adding note to UI: {note['name']}")  # Debug print
                 self.items.append(note)  # Store note data
                 card = ContentCard(
-                    name=note["name"], 
-                    mode="📄 Note", 
-                    item_data=note, 
-                    parent=self
+                    name=note["name"], mode="📄 Note", item_data=note, parent=self
                 )
                 card.clicked.connect(self.handle_item_click)
                 self.content_layout.addWidget(card)
         except Exception as e:
             print(f"Error loading notes: {e}")
             import traceback
+
             traceback.print_exc()
 
         # Load flashcards
@@ -413,10 +443,10 @@ class FolderDetailPage(QWidget):
 
         elif "Flashcard" in mode:
             flashcard = Flashcard(
-                id=item_data.get('id', ''),
+                id=item_data.get("id", ""),
                 name=name,
-                description=item_data.get('description', ''),
-                terms=[]  # Terms will be loaded by the controller
+                description=item_data.get("description", ""),
+                terms=[],  # Terms will be loaded by the controller
             )
             flashcard_edit = FlashcardEditPage()
             flashcard_edit.loadFlashcardData(flashcard)
@@ -431,13 +461,14 @@ class FolderDetailPage(QWidget):
                     # Switch to flashcard edit page
                     content_area.setCurrentWidget(flashcard_edit)
                     # Connect back button to return to folder page
-                    flashcard_edit.back_button.clicked.connect(lambda: self.returnToFolder(flashcard_edit))
+                    flashcard_edit.back_button.clicked.connect(
+                        lambda: self.returnToFolder(flashcard_edit)
+                    )
                     self.load_items()
                 else:
                     print("Error: Content area not found or is not a stacked widget")
             else:
                 print("Error: No main window found")
-            
 
     def handle_note_change(self, note_dialog):
         """Handle auto-save with delay when note content changes"""
@@ -485,9 +516,61 @@ class FolderDetailPage(QWidget):
                 )
                 formatted_date = date.strftime("%B %d, %Y")
                 self.created_label.setText(f"Created on {formatted_date}")
+                self.created_label.setStyleSheet("font-size: 16px; color: black;")
             except Exception as e:
                 print(f"Error formatting date: {e}")
                 self.created_label.setText(f"Created on {self.folder_created_at}")
+
+    def show_change_name_dialog(self):
+        dialog = ChangeFolderNameDialog(self.folder_name.text(), self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            new_name = dialog.get_new_name()
+            if new_name:
+                try:
+                    # Create folder data dictionary with all required fields
+                    folder_data = {
+                        "id": self.folder_id,
+                        "name": new_name,
+                        "total_items": self.folder_total_items,
+                        "img_url": self.folder_img_url,
+                        "access": "private",
+                        "created_at": self.folder_created_at,
+                        "collaborations": [],
+                    }
+
+                    # Initialize FolderService with the folder data
+                    folder_service = FolderService(folder_data)
+
+                    # Update the folder name
+                    updated_folder = folder_service.update_folder(name=new_name)
+                    if updated_folder:
+                        # Update the UI
+                        self.folder_name.setText(f"📁 {new_name}")
+                        print(f"Successfully updated folder name to: {new_name}")
+
+                        # Refresh the folder contents
+                        self.load_items()
+
+                        # Get the main window to refresh collection page
+                        main_window = self.window()
+                        if main_window:
+                            collection_page = main_window.findChild(
+                                QWidget, "page_collection_scroll"
+                            )
+                            if collection_page and hasattr(
+                                collection_page.widget(), "load_folders"
+                            ):
+                                collection_page.widget().load_folders()
+                                print("Refreshed collection page")
+                    else:
+                        QMessageBox.warning(
+                            self, "Error", "Failed to update folder name"
+                        )
+                except Exception as e:
+                    print(f"Error updating folder name: {str(e)}")
+                    QMessageBox.warning(
+                        self, "Error", f"Error updating folder name: {str(e)}"
+                    )
 
 
 class CreateModeDialog(QDialog):
@@ -520,8 +603,11 @@ class CreateModeDialog(QDialog):
         layout.setAlignment(Qt.AlignTop)
 
         title = QLabel("Select Modes")
-        title.setFont(QFont("Arial", 14, QFont.Bold))
+        title.setFont(QFont("Arial", 20, QFont.Bold))
         title.setAlignment(Qt.AlignCenter)
+        title.setStyleSheet(
+            "background-color: transparent;"
+        )  # Make background transparent
 
         self.name_input = QLineEdit()
         self.name_input.setPlaceholderText("📝 Enter name...")
@@ -606,18 +692,27 @@ class CreateModeDialog(QDialog):
         elif "Flashcard" in mode:
             try:
                 flashcard_controller = FlashcardController(None)
-                created_flashcard = flashcard_controller.create_flashcard(folder_id, name)
+                created_flashcard = flashcard_controller.create_flashcard(
+                    folder_id, name
+                )
                 if created_flashcard:
                     # Initialize item_data with empty terms list
                     item_data = {
-                        'id': created_flashcard.get('id', ''),
-                        'name': name,
-                        'terms': [],
-                        'created_at': created_flashcard.get('created_at', '')
+                        "id": created_flashcard.get("id", ""),
+                        "name": name,
+                        "terms": [],
+                        "created_at": created_flashcard.get("created_at", ""),
                     }
                     # Only add to UI if backend creation was successful
-                    card = ContentCard(name=name, mode="🗂️ Flashcard", item_data=item_data, parent=parent)
-                    card.clicked.connect(parent.handle_item_click)  # Connect the clicked signal
+                    card = ContentCard(
+                        name=name,
+                        mode="🗂️ Flashcard",
+                        item_data=item_data,
+                        parent=parent,
+                    )
+                    card.clicked.connect(
+                        parent.handle_item_click
+                    )  # Connect the clicked signal
                     parent.content_layout.insertWidget(0, card)
                     parent.load_items()
             except Exception as e:
