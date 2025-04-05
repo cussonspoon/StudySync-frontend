@@ -20,6 +20,7 @@ from ui.views.statistic import StatPage
 from ui.views.notification import NotificationPage
 from ui.views.community import CommunityPage
 from ui.views.user_profile import UserProfilePage
+from utils.session_manager import SessionManager
 from ui.views.folder import FolderDetailPage
 
 class Ui_MainWindow(object):
@@ -147,7 +148,7 @@ class Ui_MainWindow(object):
             )
 
         # Connect logo to user profile
-        self.logo.mousePressEvent = lambda event: self.contentArea.setCurrentWidget(self.page_profile_scroll)
+        self.logo.mousePressEvent = self.handle_logo_click
 
         # Add sidebar and content area to main layout
         self.main_layout.addWidget(self.sidebar)
@@ -155,6 +156,26 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         QMetaObject.connectSlotsByName(MainWindow)
+
+    def handle_logo_click(self, event):
+        """Handle logo click to show user profile page"""
+        # Get the current user from session manager
+        session_manager = SessionManager.get_instance()
+        current_user = session_manager.get_current_user()
+        
+        if current_user:
+            # Switch to profile page
+            self.page_profile_scroll.widget().refresh_data()
+            self.contentArea.setCurrentWidget(self.page_profile_scroll)
+            # Refresh the profile page data
+        else:
+            # If no user is logged in, show login page or message
+            from PySide6.QtWidgets import QMessageBox
+            QMessageBox.warning(
+                self.contentArea,
+                "Not Logged In",
+                "Please log in to view your profile."
+            )
 
     def createMenuButton(self, name, icon_file):
         button = QPushButton(self.menus)

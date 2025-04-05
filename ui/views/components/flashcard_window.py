@@ -1,8 +1,8 @@
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
-    QLabel, QWidget, QFrame, QGraphicsDropShadowEffect
+    QLabel, QWidget, QFrame, QGraphicsDropShadowEffect, QMessageBox
 )
-from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, QSequentialAnimationGroup
+from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, QSequentialAnimationGroup, Signal, QSize
 
 from PySide6.QtGui import QFont, QColor
 from .flashcard_components.models import Flashcard, TermWord, get_flashcard_by_id, get_sample_flashcards
@@ -55,9 +55,13 @@ class FlashcardDisplay(QFrame):
         
         self.layout = QVBoxLayout(self)
         self.layout.setAlignment(Qt.AlignCenter)
+        self.layout.setSpacing(20)
         
         self.word_label = QLabel("Word")
         self.word_label.setFont(QFont("Arial", 24))
+        self.word_label.setWordWrap(True)
+        self.word_label.setFixedWidth(400)
+        self.word_label.setFixedHeight(200)
         self.word_label.setAlignment(Qt.AlignCenter)
         self.layout.addWidget(self.word_label)
 
@@ -77,7 +81,7 @@ class FlashcardDisplay(QFrame):
     def setTerm(self, term: TermWord):
         self.current_term = term
         self.is_showing_word = True
-        self.word_label.setText(term.word)
+        self.word_label.setText(term.term)
 
     def flipCard(self):
         if not self.current_term:
@@ -102,7 +106,7 @@ class FlashcardDisplay(QFrame):
             if self.is_showing_word:
                 self.word_label.setText(self.current_term.definition)
             else:
-                self.word_label.setText(self.current_term.word)
+                self.word_label.setText(self.current_term.term)
             self.is_showing_word = not self.is_showing_word
 
         shrink.finished.connect(toggle_text)
@@ -122,6 +126,7 @@ class popup_flashcardwindow(QDialog):
         
         # Store the flashcard data
         self.flashcard_data = flashcard_data
+        print("flashcard_data", flashcard_data)
         
         # Set window title
         if self.flashcard_data:

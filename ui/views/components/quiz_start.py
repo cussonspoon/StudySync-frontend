@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QSizePolicy,
     QFrame,
     QHBoxLayout,
+    QDialog,
 )
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont, QColor
