@@ -79,22 +79,49 @@ class QuizService:
         choice = response.json()
         return Choice(**choice)
 
-    def create_quiz(self, title: str) -> Quiz:
+    def create_quiz(
+        self,
+        title: str,
+        folder_id: str,
+        quiz_type: str = "multiple",
+        mode: str = "normal",
+    ) -> Quiz:
         """Create a new quiz"""
         try:
             response = requests.post(
-                f"{API_BASE_URL}/quiz",
-                json={"title": title, "quiz_type": "quiz", "mode": "normal"},
+                f"{API_BASE_URL}/quiz?folder_id={folder_id}",
+                json={
+                    "title": title,
+                    "quiz_type": quiz_type,
+                    "mode": mode,
+                    "total_questions": 0,
+                    "total_likes": 0,
+                    "total_points": 0,
+                    "points_to_pass": 0,
+                    "time_limit": 0
+                },
             )
 
             if response.status_code == 200:
                 quiz_data = response.json()
                 # Create a new Quiz object with the response data
                 quiz = Quiz(
+                    # id=quiz_data.get("id", ""),
+                    # title=quiz_data.get("title", ""),
+                    # quiz_type=quiz_data.get("quiz_type", quiz_type),
+                    # mode=quiz_data.get("mode", mode),
+
                     id=quiz_data.get("id", ""),
                     title=quiz_data.get("title", ""),
-                    quiz_type=quiz_data.get("quiz_type", "quiz"),
-                    mode=quiz_data.get("mode", "normal"),
+                    quiz_type=quiz_data.get("quiz_type", quiz_type),
+                    mode=quiz_data.get("mode", mode),
+                    total_questions=quiz_data.get("total_questions", 0),
+                    total_likes=quiz_data.get("total_likes", 0),
+                    total_points=quiz_data.get("total_points", 0),
+                    points_to_pass=0,
+                    time_limit=0,
+                    folder_id=folder_id,
+                    created_at=quiz_data.get("created_at", 0)
                 )
                 return quiz
             else:

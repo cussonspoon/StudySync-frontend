@@ -4,11 +4,11 @@ from controllers.base_controller import BaseController
 from PySide6.QtCore import QJsonDocument
 
 class FlashcardController(BaseController):
-    def __init__(self, flashcard: Flashcard, parent=None):
+    def __init__(self, flashcard: Flashcard = None, parent=None):
         super().__init__(parent)
         self.flashcard = flashcard
         self.terms: List[TermWord] = []
-        self.terms = self.get_terms(flashcard.id)
+        # self.terms = self.get_terms(flashcard.id)
     
     def set_flashcard(self, flashcard: Flashcard):
         self.flashcard = flashcard
@@ -70,6 +70,21 @@ class FlashcardController(BaseController):
             "definition": term.definition
         }
         reply = self.perform_put_request_sync(url, data)
+        json_doc = QJsonDocument.fromJson(reply.readAll())
+        if json_doc.isNull():
+            raise ValueError("Invalid JSON response from server")
+        return json_doc.object()
+
+    def create_flashcard(self, folder_id: str, name: str):
+        """Creates a new flashcard in the folder."""
+        url = f"{self.SERVER_URL}/flashcard?folder_id={folder_id}"
+        data = {
+            "name": name,
+            "description": "",
+            "total_likes": 0,
+            "total_items": 0,
+        }
+        reply = self.perform_post_request_sync(url, data)
         json_doc = QJsonDocument.fromJson(reply.readAll())
         if json_doc.isNull():
             raise ValueError("Invalid JSON response from server")

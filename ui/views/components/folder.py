@@ -145,7 +145,6 @@ class Folder(QWidget):
             self.clicked.emit()
         super().mousePressEvent(event)
 
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 

@@ -17,13 +17,13 @@ from datetime import datetime
 
 class ContentCard(QFrame):
     # Add a signal that will be emitted when card is clicked
-    clicked = Signal(str, str, dict)  # Will emit (name, mode, item_data)
+    clicked = Signal(str, str)  # Will emit (name, mode)
 
     def __init__(self, name, mode, item_data=None, parent=None):
         super().__init__(parent)
         self.name = name
         self.mode = mode
-        self.item_data = item_data or {}  # Store the full item data
+        self.item_data = item_data  # Store the full item data
         self.setFixedHeight(100)
         self.setStyleSheet(
             """
@@ -99,5 +99,5 @@ class ContentCard(QFrame):
     def mousePressEvent(self, event):
         """Handle mouse press events to emit clicked signal"""
         if event.button() == Qt.LeftButton:
-            self.clicked.emit(self.name, self.mode, self.item_data)
+            self.clicked.emit(self.name, self.mode)
         super().mousePressEvent(event)
