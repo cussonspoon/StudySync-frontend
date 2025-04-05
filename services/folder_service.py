@@ -27,7 +27,7 @@ class FolderService:
             response = requests.get(f"{API_BASE_URL}/folder/{id}")
             print(f"Response status: {response.status_code}")
             print(f"Response content: {response.text}")
-            
+
             if response.status_code == 200:
                 items = response.json()
                 print(f"Parsed items: {items}")
@@ -297,9 +297,7 @@ class FolderService:
 
     def create_quiz(self, title: str) -> Quiz:
         """Create a new quiz"""
-        
-    
-            
+
 
 # def get_folders():
 #     # response = requests.get("http://127.0.0.1:5000/folders")
@@ -387,23 +385,61 @@ class FolderService:
 # def delete_folder(folder):
 #     return folder
 
+
 def search_folder(folder_name):
-    #implement search folder api
+    """Search for folders by name using hardcoded data"""
+    # Hardcoded sample folders
+    all_folders = [
+        {
+            "id": "1",
+            "name": "History Notes",
+            "count": "10",
+            "date": "2024-01-01",
+            "avatar": "static/images/profile.jpg",
+            "image": "static/images/pic1.jpg",
+        },
+        {
+            "id": "2",
+            "name": "Math Homework",
+            "count": "15",
+            "date": "2024-01-02",
+            "avatar": "static/images/profile.jpg",
+            "image": "static/images/pic2.jpg",
+        },
+        {
+            "id": "3",
+            "name": "Science Projects",
+            "count": "8",
+            "date": "2024-01-03",
+            "avatar": "static/images/profile.jpg",
+            "image": "static/images/pic3.jpg",
+        },
+        {
+            "id": "4",
+            "name": "English Literature",
+            "count": "12",
+            "date": "2024-01-04",
+            "avatar": "static/images/profile.jpg",
+            "image": "static/images/pic1.jpg",
+        },
+        {
+            "id": "5",
+            "name": "Study Materials",
+            "count": "20",
+            "date": "2024-01-05",
+            "avatar": "static/images/profile.jpg",
+            "image": "static/images/pic2.jpg",
+        },
+    ]
 
-    folder = [{
-        "name": "History",
-        "count": "10",
-        "date": "2024-01-01",
-        "avatar": "static/images/profile.jpg",
-        "image": "static/images/pic1.jpg",
-    }, {
-        "name": "History123",
-        "count": "10",
-        "date": "2024-01-01",
-        "avatar": "static/images/profile.jpg",
-        "image": "static/images/pic1.jpg"}]
+    # If search term is empty, return all folders
+    if not folder_name:
+        return all_folders
 
-    if folder_name == "History":
-        return folder
-    else:
-        return []
+    # Filter folders based on search term (case-insensitive)
+    matching_folders = []
+    for folder in all_folders:
+        if folder_name.lower() in folder["name"].lower():
+            matching_folders.append(folder)
+
+    return matching_folders

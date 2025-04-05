@@ -159,6 +159,7 @@ if __name__ == "__main__":
         avatar_url="static/images/avatar.png",  # Replace with valid path
         img_url="static/images/folderbg.png",  # Replace with valid path
     )
+    
     layout.addWidget(folder_widget)
 
     window.setWindowTitle("Test Folder Widget")

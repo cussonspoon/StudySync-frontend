@@ -454,6 +454,7 @@ class HomePage(QWidget):
         # Add folders directly to grid, 4 per row
         for i, folder in enumerate(results):
             folder_widget = Folder(
+                folder["id"],
                 folder["name"],
                 folder["count"],
                 folder["date"],
@@ -463,7 +464,7 @@ class HomePage(QWidget):
             row = i // 4
             col = i % 4
             grid_layout.addWidget(folder_widget, row, col)
-
+            
         # Add the grid to the scroll area
         self.scroll_layout.addWidget(self.search_results_grid)
 
