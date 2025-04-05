@@ -134,7 +134,23 @@ class popup_quizwindow(QDialog):
         self.add_button.setIcon(QIcon("static/images/plus.svg"))
         self.add_button.setIconSize(QSize(24, 24))
         self.add_button.setStyleSheet(
-            "padding: 10px; background-color: #4CAF50; color: white; border-radius: 10px;"
+            """
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                padding: 10px;
+                transition: background-color 0.2s;
+            }
+            QPushButton:hover {
+                background-color: #45a049;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            QPushButton:pressed {
+                background-color: #3d8b40;
+            }
+        """
         )
         self.add_button.setFixedSize(50, 50)
         self.add_button.clicked.connect(
@@ -143,7 +159,26 @@ class popup_quizwindow(QDialog):
 
         self.start_quiz_button = QPushButton("Start Quiz")
         self.start_quiz_button.setStyleSheet(
-            "padding: 10px; font-size: 18px; background-color: #4CAF50; color: white; border-radius: 10px;"
+            """
+            QPushButton {
+                background-color: #2196F3;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                padding: 10px 20px;
+                font-size: 18px;
+                font-weight: bold;
+                min-width: 200px;
+                transition: background-color 0.2s;
+            }
+            QPushButton:hover {
+                background-color: #1976D2;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            QPushButton:pressed {
+                background-color: #1565C0;
+            }
+        """
         )
         self.start_quiz_button.setFixedSize(200, 50)
         self.start_quiz_button.clicked.connect(lambda: self.start_quiz())
@@ -152,7 +187,23 @@ class popup_quizwindow(QDialog):
         self.refresh_button.setIcon(QIcon("static/images/refresh.svg"))
         self.refresh_button.setIconSize(QSize(24, 24))
         self.refresh_button.setStyleSheet(
-            "padding: 10px; background-color: #4CAF50; border-radius: 10px; color: white;"
+            """
+            QPushButton {
+                background-color: #FF9800;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                padding: 10px;
+                transition: background-color 0.2s;
+            }
+            QPushButton:hover {
+                background-color: #F57C00;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            QPushButton:pressed {
+                background-color: #EF6C00;
+            }
+        """
         )
         self.refresh_button.setFixedSize(50, 50)
         self.refresh_button.clicked.connect(lambda: self.refresh_questions())
@@ -320,7 +371,26 @@ class popup_quizwindow(QDialog):
 
         edit_button = QPushButton("Edit")
         edit_button.setStyleSheet(
-            "padding: 8px; font-size: 14px; background-color: blue; color: white; border-radius: 5px;"
+            """
+            QPushButton {
+                background-color: #2196F3;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                padding: 10px 20px;
+                font-size: 14px;
+                font-weight: bold;
+                min-width: 80px;
+                transition: background-color 0.2s;
+            }
+            QPushButton:hover {
+                background-color: #1976D2;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            QPushButton:pressed {
+                background-color: #1565C0;
+            }
+        """
         )
         edit_button.clicked.connect(
             lambda: self.show_question_dialog(
@@ -331,7 +401,26 @@ class popup_quizwindow(QDialog):
 
         remove_button = QPushButton("Remove")
         remove_button.setStyleSheet(
-            "padding: 8px; font-size: 14px; background-color: red; color: white; border-radius: 5px;"
+            """
+            QPushButton {
+                background-color: #FF5252;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                padding: 10px 20px;
+                font-size: 14px;
+                font-weight: bold;
+                min-width: 80px;
+                transition: background-color 0.2s;
+            }
+            QPushButton:hover {
+                background-color: #FF1744;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            QPushButton:pressed {
+                background-color: #D50000;
+            }
+        """
         )
         remove_button.clicked.connect(
             lambda: self.remove_question(question_label, question_row)
