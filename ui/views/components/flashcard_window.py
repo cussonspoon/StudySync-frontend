@@ -1,28 +1,48 @@
 from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
-    QLabel, QWidget, QFrame, QGraphicsDropShadowEffect, QMessageBox
+    QDialog,
+    QVBoxLayout,
+    QHBoxLayout,
+    QPushButton,
+    QLabel,
+    QWidget,
+    QFrame,
+    QGraphicsDropShadowEffect,
+    QMessageBox,
 )
-from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, QSequentialAnimationGroup, Signal, QSize
+from PySide6.QtCore import (
+    Qt,
+    QPropertyAnimation,
+    QEasingCurve,
+    QSequentialAnimationGroup,
+    Signal,
+    QSize,
+)
 
 from PySide6.QtGui import QFont, QColor
-from .flashcard_components.models import Flashcard, TermWord, get_flashcard_by_id, get_sample_flashcards
+from .flashcard_components.models import (
+    Flashcard,
+    TermWord,
+    get_flashcard_by_id,
+    get_sample_flashcards,
+)
+
 
 class FlashcardProgressBar(QWidget):
     def __init__(self, total, learning, known, parent=None):
         super().__init__(parent)
         self.setFixedHeight(30)
-        
+
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(10)
-        
+
         # Learning count
         self.learning_label = QLabel(f"🤔 Still learning ({learning})")
         self.learning_label.setStyleSheet("color: #FFA500;")  # Orange color
         layout.addWidget(self.learning_label)
-        
+
         layout.addStretch()
-        
+
         # Known count
         self.known_label = QLabel(f"✓ Know ({known})")
         self.known_label.setStyleSheet("color: #32CD32;")  # Green color
@@ -31,6 +51,7 @@ class FlashcardProgressBar(QWidget):
     def updateCounts(self, learning, known):
         self.learning_label.setText(f"🤔 Still learning ({learning})")
         self.known_label.setText(f"✓ Know ({known})")
+
 
 class FlashcardDisplay(QFrame):
     def __init__(self, parent=None):
@@ -43,31 +64,37 @@ class FlashcardDisplay(QFrame):
         shadow.setYOffset(4)
         shadow.setColor(QColor(0, 0, 0, 50))  # Semi-transparent black
         self.setGraphicsEffect(shadow)
-        
-        self.setStyleSheet("""
+
+        self.setStyleSheet(
+            """
             QFrame {
-                background-color: #b8d9ff;
+                background-color: #F7F6F3;
                 border-radius: 10px;
                 min-height: 300px;
                 border: none;
             }
-        """)
-        
+            QLabel {
+                color: black;
+            }
+        """
+        )
+
         self.layout = QVBoxLayout(self)
         self.layout.setAlignment(Qt.AlignCenter)
         self.layout.setSpacing(20)
-        
+
         self.word_label = QLabel("Word")
         self.word_label.setFont(QFont("Arial", 24))
         self.word_label.setWordWrap(True)
         self.word_label.setFixedWidth(400)
         self.word_label.setFixedHeight(200)
         self.word_label.setAlignment(Qt.AlignCenter)
+        self.word_label.setStyleSheet("color: black;")
         self.layout.addWidget(self.word_label)
 
         # Click to flip instruction
         self.flip_instruction = QLabel("Click to flip")
-        self.flip_instruction.setStyleSheet("color: #666666; font-size: 12px;")
+        self.flip_instruction.setStyleSheet("color: black; font-size: 12px;")
         self.flip_instruction.setAlignment(Qt.AlignCenter)
         self.layout.addWidget(self.flip_instruction)
 
@@ -118,28 +145,30 @@ class FlashcardDisplay(QFrame):
         animation_group.start()
 
 
-
 class popup_flashcardwindow(QDialog):
     def __init__(self, flashcard_data: Flashcard, parent=None):
-        super().__init__(parent, Qt.WindowSystemMenuHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+        super().__init__(
+            parent,
+            Qt.WindowSystemMenuHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint,
+        )
         self.setModal(True)
-        
+
         # Store the flashcard data
         self.flashcard_data = flashcard_data
         print("flashcard_data", flashcard_data)
-        
+
         # Set window title
         if self.flashcard_data:
             self.setWindowTitle(f"Flashcard Set: {self.flashcard_data.name}")
         else:
             self.setWindowTitle("Flashcard Set")
-            
+
         # Initialize state
         self.current_index = 0
         self.known_terms = set()
         self.setFixedSize(800, 600)
         self.setupUi()
-        
+
         # Load first term if available
         if self.flashcard_data and self.flashcard_data.terms:
             self.loadTerm(0)
@@ -148,6 +177,19 @@ class popup_flashcardwindow(QDialog):
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(20, 20, 20, 20)
         main_layout.setSpacing(20)
+
+        # Set window background color
+        self.setStyleSheet(
+            """
+            QDialog {
+                background-color: ##7FDDE6;
+                color: black;
+            }
+            QLabel {
+                color: black;
+            }
+        """
+        )
 
         # Top section with progress and title
         top_section = QWidget()
@@ -160,6 +202,7 @@ class popup_flashcardwindow(QDialog):
         self.progress_text = QLabel(f"{self.current_index + 1}/{total_terms}")
         self.progress_text.setAlignment(Qt.AlignCenter)
         self.progress_text.setFont(QFont("Arial", 16))
+        self.progress_text.setStyleSheet("color: black;")
         top_layout.addWidget(self.progress_text)
 
         # Flashcard set name
@@ -167,14 +210,15 @@ class popup_flashcardwindow(QDialog):
         self.set_name_label = QLabel(set_name)
         self.set_name_label.setAlignment(Qt.AlignCenter)
         self.set_name_label.setFont(QFont("Arial", 14))
-        self.set_name_label.setStyleSheet("color: #666666;")
+        self.set_name_label.setStyleSheet("color: black;")
         top_layout.addWidget(self.set_name_label)
 
         # Separator line
         separator = QFrame()
         separator.setFrameShape(QFrame.HLine)
         separator.setFrameShadow(QFrame.Sunken)
-        separator.setStyleSheet("""
+        separator.setStyleSheet(
+            """
             QFrame {
                 border: none;
                 background-color: #E0E0E0;
@@ -182,16 +226,15 @@ class popup_flashcardwindow(QDialog):
                 margin-top: 10px;
                 margin-bottom: 10px;
             }
-        """)
+        """
+        )
         top_layout.addWidget(separator)
 
         main_layout.addWidget(top_section)
 
         # Progress bar with counts
         self.progress_bar = FlashcardProgressBar(
-            total_terms,
-            total_terms - len(self.known_terms),
-            len(self.known_terms)
+            total_terms, total_terms - len(self.known_terms), len(self.known_terms)
         )
         main_layout.addWidget(self.progress_bar)
 
@@ -201,10 +244,11 @@ class popup_flashcardwindow(QDialog):
 
         # Navigation buttons
         nav_layout = QHBoxLayout()
-        
+
         self.prev_button = QPushButton("←")
         self.prev_button.setFixedSize(40, 40)
-        self.prev_button.setStyleSheet("""
+        self.prev_button.setStyleSheet(
+            """
             QPushButton {
                 background-color: white;
                 border: 1px solid #E0E0E0;
@@ -218,17 +262,21 @@ class popup_flashcardwindow(QDialog):
                 background-color: #F5F5F5;
                 color: #CCCCCC;
             }
-        """)
+        """
+        )
+        self.prev_button.setStyleSheet("background-color: #A5E5A0;")
         self.prev_button.clicked.connect(self.previousTerm)
-        
+
         self.next_button = QPushButton("→")
         self.next_button.setFixedSize(40, 40)
         self.next_button.setStyleSheet(self.prev_button.styleSheet())
+        self.next_button.setStyleSheet("background-color: #A5E5A0;")
         self.next_button.clicked.connect(self.nextTerm)
-        
+
         # Know/Don't Know buttons
         self.dont_know_button = QPushButton("Still Learning")
-        self.dont_know_button.setStyleSheet("""
+        self.dont_know_button.setStyleSheet(
+            """
             QPushButton {
                 background-color: #FFF3E0;
                 border: none;
@@ -239,11 +287,13 @@ class popup_flashcardwindow(QDialog):
             QPushButton:hover {
                 background-color: #FFE0B2;
             }
-        """)
+        """
+        )
         self.dont_know_button.clicked.connect(lambda: self.markTerm(False))
 
         self.know_button = QPushButton("Know")
-        self.know_button.setStyleSheet("""
+        self.know_button.setStyleSheet(
+            """
             QPushButton {
                 background-color: #E8F5E9;
                 border: none;
@@ -254,16 +304,17 @@ class popup_flashcardwindow(QDialog):
             QPushButton:hover {
                 background-color: #C8E6C9;
             }
-        """)
+        """
+        )
         self.know_button.clicked.connect(lambda: self.markTerm(True))
-        
+
         nav_layout.addWidget(self.prev_button)
         nav_layout.addStretch()
         nav_layout.addWidget(self.dont_know_button)
         nav_layout.addWidget(self.know_button)
         nav_layout.addStretch()
         nav_layout.addWidget(self.next_button)
-        
+
         main_layout.addLayout(nav_layout)
 
         # Update button states
@@ -276,13 +327,12 @@ class popup_flashcardwindow(QDialog):
         self.current_index = index
         current_term = self.flashcard_data.terms[index]
         self.flashcard.setTerm(current_term)
-        
+
         # Update progress
         total_terms = len(self.flashcard_data.terms)
         self.progress_text.setText(f"{index + 1}/{total_terms}")
         self.progress_bar.updateCounts(
-            total_terms - len(self.known_terms),
-            len(self.known_terms)
+            total_terms - len(self.known_terms), len(self.known_terms)
         )
         self.updateNavigationButtons()
 
@@ -301,12 +351,12 @@ class popup_flashcardwindow(QDialog):
                 self.known_terms.add(current_term.id)
             else:
                 self.known_terms.discard(current_term.id)
-            
+
             self.progress_bar.updateCounts(
                 len(self.flashcard_data.terms) - len(self.known_terms),
-                len(self.known_terms)
+                len(self.known_terms),
             )
-            
+
             # Automatically move to next term if available
             if self.current_index < len(self.flashcard_data.terms) - 1:
                 self.nextTerm()
@@ -314,13 +364,15 @@ class popup_flashcardwindow(QDialog):
     def updateNavigationButtons(self):
         self.prev_button.setEnabled(self.current_index > 0)
         self.next_button.setEnabled(
-            self.current_index < len(self.flashcard_data.terms) - 1 if self.flashcard_data else False
+            self.current_index < len(self.flashcard_data.terms) - 1
+            if self.flashcard_data
+            else False
         )
 
     def getFlashcardData(self):
         return {
-            'flashcard_id': self.flashcard_data.id if self.flashcard_data else None,
-            'total_terms': len(self.flashcard_data.terms) if self.flashcard_data else 0,
-            'known_terms': list(self.known_terms),
-            'current_index': self.current_index
-        } 
+            "flashcard_id": self.flashcard_data.id if self.flashcard_data else None,
+            "total_terms": len(self.flashcard_data.terms) if self.flashcard_data else 0,
+            "known_terms": list(self.known_terms),
+            "current_index": self.current_index,
+        }

@@ -1,7 +1,14 @@
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
-    QPushButton, QFrame, QScrollArea, QLineEdit,
-    QSizePolicy, QDialog
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QFrame,
+    QScrollArea,
+    QLineEdit,
+    QSizePolicy,
+    QDialog,
 )
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QFont, QIcon
@@ -10,22 +17,24 @@ from .models import get_sample_flashcards, Flashcard, TermWord
 from ..flashcard_window import popup_flashcardwindow
 from controllers.flashcard_controller import FlashcardController
 
+
 class WordCard(QFrame):
     def __init__(self, word: str = "Word", parent=None):
         super().__init__(parent)
         self.word = word
-
         self.setupUi()
 
     def setupUi(self):
         self.setFixedSize(250, 150)
-        self.setStyleSheet("""
+        self.setStyleSheet(
+            """
             WordCard {
-                background-color: #FFFFFF;
+                background-color: white;
                 border-radius: 8px;
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             }
-        """)
+        """
+        )
 
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -33,8 +42,9 @@ class WordCard(QFrame):
         word_label = QLabel(self.word)
         word_label.setFont(QFont("Inter", 18))
         word_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        word_label.setStyleSheet("color: #1A1A1A;")
+        word_label.setStyleSheet("color: black;")
         layout.addWidget(word_label)
+
 
 class TermInput(QFrame):
     def __init__(self, word: str = "", definition: str = "", parent=None):
@@ -46,7 +56,8 @@ class TermInput(QFrame):
             self.definition_input.setText(definition)
 
     def setupUi(self):
-        self.setStyleSheet("""
+        self.setStyleSheet(
+            """
             QFrame {
                 background-color: white;
                 border-radius: 8px;
@@ -56,8 +67,10 @@ class TermInput(QFrame):
                 background: transparent;
                 font-size: 14px;
                 padding: 8px;
+                color: black;
             }
-        """)
+        """
+        )
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(10, 5, 10, 5)
@@ -82,9 +95,10 @@ class TermInput(QFrame):
 
         # Delete button
         delete_button = QPushButton("×")
-        delete_button.setStyleSheet("""
+        delete_button.setStyleSheet(
+            """
             QPushButton {
-                color: #666666;
+                color: black;
                 background: transparent;
                 border: none;
                 font-size: 18px;
@@ -93,9 +107,11 @@ class TermInput(QFrame):
             QPushButton:hover {
                 color: #FF4444;
             }
-        """)
+        """
+        )
         delete_button.clicked.connect(self.deleteLater)
         layout.addWidget(delete_button)
+
 
 class AddTermDialog(QDialog):
     def __init__(self, parent=None):
@@ -103,7 +119,8 @@ class AddTermDialog(QDialog):
         self.setWindowTitle("Add New Term")
         self.setModal(True)
         self.setFixedSize(500, 300)
-        self.setStyleSheet("""
+        self.setStyleSheet(
+            """
             QDialog {
                 background-color: #f8f9fa;
                 border-radius: 10px;
@@ -151,54 +168,57 @@ class AddTermDialog(QDialog):
             QPushButton#addBtn:hover {
                 background-color: #45a049;
             }
-        """)
-        
+        """
+        )
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(10, 20, 20, 10)
         layout.setSpacing(10)
-        
+
         # Title
         title_label = QLabel("Add New Term")
-        title_label.setStyleSheet("""
+        title_label.setStyleSheet(
+            """
             font-size: 18px;
             color: #333;
             font-weight: bold;
             margin-bottom: 15px;
-        """)
+        """
+        )
         layout.addWidget(title_label)
-        
+
         # Word input
         word_label = QLabel("Word:")
         self.word_input = QLineEdit()
         self.word_input.setPlaceholderText("Enter the term or word")
-        
+
         layout.addWidget(word_label)
         layout.addWidget(self.word_input)
-        
+
         # Definition input
         definition_label = QLabel("Definition:")
         self.definition_input = QLineEdit()
         self.definition_input.setPlaceholderText("Enter the definition or explanation")
-        
+
         layout.addWidget(definition_label)
         layout.addWidget(self.definition_input)
-        
+
         # Buttons
         button_layout = QHBoxLayout()
         button_layout.setSpacing(15)
-        
+
         cancel_button = QPushButton("Cancel")
         cancel_button.setObjectName("cancelBtn")
         cancel_button.clicked.connect(self.reject)
-        
+
         add_button = QPushButton("Add Term")
         add_button.setObjectName("addBtn")
         add_button.clicked.connect(self.accept)
-        
+
         button_layout.addStretch()
         button_layout.addWidget(cancel_button)
         button_layout.addWidget(add_button)
-        
+
         layout.addStretch()
         layout.addLayout(button_layout)
 
@@ -206,8 +226,9 @@ class AddTermDialog(QDialog):
         """Get the term data as a dictionary"""
         return {
             "word": self.word_input.text().strip(),
-            "definition": self.definition_input.text().strip()
+            "definition": self.definition_input.text().strip(),
         }
+
 
 class FlashcardEditPage(QWidget):
     def __init__(self):
@@ -217,6 +238,14 @@ class FlashcardEditPage(QWidget):
         sample_flashcards = get_sample_flashcards()
         self.current_flashcard = sample_flashcards[0] if sample_flashcards else None
         self.setupUi()
+        self.setStyleSheet(
+            """
+            QWidget {
+                background-color: #F7F6F3;
+                color: black;
+            }
+        """
+        )
         # if self.current_flashcard:
         #     self.loadFlashcardData(self.current_flashcard)
 
@@ -225,57 +254,63 @@ class FlashcardEditPage(QWidget):
         main_layout.setContentsMargins(20, 20, 20, 20)
         main_layout.setSpacing(20)
 
+        # Set the main background color
+        self.setStyleSheet(
+            """
+            QWidget {
+                background-color: #F7F6F3;
+                color: black;
+            }
+            QLabel {
+                color: black;
+            }
+            QLineEdit {
+                color: black;
+            }
+        """
+        )
+
         # Header with back button and title
         header_layout = QHBoxLayout()
-        
+
         self.back_button = QPushButton("←")
-        self.back_button.setStyleSheet("""
+        self.back_button.setStyleSheet(
+            """
             QPushButton {
                 font-size: 24px;
                 border: none;
                 background: transparent;
-                color: #1A1A1A;
+                color: black;
             }
             QPushButton:hover {
                 color: #666666;
             }
-        """)
+        """
+        )
         header_layout.addWidget(self.back_button)
 
         # Title input
         self.title_input = QLineEdit()
         self.title_input.setPlaceholderText("(FLASHCARD NAME)")
-        self.title_input.setStyleSheet("""
+        self.title_input.setStyleSheet(
+            """
             QLineEdit {
                 font-size: 18px;
                 font-weight: bold;
                 padding: 10px;
-                background-color: #F0F0F0;
+                background-color: white;
+                color: black;
                 border: none;
                 border-radius: 8px;
             }
-        """)
+        """
+        )
         header_layout.addWidget(self.title_input)
-
-        # Upload Note button
-        upload_button = QPushButton("Upload Note")
-        upload_button.setStyleSheet("""
-            QPushButton {
-                background-color: transparent;
-                border: 1px solid #CCCCCC;
-                border-radius: 4px;
-                padding: 8px 16px;
-                color: #666666;
-            }
-            QPushButton:hover {
-                background-color: #F0F0F0;
-            }
-        """)
-        header_layout.addWidget(upload_button)
 
         # Start Flashcard button
         self.start_button = QPushButton("Start Flashcard")
-        self.start_button.setStyleSheet("""
+        self.start_button.setStyleSheet(
+            """
             QPushButton {
                 background-color: #4CAF50;
                 border: none;
@@ -286,7 +321,8 @@ class FlashcardEditPage(QWidget):
             QPushButton:hover {
                 background-color: #45a049;
             }
-        """)
+        """
+        )
         self.start_button.clicked.connect(self.start_flashcard)
         header_layout.addWidget(self.start_button)
 
@@ -297,10 +333,11 @@ class FlashcardEditPage(QWidget):
         words_scroll.setWidgetResizable(True)
         words_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
         words_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        words_scroll.setStyleSheet("""
+        words_scroll.setStyleSheet(
+            """
             QScrollArea {
                 border: none;
-                background-color: transparent;
+                background-color: #F7F6F3;
             }
             QScrollBar:horizontal {
                 height: 8px;
@@ -314,9 +351,11 @@ class FlashcardEditPage(QWidget):
             QScrollBar::handle:horizontal:hover {
                 background: #999999;
             }
-        """)
+        """
+        )
 
         words_container = QWidget()
+        words_container.setStyleSheet("background-color: #81E5DA;")
         self.words_layout = QHBoxLayout(words_container)
         self.words_layout.setContentsMargins(0, 0, 0, 0)
         self.words_layout.setSpacing(15)
@@ -328,7 +367,9 @@ class FlashcardEditPage(QWidget):
 
         # Terms section
         terms_container = QWidget()
-        terms_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)  # Allow vertical expansion
+        terms_container.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Expanding
+        )  # Allow vertical expansion
         terms_layout = QVBoxLayout(terms_container)
         terms_layout.setSpacing(10)
         terms_layout.setContentsMargins(0, 0, 0, 0)
@@ -341,7 +382,8 @@ class FlashcardEditPage(QWidget):
 
         add_term_button = QPushButton("+")
         add_term_button.setFixedSize(30, 30)
-        add_term_button.setStyleSheet("""
+        add_term_button.setStyleSheet(
+            """
             QPushButton {
                 background-color: #F0F0F0;
                 border: none;
@@ -352,7 +394,8 @@ class FlashcardEditPage(QWidget):
             QPushButton:hover {
                 background-color: #E0E0E0;
             }
-        """)
+        """
+        )
         add_term_button.clicked.connect(self.add_term)
         terms_header.addWidget(add_term_button)
         terms_layout.addLayout(terms_header)
@@ -360,8 +403,11 @@ class FlashcardEditPage(QWidget):
         # Terms scroll area
         terms_scroll = QScrollArea()
         terms_scroll.setWidgetResizable(True)
-        terms_scroll.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)  # Allow scroll area to expand
-        terms_scroll.setStyleSheet("""
+        terms_scroll.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Expanding
+        )  # Allow scroll area to expand
+        terms_scroll.setStyleSheet(
+            """
             QScrollArea {
                 border: none;
                 background-color: transparent;
@@ -378,7 +424,8 @@ class FlashcardEditPage(QWidget):
             QScrollBar::handle:vertical:hover {
                 background: #999999;
             }
-        """)
+        """
+        )
 
         self.terms_widget = QWidget()
         self.terms_list_layout = QVBoxLayout(self.terms_widget)
@@ -410,7 +457,7 @@ class FlashcardEditPage(QWidget):
             item = self.words_layout.takeAt(0)
             if item.widget():
                 item.widget().deleteLater()
-        
+
         terms = flashcard_controller.get_terms(flashcard.id)
         self.current_flashcard.terms = terms
         # self.set_terms(terms)
@@ -418,8 +465,10 @@ class FlashcardEditPage(QWidget):
         for term in terms:
             # Add term input
             term_input = TermInput(term.term, term.definition)
-            self.terms_list_layout.insertWidget(self.terms_list_layout.count() - 1, term_input)
-            
+            self.terms_list_layout.insertWidget(
+                self.terms_list_layout.count() - 1, term_input
+            )
+
             # Add word card
             word_card = WordCard(term.term)
             self.words_layout.insertWidget(self.words_layout.count() - 1, word_card)
@@ -432,7 +481,7 @@ class FlashcardEditPage(QWidget):
         dialog = AddTermDialog(self)
         if dialog.exec():
             term_data = dialog.get_term_data()
-            
+
             if term_data["word"] and term_data["definition"]:
                 try:
                     # Add term through API
@@ -440,9 +489,9 @@ class FlashcardEditPage(QWidget):
                     flashcard_controller.post_term(
                         self.current_flashcard.id,
                         term_data["word"],
-                        term_data["definition"]
+                        term_data["definition"],
                     )
-                    
+
                     # Reload flashcard data to show new term
                     self.loadFlashcardData(self.current_flashcard)
                 except Exception as e:
@@ -462,10 +511,7 @@ class FlashcardEditPage(QWidget):
                 word = term_widget.word_input.text()
                 definition = term_widget.definition_input.text()
                 if word or definition:  # Only add if either field has content
-                    terms.append({
-                        "word": word,
-                        "definition": definition
-                    })
+                    terms.append({"word": word, "definition": definition})
         return terms
 
     def set_terms(self, terms: List[Union[Dict[str, str], TermWord]]):
@@ -490,10 +536,12 @@ class FlashcardEditPage(QWidget):
             else:  # TermWord object
                 word = term.term
                 definition = term.definition
-                
+
             term_input = TermInput(word, definition)
-            self.terms_list_layout.insertWidget(self.terms_list_layout.count() - 1, term_input)
-            
+            self.terms_list_layout.insertWidget(
+                self.terms_list_layout.count() - 1, term_input
+            )
+
             # Add word card
             word_card = WordCard(word)
             self.words_layout.insertWidget(self.words_layout.count() - 1, word_card)
@@ -505,4 +553,4 @@ class FlashcardEditPage(QWidget):
         """Start the flashcard review session"""
         if self.current_flashcard:
             flashcard_window = popup_flashcardwindow(self.current_flashcard, self)
-            flashcard_window.exec() 
+            flashcard_window.exec()

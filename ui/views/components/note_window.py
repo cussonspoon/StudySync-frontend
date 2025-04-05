@@ -89,10 +89,6 @@ class popup_notewindow(QDialog):
 
         # Conversion buttons on the right
         conversion_layout = QHBoxLayout()
-        flashcard_btn = ConversionButton("Convert to Flashcard")
-        quiz_btn = ConversionButton("Convert to Quiz")
-        conversion_layout.addWidget(flashcard_btn)
-        conversion_layout.addWidget(quiz_btn)
 
         top_layout.addStretch()
         top_layout.addLayout(conversion_layout)
@@ -160,11 +156,6 @@ class popup_notewindow(QDialog):
         collab_section_layout.setContentsMargins(0, 0, 0, 0)
         collab_section_layout.setSpacing(8)
 
-        # Collaborators label
-        collab_label = QLabel("Collaborators")
-        collab_label.setStyleSheet("color: #666666; font-size: 13px;")
-        collab_section_layout.addWidget(collab_label)
-
         # Collaborator chips
         chips_widget = QWidget()
         chips_layout = QHBoxLayout(chips_widget)
@@ -173,29 +164,6 @@ class popup_notewindow(QDialog):
         chips_layout.setAlignment(Qt.AlignLeft)
 
         # Collaborator chips
-        collab_chip1 = CollaboratorChip("John", "#C8E6C9")
-        collab_chip2 = CollaboratorChip("Jake", "#BBDEFB")
-        chips_layout.addWidget(collab_chip1)
-        chips_layout.addWidget(collab_chip2)
-
-        # Add collaborator button
-        add_collab_btn = QPushButton("+")
-        add_collab_btn.setFixedSize(28, 28)
-        add_collab_btn.setStyleSheet(
-            """
-            QPushButton {
-                background-color: transparent;
-                border: 1px dashed #666666;
-                border-radius: 14px;
-                color: #666666;
-                font-size: 16px;
-            }
-            QPushButton:hover {
-                background-color: #F0F0F0;
-            }
-        """
-        )
-        chips_layout.addWidget(add_collab_btn)
         chips_layout.addStretch()
 
         collab_section_layout.addWidget(chips_widget)

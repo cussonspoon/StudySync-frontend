@@ -146,7 +146,7 @@ class CollectionPage(QWidget):
 
         # Header
         header_label = QLabel("My Collection")
-        header_label.setFont(QFont("Arial", 16, QFont.Bold))
+        header_label.setFont(QFont("Arial", 21, QFont.Bold))
         header_layout.addWidget(header_label, alignment=Qt.AlignLeft)
         header_label.setStyleSheet(
             """
@@ -224,11 +224,7 @@ class CollectionPage(QWidget):
         toggle_layout.addWidget(public_button)
         toggle_layout.addStretch(1)
 
-        placeholder_note_button = QPushButton("Placeholder Note")
-        placeholder_note_button.clicked.connect(self.showNoteWindow)
-        main_layout.addWidget(placeholder_note_button)
-
-        
+       
         # Store grid_layout as instance variable so we can update it
         self.grid_layout = QGridLayout()
         self.grid_layout.setSpacing(10)
@@ -237,32 +233,25 @@ class CollectionPage(QWidget):
 
         # Create add folder button
         add_folder_button = QPushButton("+")
+        add_folder_button.setFixedSize(40, 40)
         add_folder_button.setStyleSheet(
             """
             QPushButton {
-                background-color: #87db8a;
-                border-radius: 15px;
-                padding: 5px 15px;
-                font-size: 12px;
-                color: #333;
+                background-color: #7DE592;
+                border-radius: 5px;
+                font-size: 24px;
+                color: black;
             }
             QPushButton:hover {
-                background-color: #79AD47;
+                background-color: #A9DFBF;
             }
-            """
+        """
         )
         print("Connecting add folder button")  # Debug print
         add_folder_button.clicked.connect(self.on_add_folder_clicked)
         toggle_layout.addWidget(add_folder_button)
 
-        # Create note and flashcard buttons
-        note_button = QPushButton("Note")
-        note_button.clicked.connect(self.showNoteWindow)
-        toggle_layout.addWidget(note_button)
-
-        flashcard_button = QPushButton("Flashcard")
-        flashcard_button.clicked.connect(self.showFlashcardWindow)
-        toggle_layout.addWidget(flashcard_button)
+     
 
         # Grid layout for folders
         self.grid_layout = QGridLayout()
@@ -273,28 +262,28 @@ class CollectionPage(QWidget):
         main_layout.addStretch(1)
 
         # Add flashcard button
-        create_flashcard_btn = QPushButton("Create Flashcard")
-        create_flashcard_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #007AFF;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                padding: 10px 20px;
-                font-size: 14px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #0056b3;
-            }
-        """)
-        create_flashcard_btn.clicked.connect(self.showFlashcardEdit)
-        main_layout.addWidget(create_flashcard_btn)
+        # create_flashcard_btn = QPushButton("Create Flashcard")
+        # create_flashcard_btn.setStyleSheet("""
+        #     QPushButton {
+        #         background-color: #007AFF;
+        #         color: white;
+        #         border: none;
+        #         border-radius: 4px;
+        #         padding: 10px 20px;
+        #         font-size: 14px;
+        #         font-weight: bold;
+        #     }
+        #     QPushButton:hover {
+        #         background-color: #0056b3;
+        #     }
+        # """)
+        # create_flashcard_btn.clicked.connect(self.showFlashcardEdit)
+        # main_layout.addWidget(create_flashcard_btn)
 
-        # Existing flashcard button
-        flashcard_btn = QPushButton("View Flashcard")
-        flashcard_btn.clicked.connect(self.showFlashcardWindow)
-        main_layout.addWidget(flashcard_btn)
+        # # Existing flashcard button
+        # flashcard_btn = QPushButton("View Flashcard")
+        # flashcard_btn.clicked.connect(self.showFlashcardWindow)
+        # main_layout.addWidget(flashcard_btn)
 
         main_layout.addStretch()
 

@@ -104,11 +104,13 @@ class LoginPage(QWidget):
                 border: 2px solid #E0E0E0;
                 border-radius: 10px;
                 font-size: 16px;
+                color: black;
                 background-color: #FAFAFA;
             }
             QLineEdit#usernameInput:focus {
                 border-color: #4A90E2;
                 background-color: white;
+                color: black;
             }
         """)
         self.form_layout.addWidget(self.username_input)
@@ -125,10 +127,12 @@ class LoginPage(QWidget):
                 border-radius: 10px;
                 font-size: 16px;
                 background-color: #FAFAFA;
+                color: black;
             }
             QLineEdit#passwordInput:focus {
                 border-color: #4A90E2;
                 background-color: white;
+                color: black;
             }
         """)
         self.form_layout.addWidget(self.password_input)
