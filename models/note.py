@@ -6,17 +6,15 @@ from models.user import User
 
 
 @dataclass
-class Note:
-    id: str
+class CreateNote:
     name: str
-    content: int
+    content: str
     owner_id: str
     folder_id: str
-    created_at: str
 
 @dataclass
 class UpdateNote:
     name: str = None
-    content: str 
+    content: str = None
     owner_id: str = None
     folder_id: str = None

@@ -30,6 +30,7 @@ from .components.flashcard_components.flashcard_edit import FlashcardEditPage
 from .components.flashcard_components.models import get_sample_flashcards
 from .components.quiz_window import popup_quizwindow
 from models.quiz import Quiz
+from services.note_service import NoteService
 
 
 class Tag(QFrame):
@@ -273,20 +274,36 @@ class FolderDetailPage(QWidget):
         if not response:
             print("No response from API")  # Debug print
             return
+        
+        if not self.folder_id:
+            print("Warning: No folder ID set!")
+            return
 
         # Store all items for reference
         self.items = []
 
         # Load notes
-        notes = response.get("notes", [])
-        print(f"Found {len(notes)} notes")  # Debug print
-        for note in notes:
-            self.items.append(note)  # Store note data
-            card = ContentCard(
-                name=note["name"], mode="📄 Note", item_data=note, parent=self
-            )
-            card.clicked.connect(self.handle_item_click)
-            self.content_layout.addWidget(card)
+        try:
+            note_service = NoteService()
+            print(f"Attempting to load notes for folder: {self.folder_id}")
+            notes = note_service.get_notes_by_folder(self.folder_id)
+            print(f"Found {len(notes)} notes: {[note['name'] for note in notes]}")  # Debug print
+
+            for note in notes:
+                print(f"Adding note to UI: {note['name']}")  # Debug print
+                self.items.append(note)  # Store note data
+                card = ContentCard(
+                    name=note["name"], 
+                    mode="📄 Note", 
+                    item_data=note, 
+                    parent=self
+                )
+                card.clicked.connect(self.handle_item_click)
+                self.content_layout.addWidget(card)
+        except Exception as e:
+            print(f"Error loading notes: {e}")
+            import traceback
+            traceback.print_exc()
 
         # Load flashcards
         flashcards = response.get("flashcards", [])
@@ -356,11 +373,28 @@ class FolderDetailPage(QWidget):
 
         if "Note" in mode:
             note_dialog = popup_notewindow(self)
+
+            # Set window title to note name
+            note_dialog.setWindowTitle(name)
+
+            # Set note content
             note_dialog.title_input.setPlainText(name)
-            if note_dialog.exec():
-                note_data = note_dialog.getNoteData()
-                print(f"Note Data: {note_data}")
-                self.load_items()  # Refresh after edit
+            note_dialog.content_input.setHtml(item_data.get("content", ""))
+
+            # Store note ID and folder ID for updates
+            note_dialog.note_id = item_data.get("id")
+            note_dialog.folder_id = self.folder_id
+
+            # Connect text change signals for auto-save
+            note_dialog.title_input.textChanged.connect(
+                lambda: self.handle_note_change(note_dialog)
+            )
+            note_dialog.content_input.textChanged.connect(
+                lambda: self.handle_note_change(note_dialog)
+            )
+
+            # Show the dialog
+            note_dialog.exec()
 
         elif "Quiz" in mode:
             # Create Quiz object from existing data
@@ -404,6 +438,41 @@ class FolderDetailPage(QWidget):
             else:
                 print("Error: No main window found")
             
+
+    def handle_note_change(self, note_dialog):
+        """Handle auto-save with delay when note content changes"""
+        # Cancel any existing timer
+        if hasattr(self, "_save_timer"):
+            self._save_timer.stop()
+
+        # Create new timer for delayed save
+        from PySide6.QtCore import QTimer
+
+        self._save_timer = QTimer()
+        self._save_timer.setSingleShot(True)
+        self._save_timer.timeout.connect(lambda: self.save_note_changes(note_dialog))
+        self._save_timer.start(1000)  # 1 second delay
+
+    def save_note_changes(self, note_dialog):
+        """Save note changes to file"""
+        try:
+            note_data = note_dialog.getNoteData()
+            note_service = NoteService()
+            updated_note = note_service.update_note(
+                folder_id=note_dialog.folder_id,
+                note_id=note_dialog.note_id,
+                update_data={
+                    "name": note_data["title"],
+                    "content": note_data["content"],
+                },
+            )
+            if updated_note:
+                print(f"Auto-saved note: {updated_note['name']}")
+        except Exception as e:
+            print(f"Error auto-saving note: {e}")
+            import traceback
+
+            traceback.print_exc()
 
     def update_created_label(self):
         if self.folder_created_at:
@@ -493,28 +562,46 @@ class CreateModeDialog(QDialog):
 
         mode = selected_button.text()
         parent = self.parent()
-        folder_id = parent.folder_id  # Get the current folder's ID
+        folder_id = parent.folder_id
 
-        # Show appropriate window based on mode
         if "Note" in mode:
-            pass
-            # self.accept()  # Close the create dialog first
-            # note_dialog = popup_notewindow(parent)
-            # note_dialog.title_input.setPlainText(name)  # Set the title
-            # if note_dialog.exec():
-            #     note_data = note_dialog.getNoteData()
-            #     # Create note in backend
-            #     try:
-            #         folder_service = FolderService(None)
-            #         created_note = folder_service.create_note(
-            #             folder_id, name, note_data
-            #         )
-            #         if created_note:
-            #             # Only add to UI if backend creation was successful
-            #             card = ContentCard(name=name, mode="📄 Note", parent=parent)
-            #             parent.content_layout.insertWidget(0, card)
-            #     except Exception as e:
-            #         print(f"Error creating note: {e}")
+            self.accept()  # Close the create dialog first
+            note_dialog = popup_notewindow(parent)
+            note_dialog.title_input.setPlainText(name)
+
+            # Create initial note
+            try:
+                note_service = NoteService()
+                created_note = note_service.create_note(
+                    folder_id=folder_id,
+                    name=name,
+                    content="",  # Empty content initially
+                )
+
+                if created_note:
+                    # Store note ID and folder ID for updates
+                    note_dialog.note_id = created_note["id"]
+                    note_dialog.folder_id = folder_id
+
+                    # Connect text change signals for auto-save
+                    note_dialog.title_input.textChanged.connect(
+                        lambda: parent.handle_note_change(note_dialog)
+                    )
+                    note_dialog.content_input.textChanged.connect(
+                        lambda: parent.handle_note_change(note_dialog)
+                    )
+
+                    if note_dialog.exec():
+                        # Final save on dialog accept
+                        parent.save_note_changes(note_dialog)
+                        # Refresh the folder contents
+                        parent.load_items()
+
+            except Exception as e:
+                print(f"Error creating note: {e}")
+                import traceback
+
+                traceback.print_exc()
 
         elif "Flashcard" in mode:
             try:
@@ -558,3 +645,41 @@ class CreateModeDialog(QDialog):
                 print(f"Error creating quiz: {e}")
 
         self.accept()
+
+    def handle_note_change(self, note_dialog):
+        """Handle auto-save with delay when note content changes"""
+        # Cancel any existing timer
+        if hasattr(self, "_save_timer"):
+            self._save_timer.stop()
+
+        # Create new timer for delayed save
+        from PySide6.QtCore import QTimer
+
+        self._save_timer = QTimer()
+        self._save_timer.setSingleShot(True)
+        self._save_timer.timeout.connect(lambda: self.save_note_changes(note_dialog))
+        self._save_timer.start(1000)  # 1 second delay
+
+    def save_note_changes(self, note_dialog):
+        """Save note changes to file"""
+        try:
+            note_data = note_dialog.getNoteData()
+            note_service = NoteService()
+            updated_note = note_service.update_note(
+                folder_id=note_dialog.folder_id,
+                note_id=note_dialog.note_id,
+                update_data={
+                    "name": note_data["title"],
+                    "content": note_data["content"],
+                },
+            )
+            if updated_note:
+                print(f"Auto-saved note: {updated_note['name']}")
+        except Exception as e:
+            print(f"Error auto-saving note: {e}")
+            import traceback
+
+            traceback.print_exc()
+
+
+# but first check if there's an existing note that match the folder_id , if so = load  note content in json file and put

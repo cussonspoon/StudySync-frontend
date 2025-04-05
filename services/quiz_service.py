@@ -174,3 +174,9 @@ class QuizService:
             self._quizzes.remove(quiz)
             return True
         return False
+
+    def get_quizzes_by_folder(self, folder_id: str) -> List[Quiz]:
+        """Get all quizzes in a folder"""
+        response = requests.get(f"{API_BASE_URL}/folder/{folder_id}/quizzes")
+        quizzes = response.json()
+        return [Quiz(**quiz) for quiz in quizzes]
