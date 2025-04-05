@@ -48,7 +48,23 @@ class ContentCard(QFrame):
         # Add icon/image placeholder
         icon = QLabel()
         icon.setFixedSize(80, 80)
-        icon.setStyleSheet("background-color: #E0E0E0; border-radius: 4px;")
+        icon.setStyleSheet("""
+            QLabel {
+                background-color: #EEEEEE;
+                border-radius: 4px;
+                font-size: 40px;
+                qproperty-alignment: AlignCenter;
+            }
+        """)
+        
+        # Set icon based on mode
+        if "Note" in mode:
+            icon.setText("📄")
+        elif "Flashcard" in mode:
+            icon.setText("🗂️")
+        elif "Quiz" in mode:
+            icon.setText("❓")
+            
         card_layout.addWidget(icon)
 
         # Create vertical layout for text content
@@ -66,13 +82,13 @@ class ContentCard(QFrame):
             if self.item_data.get('content'):
                 subtitle.setText(f"Note - {len(self.item_data['content'])} characters")
         elif "Flashcard" in mode:
-            subtitle = QLabel("Flashcard set - 0 terms")
+            subtitle = QLabel("Flashcard set")
             self.subtitle = subtitle  # Store reference to update term count later
             if self.item_data.get('terms'):
                 term_count = len(self.item_data['terms'])
                 subtitle.setText(f"Flashcard set - {term_count} terms")
         elif "Quiz" in mode:
-            subtitle = QLabel("Quiz - 0 Questions")
+            subtitle = QLabel("Quiz")
             if self.item_data.get('questions'):
                 question_count = len(self.item_data['questions'])
                 subtitle.setText(f"Quiz - {question_count} Questions")

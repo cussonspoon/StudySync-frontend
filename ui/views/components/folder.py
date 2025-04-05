@@ -86,6 +86,7 @@ class Folder(QWidget):
                 font-size: 14px;
                 font-weight: bold;
                 color: black;
+                background-color: transparent;
             }
         """
         )
@@ -108,6 +109,7 @@ class Folder(QWidget):
                 color: black;
                 margin-top: 4px;  /* Changed from -4 to 4 */
                 margin-bottom: 4px; /* Changed from -4 to 4 */
+                background-color: transparent;
             }
         """
         )
@@ -137,6 +139,7 @@ class Folder(QWidget):
                 font-size: 12px;
                 font-weight: normal;
                 color: black;
+                background-color: transparent;
             }
         """
         )

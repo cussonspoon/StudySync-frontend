@@ -68,7 +68,7 @@ class FlashcardDisplay(QFrame):
         self.setStyleSheet(
             """
             QFrame {
-                background-color: #F7F6F3;
+                background-color: #b8d9ff;
                 border-radius: 10px;
                 min-height: 300px;
                 border: none;

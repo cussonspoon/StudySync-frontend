@@ -124,7 +124,7 @@ class FolderDetailPage(QWidget):
         self.setStyleSheet(
             """
             QWidget {
-                background-color: #FAFAFA;
+                background-color: #F0F0F0;
                 color: black;
             }
             QLabel {
@@ -452,6 +452,13 @@ class FolderDetailPage(QWidget):
             flashcard_edit.loadFlashcardData(flashcard)
             # Get the main window
             main_window = self.window()
+            main_window.setStyleSheet(
+                """
+                QWidget {
+                    background-color: #F7F6F3;
+                }
+                """
+            )
             if main_window:
                 # Get the content area widget
                 content_area = main_window.findChild(QWidget, "contentArea")
