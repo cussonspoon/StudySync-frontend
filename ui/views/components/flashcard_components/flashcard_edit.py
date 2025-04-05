@@ -237,15 +237,31 @@ class FlashcardEditPage(QWidget):
         # Get sample data
         sample_flashcards = get_sample_flashcards()
         self.current_flashcard = sample_flashcards[0] if sample_flashcards else None
-        self.setupUi()
+
+        # Set the global stylesheet for the entire page and all widgets
         self.setStyleSheet(
             """
             QWidget {
                 background-color: #F7F6F3;
                 color: black;
             }
+            QScrollArea, QScrollArea > QWidget > QWidget {
+                background-color: #F7F6F3;
+            }
+            QLabel {
+                color: black;
+                background-color: transparent;
+            }
+            QLineEdit {
+                color: black;
+            }
+            QPushButton {
+                color: black;
+            }
         """
         )
+
+        self.setupUi()
         # if self.current_flashcard:
         #     self.loadFlashcardData(self.current_flashcard)
 
@@ -253,22 +269,6 @@ class FlashcardEditPage(QWidget):
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(20, 20, 20, 20)
         main_layout.setSpacing(20)
-
-        # Set the main background color
-        self.setStyleSheet(
-            """
-            QWidget {
-                background-color: #F7F6F3;
-                color: black;
-            }
-            QLabel {
-                color: black;
-            }
-            QLineEdit {
-                color: black;
-            }
-        """
-        )
 
         # Header with back button and title
         header_layout = QHBoxLayout()
@@ -355,7 +355,9 @@ class FlashcardEditPage(QWidget):
         )
 
         words_container = QWidget()
-        words_container.setStyleSheet("background-color: #81E5DA;")
+        words_container.setStyleSheet(
+            "background-color: #F7F6F3;"
+        )  # Changed from #81E5DA to #F7F6F3
         self.words_layout = QHBoxLayout(words_container)
         self.words_layout.setContentsMargins(0, 0, 0, 0)
         self.words_layout.setSpacing(15)
