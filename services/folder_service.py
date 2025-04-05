@@ -18,7 +18,7 @@ class FolderService:
         self._folder = folder_data
         self._items = []
         if folder_data is not None:  # Only fetch items if we have a folder
-            self._items = self.fetch_items()
+            self._items = self.fetch_items(folder_data["id"])
 
     def fetch_items(self, id):
         """Fetch all items in a folder"""
@@ -84,38 +84,65 @@ class FolderService:
             print(f"Exception while creating folder: {str(e)}")
             raise
 
+    # def update_folder(self, name: str = None, access: str = None, img_url: str = None):
+    #     """Update folder properties"""
+    #     try:
+    #         # Build update data with only provided values
+    #         update_data = {}
+    #         if name is not None:
+    #             update_data["name"] = name
+    #         if access is not None:
+    #             update_data["accesss"] = access  # Note: API uses "accesss" with 3 's'
+    #         if img_url is not None:
+    #             update_data["img_url"] = img_url
+           
+    #         response = requests.patch(
+    #             f"{API_BASE_URL}/folder/{self._folder["id"]}", json=update_data
+    #         )
+
+    #         if response.status_code == 200:
+    #             folder_data = response.json()
+    #             # Update the current folder object with new data
+    #             self._folder["name"] = folder_data.get("name", self._folder["name"])
+    #             self._folder["access"] = folder_data.get("accesss", self._folder["access"])
+    #             self._folder["img_url"] = folder_data.get("img_url", self._folder["img_url"])
+    #             return self._folder
+    #         else:
+    #             raise Exception(f"Failed to update folder: {response.text}")
+    #     except Exception as e:
+    #         print(f"Error updating folder: {str(e)}")
+    #         raise
+
     def update_folder(self, name: str = None, access: str = None, img_url: str = None):
         """Update folder properties"""
         try:
-            # Build update data with only provided values
+            # Build update data with required and optional values
             update_data = {}
+
+            # Always include current access if none provided
+            update_data["accesss"] = access if access is not None else self._folder.get("access", "private")
+
             if name is not None:
                 update_data["name"] = name
-            if access is not None:
-                update_data["accesss"] = access  # Note: API uses "accesss" with 3 's'
             if img_url is not None:
                 update_data["img_url"] = img_url
-            if "total_items" in self._folder.__dict__:
-                update_data["total_items"] = self._folder.total_items
-            if "total_likes" in self._folder.__dict__:
-                update_data["total_likes"] = self._folder.total_likes
 
             response = requests.patch(
-                f"{API_BASE_URL}/folder/{self._folder.id}", json=update_data
+                f"{API_BASE_URL}/folder/{self._folder['id']}", json=update_data  # Fixed quotes
             )
 
             if response.status_code == 200:
                 folder_data = response.json()
                 # Update the current folder object with new data
-                self._folder.name = folder_data.get("name", self._folder.name)
-                self._folder.access = folder_data.get("accesss", self._folder.access)
-                self._folder.img_url = folder_data.get("img_url", self._folder.img_url)
+                self._folder["name"] = folder_data.get("name", self._folder["name"])
                 return self._folder
             else:
                 raise Exception(f"Failed to update folder: {response.text}")
         except Exception as e:
             print(f"Error updating folder: {str(e)}")
             raise
+
+
 
     # add
     def add_folder_collaborations(self, user_name: str):

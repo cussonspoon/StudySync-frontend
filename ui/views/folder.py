@@ -58,6 +58,60 @@ class Tag(QFrame):
             layout.addWidget(remove_btn)
 
 
+class ChangeFolderNameDialog(QDialog):
+    def __init__(self, current_name, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Change Folder Name")
+        self.setFixedSize(300, 150)
+        self.setStyleSheet(
+            """
+            QDialog { 
+                background-color: #F7F6F3; 
+                border-radius: 10px; 
+            }
+            QLineEdit {
+                padding: 8px;
+                border-radius: 5px;
+                border: 1px solid #ccc;
+                background: white;
+                font-size: 14px;
+            }
+            QPushButton {
+                padding: 8px 16px;
+                border-radius: 5px;
+                font-size: 14px;
+                min-width: 100px;
+            }
+            QPushButton#saveBtn {
+                background-color: #A9DFBF;
+                border: none;
+            }
+            QPushButton#saveBtn:hover {
+                background-color: #82E0AA;
+            }
+            """
+        )
+
+        layout = QVBoxLayout(self)
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+
+        # Name input
+        self.name_input = QLineEdit()
+        self.name_input.setPlaceholderText("Enter new folder name")
+        self.name_input.setText(current_name.replace("📁 ", ""))
+        layout.addWidget(self.name_input)
+
+        # Save button
+        save_btn = QPushButton("Save")
+        save_btn.setObjectName("saveBtn")
+        save_btn.clicked.connect(self.accept)
+        layout.addWidget(save_btn, alignment=Qt.AlignCenter)
+
+    def get_new_name(self):
+        return self.name_input.text().strip()
+
+
 class FolderDetailPage(QWidget):
     def __init__(self):
         super().__init__()
@@ -139,11 +193,21 @@ class FolderDetailPage(QWidget):
         self.created_label.setStyleSheet("color: black;")
         self.created_label.setAlignment(Qt.AlignCenter)
 
-        upload_btn = QPushButton("📷 Upload image")
+        upload_btn = QPushButton("🔁 Change name")
         upload_btn.setFixedSize(130, 30)
         upload_btn.setStyleSheet(
-            "background-color: gray; color: white; border-radius: 5px;"
+            """
+            QPushButton {
+                background-color: gray; 
+                color: white; 
+                border-radius: 5px;
+            }
+            QPushButton:hover {
+                background-color: #666666;
+            }
+            """
         )
+        upload_btn.clicked.connect(self.show_change_name_dialog)
 
         banner_layout.addWidget(self.folder_name)
         banner_layout.addWidget(self.created_label)
@@ -456,6 +520,57 @@ class FolderDetailPage(QWidget):
             except Exception as e:
                 print(f"Error formatting date: {e}")
                 self.created_label.setText(f"Created on {self.folder_created_at}")
+
+    def show_change_name_dialog(self):
+        dialog = ChangeFolderNameDialog(self.folder_name.text(), self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            new_name = dialog.get_new_name()
+            if new_name:
+                try:
+                    # Create folder data dictionary with all required fields
+                    folder_data = {
+                        "id": self.folder_id,
+                        "name": new_name,
+                        "total_items": self.folder_total_items,
+                        "img_url": self.folder_img_url,
+                        "access": "private",
+                        "created_at": self.folder_created_at,
+                        "collaborations": [],
+                    }
+
+                    # Initialize FolderService with the folder data
+                    folder_service = FolderService(folder_data)
+
+                    # Update the folder name
+                    updated_folder = folder_service.update_folder(name=new_name)
+                    if updated_folder:
+                        # Update the UI
+                        self.folder_name.setText(f"📁 {new_name}")
+                        print(f"Successfully updated folder name to: {new_name}")
+
+                        # Refresh the folder contents
+                        self.load_items()
+
+                        # Get the main window to refresh collection page
+                        main_window = self.window()
+                        if main_window:
+                            collection_page = main_window.findChild(
+                                QWidget, "page_collection_scroll"
+                            )
+                            if collection_page and hasattr(
+                                collection_page.widget(), "load_folders"
+                            ):
+                                collection_page.widget().load_folders()
+                                print("Refreshed collection page")
+                    else:
+                        QMessageBox.warning(
+                            self, "Error", "Failed to update folder name"
+                        )
+                except Exception as e:
+                    print(f"Error updating folder name: {str(e)}")
+                    QMessageBox.warning(
+                        self, "Error", f"Error updating folder name: {str(e)}"
+                    )
 
 
 class CreateModeDialog(QDialog):
